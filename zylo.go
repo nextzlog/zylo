@@ -4,44 +4,49 @@
  */
 package zylo
 
-import "math"
-import "time"
-import "unsafe"
+import (
+	"bytes"
+	"encoding/binary"
+	"math"
+	"time"
+	"unsafe"
+)
 
 /*
  defines a QSO data frame in zLog binary format.
  */
 type QSO struct {
-	time float64;
-	call [13] byte;
-	sent [31] byte;
-	rcvd [31] byte;
-	sRST uint16;
-	rRST uint16;
-	seID uint32;
-	Mode byte;
-	Band byte;
-	pow1 byte;
-	mul1 [31] byte;
-	mul2 [31] byte;
-	new1 bool;
-	new2 bool;
-	mark byte;
-	name [15] byte;
-	note [65] byte;
-	isCQ bool;
-	dupe bool;
-	rsv1 byte;
-	txID byte;
-	pow2 uint32;
-	rsv2 uint32;
-	rsv3 uint32;
+	time float64
+	call [13] byte
+	sent [31] byte
+	rcvd [31] byte
+	void byte
+	sRST uint16
+	rRST uint16
+	seID uint32
+	Mode byte
+	Band byte
+	pow1 byte
+	mul1 [31] byte
+	mul2 [31] byte
+	new1 bool
+	new2 bool
+	mark byte
+	name [15] byte
+	note [65] byte
+	isCQ bool
+	dupe bool
+	rsv1 byte
+	txID byte
+	pow2 uint32
+	rsv2 uint32
+	rsv3 uint32
 }
 
 /*
  QSO list.
  */
-type Log []QSO;
+type Log []QSO
 
 /*
  mode enumeration.
@@ -92,19 +97,39 @@ func ToLog(ptr uintptr) *Log {
 }
 
 /*
+ converts a QSO list into a binary data.
+ */
+func (log *Log) Dump(zone *time.Location) []byte {
+	_, off := time.Now().In(zone).Zone()
+	min := int16(- off / 60)
+	buf := new(bytes.Buffer)
+	buf.Write(make([]byte, 0x54))
+	binary.Write(buf, binary.LittleEndian, min)
+	buf.Write(make([]byte, 0xAA))
+	binary.Write(buf, binary.LittleEndian, log)
+	return buf.Bytes()
+}
+
+/*
  extracts the operation time from the QSO.
  */
-func (qso *QSO) GetTime() time.Time {
-	var abs = math.Abs(qso.time);
-	var hrs = time.Duration((abs - float64(int64(abs))) * 24);
-	var ret = time.Date(1899, 12, 30, 0, 0, 0, 0, time.Local);
-	return ret.Add(hrs * time.Hour).AddDate(0, 0, int(qso.time));
+func (qso *QSO) GetTime(zone *time.Location) time.Time {
+	var t = math.Abs(qso.time)
+	var h = time.Duration((t - float64(int(t))) * 24)
+	var d = time.Date(1899, 12, 30, 0, 0, 0, 0, zone)
+	return d.Add(h * time.Hour).AddDate(0, 0, int(t))
 }
 
+/*
+ converts the Delphi byte array into a string.
+ */
 func getString(field []byte) string {
-	return string(field[1:int(field[0]) + 1]);
+	return string(field[1:int(field[0]) + 1])
 }
 
+/*
+ writes the string into the Delphi byte array.
+ */
 func setString(field []byte, value string) {
 	field[0] = byte(len(value))
 	copy(field[1:], value)
@@ -114,82 +139,82 @@ func setString(field []byte, value string) {
  extracts the contacted station's callsign.
  */
 func (qso *QSO) GetCall() string {
-	return getString(qso.call[:]);
+	return getString(qso.call[:])
 }
 
 /*
  extracts the contest QSO transmitted serial number.
  */
 func (qso *QSO) GetSent() string {
-	return getString(qso.sent[:]);
+	return getString(qso.sent[:])
 }
 
 /*
  extracts the contest QSO received serial number.
  */
 func (qso *QSO) GetRcvd() string {
-	return getString(qso.rcvd[:]);
+	return getString(qso.rcvd[:])
 }
 
 /*
  extracts the logging operator's name.
  */
 func (qso *QSO) GetName() string {
-	return getString(qso.name[:]);
+	return getString(qso.name[:])
 }
 
 /*
  extracts the first multiplier.
  */
 func (qso *QSO) GetMul1() string {
-	return getString(qso.mul1[:]);
+	return getString(qso.mul1[:])
 }
 
 /*
  extracts the second multiplier.
  */
 func (qso *QSO) GetMul2() string {
-	return getString(qso.mul2[:]);
+	return getString(qso.mul2[:])
 }
 
 /*
  extracts the contacted station's callsign.
  */
 func (qso *QSO) SetCall(value string) {
-	setString(qso.call[:], value);
+	setString(qso.call[:], value)
 }
 
 /*
  extracts the contest QSO transmitted serial number.
  */
 func (qso *QSO) SetSent(value string) {
-	setString(qso.sent[:], value);
+	setString(qso.sent[:], value)
 }
 
 /*
  extracts the contest QSO received serial number.
  */
 func (qso *QSO) SetRcvd(value string) {
-	setString(qso.rcvd[:], value);
+	setString(qso.rcvd[:], value)
 }
 
 /*
  extracts the logging operator's name.
  */
 func (qso *QSO) SetName(value string) {
-	setString(qso.name[:], value);
+	setString(qso.name[:], value)
 }
 
 /*
  sets the first multiplier.
  */
 func (qso *QSO) SetMul1(value string) {
-	setString(qso.mul1[:], value);
+	setString(qso.mul1[:], value)
 }
 
 /*
  sets the second multiplier.
  */
 func (qso *QSO) SetMul2(value string) {
-	setString(qso.mul2[:], value);
+	setString(qso.mul2[:], value)
 }

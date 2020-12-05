@@ -46,7 +46,7 @@ func zlaunch(cfg string) {}
 ```go
 func zrevise(qso uintptr) {}
 func zverify(qso uintptr) (score int) {}
-func zresult(qso uintptr) (total int) {}
+func zresult(log uintptr) (total int) {}
 ```
 
 ### Modify
