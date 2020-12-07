@@ -41,6 +41,7 @@ var
 	zresult: function (ptr: pointer; len: integer): integer; stdcall;
 	zinsert: procedure(ptr: pointer; len: integer); stdcall;
 	zdelete: procedure(ptr: pointer; len: integer); stdcall;
+	zfinish: procedure(); stdcall;
 
 const
 	BIN = 'zbin';
@@ -100,6 +101,7 @@ begin
 		zresult := GetProcAddress(Handle, 'zresult');
 		zinsert := GetProcAddress(Handle, 'zinsert');
 		zdelete := GetProcAddress(Handle, 'zdelete');
+		zfinish := GetProcAddress(Handle, 'zfinish');
 		zlaunch(PAnsiChar(AnsiString(cfg)));
 	except
 		Handle := 0;
@@ -126,6 +128,7 @@ end;
 procedure zLogContestTerm();
 begin
 	if Handle <> 0 then begin
+		zfinish();
 		FreeLibrary(Handle);
 		Handle := 0;
 	end;

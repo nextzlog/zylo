@@ -41,7 +41,7 @@ func zlaunch(cfg string) {}
 
 ### Verify
 
-- When zLog needs to update the score, zLog calls the `zrevise` function to extract the multiplier, and calls `zverify` function to calculate the individual QSO score, and finally invoke the `zresult` function to update the total score.
+- When zLog needs to update the score, zLog calls the `zrevise` function to extract the multiplier, and calls the `zverify` function to calculate the individual QSO score, and finally invoke the `zresult` function to update the total score.
 
 ```go
 func zrevise(qso uintptr) {}
@@ -51,11 +51,19 @@ func zresult(log uintptr) (total int) {}
 
 ### Modify
 
-- zLog calls `zinsert` function every time zLog imports or appends QSOs, and calls `zdelete` function when zLog deletes or modifies a QSO.
+- zLog calls the `zinsert` function every time zLog imports or appends QSOs, and calls the `zdelete` function when zLog deletes or modifies a QSO.
 
 ```go
 func zinsert(qso uintptr) {}
 func zdelete(qso uintptr) {}
+```
+
+### Finish
+
+- zLog calls the `zfinish` function after the contest is closed in the main window.
+
+```go
+func zfinish() {}
 ```
 
 ## Build
