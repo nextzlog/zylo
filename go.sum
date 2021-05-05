@@ -1,0 +1,6 @@
+github.com/amenzhinsky/go-memexec v0.4.0 h1:hqB1jIrvjzixAd82iYDeh8ayRM5jV0q77KkY85LZWKs=
+github.com/amenzhinsky/go-memexec v0.4.0/go.mod h1:h0mF+2xuXzWR8t7WX/huIIu1qmA1R+Rql7BmdAenEWs=
+github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d h1:VhgPp6v9qf9Agr/56bj7Y/xa04UccTW04VP0Qed4vnQ=
+github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d/go.mod h1:YUTz3bUH2ZwIWBy3CJBeOBEugqcmXREj14T+iG/4k4U=
+gopkg.in/go-toast/toast.v1 v1.0.0-20180812000517-0a84660828b2 h1:gu/oICkpJXc2rCRVO9lrict4+gbV9uZhVPivr0RGQRQ=
+gopkg.in/go-toast/toast.v1 v1.0.0-20180812000517-0a84660828b2/go.mod h1:5x9TKRvWYIVtTclT+koiTYO7ZW9N649n5SG7uKools0=
