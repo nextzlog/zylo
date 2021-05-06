@@ -93,6 +93,13 @@ const (
 const QBYTES = 256
 
 /*
+ reference to qxsl.exe
+ */
+type QxSL struct {
+	exe *memexec.Exec
+}
+
+/*
  a bridge function of Delphi InputBox.
  */
 var Ibox func(string, string) (string, bool)
@@ -195,17 +202,31 @@ func (qso *QSO) GetName() string {
 }
 
 /*
- extracts the first multiplier.
+ extracts the 1st multiplier.
  */
 func (qso *QSO) GetMul1() string {
 	return getString(qso.mul1[:])
 }
 
 /*
- extracts the second multiplier.
+ extracts the 2nd multiplier.
  */
 func (qso *QSO) GetMul2() string {
 	return getString(qso.mul2[:])
+}
+
+/*
+ extracts whether the 1st multiplier appears for the first time.
+ */
+func (qso *QSO) IsNewMul1() bool {
+	return qso.new1
+}
+
+/*
+ extracts whether the 2nd multiplier appears for the first time.
+ */
+func (qso *QSO) IsNewMul2() bool {
+	return qso.new2
 }
 
 /*
@@ -237,21 +258,31 @@ func (qso *QSO) SetName(value string) {
 }
 
 /*
- sets the first multiplier.
+ sets the 1st multiplier.
  */
 func (qso *QSO) SetMul1(value string) {
 	setString(qso.mul1[:], value)
 }
 
 /*
- sets the second multiplier.
+ sets the 2nd multiplier.
  */
 func (qso *QSO) SetMul2(value string) {
 	setString(qso.mul2[:], value)
 }
 
-type QxSL struct {
-	exe *memexec.Exec
+/*
+ sets whether the 1st multiplier appears for the 1st time.
+ */
+func (qso *QSO) SetNewMul1(value bool) {
+	qso.new1 = value
+}
+
+/*
+ sets whether the 2nd multiplier appears for the 1st time.
+ */
+func (qso *QSO) SetNewMul2(value bool) {
+	qso.new2 = value
 }
 
 /*
@@ -269,7 +300,7 @@ func NewQxSL(bytes []byte) (qxsl *QxSL, err error) {
 }
 
 /*
- release resources for qxsl.exe.
+ releases resources for qxsl.exe.
  */
 func (qxsl *QxSL) Close() error {
 	return qxsl.exe.Close()
