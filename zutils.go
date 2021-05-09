@@ -100,9 +100,14 @@ type QxSL struct {
 }
 
 /*
- a bridge function of Delphi InputBox.
+ a bridge function to insert a QSO.
  */
-var Ibox func(string, string) (string, bool)
+var InsertQSO func(qso *QSO)
+
+/*
+ a bridge function to delete a QSO.
+ */
+var DeleteQSO func(qso *QSO)
 
 /*
  displays a message as a toast.
@@ -146,6 +151,20 @@ func (log *Log) Dump(zone *time.Location) []byte {
 	buf.Write(make([]byte, 0xAA))
 	binary.Write(buf, binary.LittleEndian, log)
 	return buf.Bytes()
+}
+
+/*
+ inserts a QSO to zLog.
+ */
+func (qso *QSO) Insert() {
+	InsertQSO(qso);
+}
+
+/*
+ deletes a QSO to zLog.
+ */
+func (qso *QSO) Delete() {
+	DeleteQSO(qso);
 }
 
 /*
@@ -324,13 +343,6 @@ func (qxsl *QxSL) Format(source, target, format string) error {
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	_, err := cmd.Output()
 	return err
-}
-
-/*
- displays a modal dialog asking the user to enter a string value.
- */
-func Prompt(label, value string) (ret string, ok bool) {
-	return Ibox(label, value);
 }
 
 /*

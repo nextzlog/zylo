@@ -37,7 +37,7 @@ func zlaunch() {}
 func zfinish() {}
 ```
 
-### Open Contest
+### Open & Close
 
 - zLog calls the `zattach` (`zdetach`) function when the contest is opened (closed).
 
@@ -100,6 +100,9 @@ Feel free to contact [@nextzlog](https://twitter.com/nextzlog) on Twitter.
 ### Author
 
 [無線部開発班](https://pafelog.net)
+
+- JG1VPP
+- JS2FVO
 
 ### Clauses
 

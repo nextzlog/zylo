@@ -5,22 +5,26 @@
 package main
 
 /*
-typedef char* text;
+typedef void (*Insert)(void*);
+typedef void (*Delete)(void*);
+typedef void (*Filter)(char*);
 
-typedef text (*ShowInputDialog)(text, text);
-typedef void (*SetFilterString)(text, text);
-
-inline text doShowInputDialog(text l, text v, ShowInputDialog f) {
-	return f(l, v);
+inline void doInsert(void *p, Insert f) {
+	f(p);
 }
 
-inline void doSetFilterString(text i, text e, SetFilterString f) {
-	f(i, e);
+inline void doDelete(void *p, Delete f) {
+	f(p);
+}
+
+inline void doFilter(char *t, Filter f) {
+	f(t);
 }
 */
 import "C"
 import (
 	_ "embed"
+	"unsafe"
 	"github.com/nextzlog/zylo"
 )
 
@@ -32,20 +36,15 @@ var qbin []byte
  */
 var qxsl *zylo.QxSL
 
-/*
- a bridge function of Delphi InputBox.
- */
-var ibox C.ShowInputDialog
-
-//export _zylo_export_launch
-func _zylo_export_launch() {
+//export zylo_to_zlog_launch
+func zylo_to_zlog_launch() {
 	defer zylo.CapturePanic()
 	qxsl, _ = zylo.NewQxSL(qbin)
 	zlaunch()
 }
 
-//export _zylo_export_finish
-func _zylo_export_finish() {
+//export zylo_to_zlog_finish
+func zylo_to_zlog_finish() {
 	defer zylo.CapturePanic()
 	if qxsl != nil {
 		defer qxsl.Close()
@@ -53,33 +52,34 @@ func _zylo_export_finish() {
 	zfinish()
 }
 
-//export _zylo_export_dialog
-func _zylo_export_dialog(fun C.ShowInputDialog) {
+//export zlog_to_zylo_insert
+func zlog_to_zylo_insert(fun C.Insert) {
 	defer zylo.CapturePanic()
-	zylo.Ibox = func(l, v string) (string, bool){
-		lab := C.CString(l)
-		val := C.CString(v)
-		str := C.doShowInputDialog(lab, val, fun)
-		if str != nil {
-			return C.GoString(str), true
-		} else {
-			return "", false
-		}
+	zylo.InsertQSO = func(qso *zylo.QSO) {
+		C.doInsert(unsafe.Pointer(qso), fun)
 	}
 }
 
-//export _zylo_export_filter
-func _zylo_export_filter(fun C.SetFilterString) {
+//export zlog_to_zylo_delete
+func zlog_to_zylo_delete(fun C.Delete) {
+	defer zylo.CapturePanic()
+	zylo.DeleteQSO = func(qso *zylo.QSO) {
+		C.doDelete(unsafe.Pointer(qso), fun)
+	}
+}
+
+//import zlog_to_zylo_filter
+func zlog_to_zylo_filter(fun C.Filter) {
 	defer zylo.CapturePanic()
 	if qxsl != nil {
 		ex, _ := qxsl.Filter()
 		value := C.CString(ex)
-		C.doSetFilterString(value, value, fun)
+		C.doFilter(value, fun)
 	}
 }
 
-//export _zylo_export_import
-func _zylo_export_import(source, target *C.char) (err bool) {
+//export zylo_to_zlog_import
+func zylo_to_zlog_import(source, target *C.char) (err bool) {
 	defer zylo.CapturePanic()
 	f := "zbin"
 	s := C.GoString(source)
@@ -88,8 +88,8 @@ func _zylo_export_import(source, target *C.char) (err bool) {
 	return
 }
 
-//export _zylo_export_export
-func _zylo_export_export(source, format *C.char) (err bool) {
+//export zylo_to_zlog_export
+func zylo_to_zlog_export(source, format *C.char) (err bool) {
 	defer zylo.CapturePanic()
 	s := C.GoString(source)
 	f := C.GoString(format)
@@ -97,55 +97,55 @@ func _zylo_export_export(source, format *C.char) (err bool) {
 	return
 }
 
-//export _zylo_export_attach
-func _zylo_export_attach(test, path *C.char) {
+//export zylo_to_zlog_attach
+func zylo_to_zlog_attach(test, path *C.char) {
 	defer zylo.CapturePanic()
 	t := C.GoString(test)
 	c := C.GoString(path)
 	zattach(t, c)
 }
 
-//export _zylo_export_detach
-func _zylo_export_detach() {
+//export zylo_to_zlog_detach
+func zylo_to_zlog_detach() {
 	defer zylo.CapturePanic()
 	zdetach()
 }
 
-//export _zylo_export_verify
-func _zylo_export_verify(ptr uintptr, size int) (score int) {
+//export zylo_to_zlog_verify
+func zylo_to_zlog_verify(ptr uintptr, size int) (score int) {
 	defer zylo.CapturePanic()
 	score = zverify(zylo.ToLog(ptr, size))
 	return
 }
 
-//export _zylo_export_update
-func _zylo_export_update(ptr uintptr, size int) (total int) {
+//export zylo_to_zlog_update
+func zylo_to_zlog_update(ptr uintptr, size int) (total int) {
 	defer zylo.CapturePanic()
 	total = zupdate(zylo.ToLog(ptr, size))
 	return
 }
 
-//export _zylo_export_insert
-func _zylo_export_insert(ptr uintptr, size int) {
+//export zylo_to_zlog_insert
+func zylo_to_zlog_insert(ptr uintptr, size int) {
 	defer zylo.CapturePanic()
 	zinsert(zylo.ToLog(ptr, size))
 }
 
-//export _zylo_export_delete
-func _zylo_export_delete(ptr uintptr, size int) {
+//export zylo_to_zlog_delete
+func zylo_to_zlog_delete(ptr uintptr, size int) {
 	defer zylo.CapturePanic()
 	zdelete(zylo.ToLog(ptr, size))
 }
 
-//export _zylo_export_kpress
-func _zylo_export_kpress(key int, source *C.char) (block bool) {
+//export zylo_to_zlog_kpress
+func zylo_to_zlog_kpress(key int, source *C.char) (block bool) {
 	defer zylo.CapturePanic()
 	block = zkpress(key, C.GoString(source))
 	return
 }
 
-//export _zylo_export_fclick
-func _zylo_export_fclick(btn int, source *C.char) (block bool) {
+//export zylo_to_zlog_fclick
+func zylo_to_zlog_fclick(btn int, source *C.char) (block bool) {
 	defer zylo.CapturePanic()
 	block = zfclick(btn, C.GoString(source))
 	return
