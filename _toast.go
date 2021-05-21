@@ -5,9 +5,11 @@
 package main
 
 import (
+	"strings"
 	"github.com/nextzlog/zylo"
-	mapset "github.com/deckarep/golang-set"
 )
+
+var score = 0
 
 func zlaunch() {
 	zylo.Notify("CQ!")
@@ -18,57 +20,52 @@ func zfinish() {
 }
 
 func zattach(test string, path string) {
-	zylo.Notify("%s opened", test)
+	zylo.HookButton("CWPlayButton")
+	zylo.HookButton("CWStopButton")
+	zylo.HookEditor("CallsignEdit")
+	zylo.Notify(test)
 }
 
 func zdetach() {
-	zylo.Notify("contest closed")
+	score = 0
 }
 
-func zverify(list zylo.Log) (score int) {
-	for _, qso := range list {
-		call := qso.GetCall()
-		rcvd := qso.GetRcvd()
-		qso.SetMul1(rcvd)
-		if call != "" && rcvd != "" {
-			score = 1
-		}
-	}
-	return
+func zinsert(qso *zylo.QSO) {
+	score += int(qso.Score)
 }
 
-func zupdate(list zylo.Log) (total int) {
-	calls := mapset.NewSet()
-	mults := mapset.NewSet()
-	for _, qso := range list {
-		calls.Add(qso.GetCall())
-		mults.Add(qso.GetMul1())
-	}
-	score := calls.Cardinality()
-	multi := mults.Cardinality()
-	total = score * multi
-	return
+func zdelete(qso *zylo.QSO) {
+	score -= int(qso.Score)
 }
 
-func zinsert(list zylo.Log) {
-	for _, qso := range list {
-		zylo.Notify("insert %s", qso.GetCall())
+func zverify(qso *zylo.QSO) {
+	rcvd := qso.GetRcvd()
+	qso.SetMul1(rcvd)
+	if qso.Dupe {
+		qso.Score = 0
+	} else {
+		qso.Score = 1
 	}
 }
 
-func zdelete(list zylo.Log) {
-	for _, qso := range list {
-		zylo.Notify("delete %s", qso.GetCall())
-	}
+func zcities() string {
+	var list []string;
+	list = append(list, "100105 Bunkyo")
+	list = append(list, "100110 Meguro")
+	return strings.Join(list, "\n")
 }
 
-func zkpress(key int, source string) (block bool) {
-	return
+func zpoints(score, mults int) int {
+	return score * mults
 }
 
-func zfclick(btn int, source string) (block bool) {
-	zylo.Notify("button %s (%d) clicked", source, btn)
-	return
+func zeditor(key int, name string) bool {
+	return rune(key) == ' '
+}
+
+func zbutton(btn int, name string) bool {
+	zylo.Notify("button %s clicked", name)
+	return false
 }
 
 func main() {}

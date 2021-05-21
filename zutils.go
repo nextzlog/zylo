@@ -21,37 +21,32 @@ import (
  defines a QSO data frame in zLog binary format.
  */
 type QSO struct {
-	time float64
-	call [13]byte
-	sent [31]byte
-	rcvd [31]byte
-	void byte
-	sRST uint16
-	rRST uint16
-	seID uint32
-	Mode byte
-	Band byte
-	pow1 byte
-	mul1 [31]byte
-	mul2 [31]byte
-	new1 bool
-	new2 bool
-	mark byte
-	name [15]byte
-	note [65]byte
-	isCQ bool
-	dupe bool
-	rsv1 byte
-	txID byte
-	pow2 uint32
-	rsv2 uint32
-	rsv3 uint32
+	time  float64
+	call  [13]byte
+	sent  [31]byte
+	rcvd  [31]byte
+	void  byte
+	sRST  uint16
+	rRST  uint16
+	ID    uint32
+	Mode  byte
+	Band  byte
+	Pow1  byte
+	mul1  [31]byte
+	mul2  [31]byte
+	new1  bool
+	new2  bool
+	Score byte
+	name  [15]byte
+	note  [65]byte
+	isCQ  bool
+	Dupe  bool
+	rsv1  byte
+	TxID  byte
+	Pow2  uint32
+	rsv2  uint32
+	rsv3  uint32
 }
-
-/*
- QSO list.
- */
-type Log []QSO
 
 /*
  mode enumeration.
@@ -110,6 +105,21 @@ var InsertQSO func(qso *QSO)
 var DeleteQSO func(qso *QSO)
 
 /*
+ a bridge function to update a QSO.
+ */
+var UpdateQSO func(qso *QSO)
+
+/*
+ a bridge function to add editor handler.
+ */
+var HookEditor func(name string)
+
+/*
+ a bridge function to add button handler.
+ */
+var HookButton func(name string)
+
+/*
  displays a message as a toast.
  */
 func Notify(msg string, args ...interface{}) {
@@ -129,31 +139,6 @@ func ToQSO(ptr uintptr) (qso *QSO) {
 }
 
 /*
- converts a raw pointer into a QSO list.
- */
-func ToLog(ptr uintptr, size int) (list Log) {
-	for i := 0; i < size; i++ {
-		list = append(list, *ToQSO(ptr))
-		ptr += QBYTES
-	}
-	return
-}
-
-/*
- converts a QSO list into a binary data.
- */
-func (log *Log) Dump(zone *time.Location) []byte {
-	_, off := time.Now().In(zone).Zone()
-	min := int16(-off / 60)
-	buf := new(bytes.Buffer)
-	buf.Write(make([]byte, 0x54))
-	binary.Write(buf, binary.LittleEndian, min)
-	buf.Write(make([]byte, 0xAA))
-	binary.Write(buf, binary.LittleEndian, log)
-	return buf.Bytes()
-}
-
-/*
  inserts a QSO to zLog.
  */
 func (qso *QSO) Insert() {
@@ -161,10 +146,17 @@ func (qso *QSO) Insert() {
 }
 
 /*
- deletes a QSO to zLog.
+ deletes a QSO in zLog.
  */
 func (qso *QSO) Delete() {
 	DeleteQSO(qso);
+}
+
+/*
+ updates a QSO in zLog.
+ */
+func (qso *QSO) Update() {
+	UpdateQSO(qso);
 }
 
 /*
@@ -200,24 +192,31 @@ func (qso *QSO) GetCall() string {
 }
 
 /*
- extracts the contest QSO transmitted serial number.
+ extracts the transmitted serial number.
  */
 func (qso *QSO) GetSent() string {
 	return getString(qso.sent[:])
 }
 
 /*
- extracts the contest QSO received serial number.
+ extracts the received serial number.
  */
 func (qso *QSO) GetRcvd() string {
 	return getString(qso.rcvd[:])
 }
 
 /*
- extracts the logging operator's name.
+ extracts the operator's name.
  */
 func (qso *QSO) GetName() string {
 	return getString(qso.name[:])
+}
+
+/*
+ extracts the QSO notes.
+ */
+func (qso *QSO) GetNote() string {
+	return getString(qso.note[:])
 }
 
 /*
@@ -235,20 +234,6 @@ func (qso *QSO) GetMul2() string {
 }
 
 /*
- extracts whether the 1st multiplier appears for the first time.
- */
-func (qso *QSO) IsNewMul1() bool {
-	return qso.new1
-}
-
-/*
- extracts whether the 2nd multiplier appears for the first time.
- */
-func (qso *QSO) IsNewMul2() bool {
-	return qso.new2
-}
-
-/*
  extracts the contacted station's callsign.
  */
 func (qso *QSO) SetCall(value string) {
@@ -256,24 +241,31 @@ func (qso *QSO) SetCall(value string) {
 }
 
 /*
- extracts the contest QSO transmitted serial number.
+ extracts the transmitted serial number.
  */
 func (qso *QSO) SetSent(value string) {
 	setString(qso.sent[:], value)
 }
 
 /*
- extracts the contest QSO received serial number.
+ extracts the received serial number.
  */
 func (qso *QSO) SetRcvd(value string) {
 	setString(qso.rcvd[:], value)
 }
 
 /*
- extracts the logging operator's name.
+ extracts the operator's name.
  */
 func (qso *QSO) SetName(value string) {
 	setString(qso.name[:], value)
+}
+
+/*
+ extracts the QSO notes.
+ */
+func (qso *QSO) SetNote(value string) {
+	setString(qso.note[:], value)
 }
 
 /*
@@ -291,17 +283,17 @@ func (qso *QSO) SetMul2(value string) {
 }
 
 /*
- sets whether the 1st multiplier appears for the 1st time.
+ converts a QSO into a binary data.
  */
-func (qso *QSO) SetNewMul1(value bool) {
-	qso.new1 = value
-}
-
-/*
- sets whether the 2nd multiplier appears for the 1st time.
- */
-func (qso *QSO) SetNewMul2(value bool) {
-	qso.new2 = value
+func (qso *QSO) Dump(locale *time.Location) []byte {
+	_, off := time.Now().In(locale).Zone()
+	min := int16(-off / 60)
+	buf := new(bytes.Buffer)
+	buf.Write(make([]byte, 0x54))
+	binary.Write(buf, binary.LittleEndian, min)
+	buf.Write(make([]byte, 0xAA))
+	binary.Write(buf, binary.LittleEndian, qso)
+	return buf.Bytes()
 }
 
 /*

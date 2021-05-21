@@ -9,20 +9,22 @@ interface
 
 uses
 	Classes,
-	Windows,
 	Dialogs,
-	IOUtils,
+	Windows,
 	Menus,
+	IOUtils,
+	Controls,
 	StdCtrls,
 	StrUtils,
 	SysUtils,
-	UITypes,
 	UzLogQSO,
+	UzLogConst,
 	UzLogGlobal,
+	UMultipliers,
 	RegularExpressions;
 
 type
-	TzLogEvent = (evAddQSO = 0, evModifyQSO, evDeleteQSO);
+	TzLogEvent = (evInsertQSO = 0, evUpdateQSO, evDeleteQSO);
 	TImportDialog = class(TOpenDialog)
 		procedure ImportMenuClicked(Sender: TObject);
 	end;
@@ -30,50 +32,71 @@ type
 		procedure ExportMenuClicked(Sender: TObject);
 		procedure FilterTypeChanged(Sender: TObject);
 	end;
+	TEditorBundle = class
+		Source: TEdit;
+		Origin: TKeyPressEvent;
+		procedure Handle(Sender: TObject; var Key: Char);
+	end;
+	TButtonBundle = class
+		Source: TButton;
+		Origin: TNotifyEvent;
+		procedure Handle(Sender: TObject);
+	end;
+
 var
 	Fmt: string;
-	Enabled: boolean;
-	zHandle: THandle;
+	CityList: TCityList;
 	ImportMenu: TMenuItem;
 	ExportMenu: TMenuItem;
 	ImportDialog: TImportDialog;
 	ExportDialog: TExportDialog;
-	zlaunch: procedure(); stdcall;
-	zfinish: procedure(); stdcall;
+	zlaunch: procedure; stdcall;
+	zfinish: procedure; stdcall;
 	yinsert: procedure(fun: pointer); stdcall;
 	ydelete: procedure(fun: pointer); stdcall;
+	yupdate: procedure(fun: pointer); stdcall;
 	yfilter: procedure(fun: pointer); stdcall;
+	ycities: procedure(fun: pointer); stdcall;
+	yeditor: procedure(fun: pointer); stdcall;
+	ybutton: procedure(fun: pointer); stdcall;
 	zimport: procedure(src: PAnsiChar; dst: PAnsiChar); stdcall;
 	zexport: procedure(src: PAnsiChar; fmt: PAnsiChar); stdcall;
 	zattach: procedure(str: PAnsiChar; cfg: PAnsiChar); stdcall;
-	zdetach: procedure(); stdcall;
-	zverify: function (ptr: pointer; len: integer): integer; stdcall;
-	zupdate: function (ptr: pointer; len: integer): integer; stdcall;
-	zinsert: procedure(ptr: pointer; len: integer); stdcall;
-	zdelete: procedure(ptr: pointer; len: integer); stdcall;
-	zkpress: function (key: integer; source: PAnsiChar): boolean; stdcall;
-	zfclick: function (btn: integer; source: PAnsiChar): boolean; stdcall;
-
-const
-	LEN = sizeof(TQSOData);
+	zdetach: procedure; stdcall;
+	zinsert: procedure(ptr: pointer); stdcall;
+	zdelete: procedure(ptr: pointer); stdcall;
+	zverify: procedure(ptr: pointer); stdcall;
+	zpoints: function (pts, mul: integer): integer; stdcall;
+	zeditor: function (key: integer; name: PAnsiChar): boolean; stdcall;
+	zbutton: function (btn: integer; name: PAnsiChar): boolean; stdcall;
 
 (*zLog event handlers*)
-procedure zLogInitialize();
-procedure zLogContestInit(contest, cfg: string);
-procedure zLogContestEvent(event: TzLogEvent; bQSO, aQSO: TQSO);
-procedure zLogContestTerm();
-procedure zLogTerminate();
-function zLogCalcPointsHookHandler(aQSO: TQSO): boolean;
-function zLogExtractMultiHookHandler(aQSO: TQSO; var mul: string): boolean;
-function zLogValidMultiHookHandler(mul: string; var val: boolean): boolean;
-function zLogGetTotalScore(): integer;
-function zLogKeyBoardPressed(Sender: TObject; key: Char): boolean;
-function zLogFunctionClicked(Sender: TObject): boolean;
-function DtoC(str: string): PAnsiChar;
-function CtoD(str: PAnsiChar): string;
+procedure zyloRuntimeLaunch;
+procedure zyloRuntimeFinish;
+procedure zyloContestOpened(contest, cfg: string);
+procedure zyloContestClosed;
+procedure zyloLogUpdated(event: TzLogEvent; bQSO, aQSO: TQSO);
+
+(*zLog contest rules*)
+function zyloRequestTotal(Points, Multi: integer): integer;
+function zyloRequestScore(aQSO: TQSO): boolean;
+function zyloRequestMulti(aQSO: TQSO; var mul: string): boolean;
+function zyloRequestValid(aQSO: TQSO; var val: boolean): boolean;
+function zyloRequestTable(Path: String; List: TCityList): boolean;
+
+(*callback functions*)
 procedure InsertCallBack(ptr: pointer); stdcall;
 procedure DeleteCallBack(ptr: pointer); stdcall;
+procedure UpdateCallBack(ptr: pointer); stdcall;
 procedure FilterCallBack(f: PAnsiChar); stdcall;
+procedure CitiesCallBack(f: PAnsiChar); stdcall;
+procedure EditorCallBack(f: PAnsiChar); stdcall;
+procedure ButtonCallBack(f: PAnsiChar); stdcall;
+
+function DtoC(str: string): PAnsiChar;
+function CtoD(str: PAnsiChar): string;
+
+function FindUI(Name: string): TComponent;
 
 implementation
 
@@ -87,10 +110,15 @@ end;
 
 function CtoD(str: PAnsiChar): string;
 begin
-	Result := string(AnsiString(str));
+	Result := UTF8String(str);
 end;
 
-(*callback function that will be invoked from DLL*)
+function FindUI(Name: string): TComponent;
+begin
+	Result := MainForm.FindComponent(Name);
+end;
+
+(*callback function that will be invoked by DLL*)
 procedure InsertCallBack(ptr: pointer); stdcall;
 var
 	qso: TQSO;
@@ -100,17 +128,33 @@ begin
 	MyContest.LogQSO(qso, True);
 end;
 
-(*callback function that will be invoked from DLL*)
+(*callback function that will be invoked by DLL*)
 procedure DeleteCallBack(ptr: pointer); stdcall;
 var
 	qso: TQSO;
 begin
 	qso := TQSO.Create;
 	qso.FileRecord := TQSOData(ptr^);
+	Log.DeleteQSO(qso);
 	MyContest.Renew;
+	qso.Free;
 end;
 
-(*callback function that will be invoked from DLL*)
+(*callback function that will be invoked by DLL*)
+procedure UpdateCallBack(ptr: pointer); stdcall;
+var
+	qso: TQSO;
+begin
+	qso := TQSO.Create;
+	qso.FileRecord := TQSOData(ptr^);
+	qso.Reserve := actEdit;
+	Log.AddQue(qso);
+	Log.ProcessQue;
+	MyContest.Renew;
+	qso.Free;
+end;
+
+(*callback function that will be invoked by DLL*)
 procedure FilterCallBack(f: PAnsiChar); stdcall;
 begin
 	ImportDialog.Filter := CtoD(f);
@@ -118,134 +162,196 @@ begin
 	ExportDialog.OnTypeChange := ExportDialog.FilterTypeChanged;
 end;
 
-procedure zLogInitialize();
+(*callback function that will be invoked by DLL*)
+procedure CitiesCallBack(f: PAnsiChar); stdcall;
+var
+	city: TCity;
+	line: string;
+	list: TStringList;
+	vals: TArray<string>;
+begin
+	list := TStringList.Create;
+	list.Text := AdjustLineBreaks(CtoD(f), tlbsLF); 
+	for line in list do begin
+		city := TCity.Create;
+		vals := TRegEx.Split(line, '\s+');
+		city.CityNumber := vals[0];
+		city.CityName := vals[1];
+		city.Index := CityList.List.Count;
+		CityList.List.Add(city);
+		CityList.SortedMultiList.AddObject(city.CityNumber, city);
+	end;
+	list.Free;
+end;
+
+(*callback function that will be invoked by DLL*)
+procedure EditorCallBack(f: PAnsiChar); stdcall;
+var
+	Source: TEdit;
+	Bundle: TEditorBundle;
+begin
+	Source := TEdit(FindUI(CtoD(f)));
+	if (@zeditor <> nil) and (Source <> nil) then begin
+		Bundle := TEditorBundle.Create;
+		Bundle.Source := Source;
+		Bundle.Origin := Source.OnKeyPress;
+		Source.OnKeyPress := Bundle.Handle;
+	end;
+end;
+
+(*callback function that will be invoked by DLL*)
+procedure ButtonCallBack(f: PAnsiChar); stdcall;
+var
+	Source: TButton;
+	Bundle: TButtonBundle;
+begin
+	Source := TButton(FindUI(CtoD(f)));
+	if (@zbutton <> nil) and (Source <> nil) then begin
+		Bundle := TButtonBundle.Create;
+		Bundle.Source := Source;
+		Bundle.Origin := Source.OnClick;
+		Source.OnClick := Bundle.Handle;
+	end;
+end;
+
+procedure zyloRuntimeLaunch;
 var
 	fil: AnsiString;
+	zHandle: THandle;
 begin
 	ImportMenu := MainForm.MergeFile1;
 	ExportMenu := MainForm.Export1;
 	ImportDialog := TImportDialog.Create(MainForm);
 	ExportDialog := TExportDialog.Create(MainForm);
 	ExportDialog.Options := [ofOverwritePrompt];
-	try
-		zHandle := LoadLibrary(PChar('zylo.dll'));
-		zlaunch := GetProcAddress(zHandle, 'zylo_to_zlog_launch');
-		zfinish := GetProcAddress(zHandle, 'zylo_to_zlog_finish');
-		yinsert := GetProcAddress(zHandle, 'zlog_to_zylo_insert');
-		ydelete := GetProcAddress(zHandle, 'zlog_to_zylo_delete');
-		yfilter := GetProcAddress(zHandle, 'zlog_to_zylo_filter');
-		zimport := GetProcAddress(zHandle, 'zylo_to_zlog_import');
-		zexport := GetProcAddress(zHandle, 'zylo_to_zlog_export');
-		zattach := GetProcAddress(zHandle, 'zylo_to_zlog_attach');
-		zdetach := GetProcAddress(zHandle, 'zylo_to_zlog_detach');
-		zverify := GetProcAddress(zHandle, 'zylo_to_zlog_verify');
-		zupdate := GetProcAddress(zHandle, 'zylo_to_zlog_update');
-		zinsert := GetProcAddress(zHandle, 'zylo_to_zlog_insert');
-		zdelete := GetProcAddress(zHandle, 'zylo_to_zlog_delete');
-		zkpress := GetProcAddress(zHandle, 'zylo_to_zlog_kpress');
-		zfclick := GetProcAddress(zHandle, 'zylo_to_zlog_fclick');
-	except
-		zHandle := 0;
-	end;
-	if @zlaunch <> nil then zlaunch();
-	if @yinsert <> nil then yinsert(@InsertCallBack);
-	if @ydelete <> nil then ydelete(@DeleteCallBack);
-	if @yfilter <> nil then yfilter(@FilterCallBack);
+	zHandle := LoadLibrary(PChar('zylo.dll'));
+	zlaunch := GetProcAddress(zHandle, 'zylo_handle_launch');
+	zfinish := GetProcAddress(zHandle, 'zylo_handle_finish');
+	yinsert := GetProcAddress(zHandle, 'zylo_permit_insert');
+	ydelete := GetProcAddress(zHandle, 'zylo_permit_delete');
+	yupdate := GetProcAddress(zHandle, 'zylo_permit_update');
+	yfilter := GetProcAddress(zHandle, 'zylo_permit_filter');
+	ycities := GetProcAddress(zHandle, 'zylo_permit_cities');
+	yeditor := GetProcAddress(zHandle, 'zylo_permit_editor');
+	ybutton := GetProcAddress(zHandle, 'zylo_permit_button');
+	zimport := GetProcAddress(zHandle, 'zylo_handle_import');
+	zexport := GetProcAddress(zHandle, 'zylo_handle_export');
+	zattach := GetProcAddress(zHandle, 'zylo_handle_attach');
+	zdetach := GetProcAddress(zHandle, 'zylo_handle_detach');
+	zinsert := GetProcAddress(zHandle, 'zylo_handle_insert');
+	zdelete := GetProcAddress(zHandle, 'zylo_handle_delete');
+	zverify := GetProcAddress(zHandle, 'zylo_handle_verify');
+	zpoints := GetProcAddress(zHandle, 'zylo_handle_points');
+	zeditor := GetProcAddress(zHandle, 'zylo_handle_editor');
+	zbutton := GetProcAddress(zHandle, 'zylo_handle_button');
+	if (@zlaunch <> nil) then zlaunch;
+	if (@yinsert <> nil) then yinsert(@InsertCallBack);
+	if (@ydelete <> nil) then ydelete(@DeleteCallBack);
+	if (@yupdate <> nil) then yupdate(@UpdateCallBack);
+	if (@yfilter <> nil) then yfilter(@FilterCallBack);
+	if (@yeditor <> nil) then yeditor(@EditorCallBack);
+	if (@ybutton <> nil) then ybutton(@ButtonCallBack);
 	if (@zimport <> nil) and (@zexport <> nil) then begin
 		ImportMenu.OnClick := ImportDialog.ImportMenuClicked;
 		ExportMenu.OnClick := ExportDialog.ExportMenuClicked;
 	end;
 end;
 
-procedure zLogContestInit(contest: string; cfg: string);
+procedure zyloRuntimeFinish;
 begin
-	Enabled := True;
+	(*do not close Go DLL*)
+	if @zfinish <> nil then
+		zfinish;
+end;
+
+procedure zyloContestOpened(contest: string; cfg: string);
+var
+	idx: integer;
+begin
 	if @zattach <> nil then
 		zattach(DtoC(contest), DtoC(cfg));
 end;
 
-procedure zLogContestEvent(event: TzLogEvent; bQSO, aQSO: TQSO);
+procedure zyloContestClosed;
+begin
+	if @zdetach <> nil then
+		zdetach;
+end;
+
+procedure zyloLogUpdated(event: TzLogEvent; bQSO, aQSO: TQSO);
 var
 	qso: TQSOData;
 begin
-	if Enabled then begin
-		if (@zinsert <> nil) and (event <> evDeleteQSO) then begin
-			qso := aQSO.FileRecord;
-			zinsert(@qso, 1);
-		end;
-		if (@zdelete <> nil) and (event <> evAddQSO) then begin
-			qso := bQSO.FileRecord;
-			zdelete(@qso, 1);
-		end;
+	if (@zdelete <> nil) and (event <> evInsertQSO) then begin
+		qso := bQSO.FileRecord;
+		zdelete(@qso);
+	end;
+	if (@zinsert <> nil) and (event <> evDeleteQSO) then begin
+		if aQSO.Time = 0 then Exit;
+		qso := aQSO.FileRecord;
+		zinsert(@qso);
 	end;
 end;
 
-procedure zLogContestTerm();
+function zyloRequestTotal(Points, Multi: integer): Integer;
 begin
-	if @zdetach <> nil then
-		zdetach();
-	Enabled := False;
-end;
-
-procedure zLogTerminate();
-begin
-	(*do not close Go DLL*)
-	if @zfinish <> nil then
-		zfinish();
+	if @zpoints <> nil then
+		Result := zpoints(Points, Multi)
+	else
+		Result := -1;
 end;
 
 (*returns whether the QSO score is calculated by this handler*)
-function zLogCalcPointsHookHandler(aQSO: TQSO): boolean;
+function zyloRequestScore(aQSO: TQSO): boolean;
 var
 	qso: TQSOData;
 begin
 	Result := @zverify <> nil;
 	if Result then begin
 		qso := aQSO.FileRecord;
-		aQSO.Points := zverify(@qso, 1);
+		zverify(@qso);
+		aQSO.FileRecord := qso;
 	end;
 end;
 
 (*returns whether the multiplier is extracted by this handler*)
-function zLogExtractMultiHookHandler(aQSO: TQSO; var mul: string): boolean;
+function zyloRequestMulti(aQSO: TQSO; var mul: string): boolean;
 var
 	qso: TQSOData;
 begin
 	Result := @zverify <> nil;
 	if Result then begin
 		qso := aQSO.FileRecord;
-		zverify(@qso, 1);
-		mul := string(qso.Multi1);
+		zverify(@qso);
+		aQSO.FileRecord := qso;
+		mul := qso.Multi1;
 	end;
 end;
 
 (*returns whether the multiplier is validated by this handler*)
-function zLogValidMultiHookHandler(mul: string; var val: boolean): boolean;
+function zyloRequestValid(aQSO: TQSO; var val: boolean): boolean;
+var
+	qso: TQSOData;
 begin
 	Result := @zverify <> nil;
-	if Result then
-		val := mul <> '';
+	if Result then begin
+		qso := aQSO.FileRecord;
+		zverify(@qso);
+		aQSO.FileRecord := qso;
+		val := qso.Multi1 <> '';
+	end;
 end;
 
-function zLogGetTotalScore(): Integer;
-var
-	buf: TBytesStream;
-	qso: TQSOData;
-	idx: integer;
+(*returns whether the cities list is provided by this handler*)
+function zyloRequestTable(Path: string; List: TCityList): boolean;
 begin
-	Result := -1;
-	if @zupdate <> nil then begin
-		buf := TBytesStream.Create;
-		try
-			for idx := 1 to Log.TotalQSO do begin
-				qso := Log.QsoList[idx].FileRecord;
-				buf.Write(qso, LEN);
-			end;
-			Result := zupdate(buf.bytes, Log.TotalQSO);
-		finally
-			buf.Free;
-		end;
-	end;
+	UzLogExtension.CityList := List;
+	if @ycities <> nil then begin
+		ycities(@CitiesCallBack);
+		Result := True;
+	end else
+		Result := False;
+	UzLogExtension.CityList := nil;
 end;
 
 procedure TImportDialog.ImportMenuClicked(Sender: TObject);
@@ -288,22 +394,16 @@ begin
 	DefaultExt := ext;
 end;
 
-(*returns whether the event is blocked by this handler*)
-function zLogKeyBoardPressed(Sender: TObject; key: Char): boolean;
+procedure TEditorBundle.Handle(Sender: TObject; var Key: Char);
 begin
-	if @zkpress <> nil then
-		Result := zkpress(integer(key), DtoC(TEdit(Sender).Name))
-	else
-		Result := False;
+	if not zeditor(integer(Key), DtoC(Source.Name)) then
+		Self.Origin(Sender, Key);
 end;
 
-(*returns whether the event is blocked by this handler*)
-function zLogFunctionClicked(Sender: TObject): boolean;
+procedure TButtonBundle.Handle(Sender: TObject);
 begin
-	if @zfclick <> nil then
-		Result := zfclick(TButton(Sender).Tag, DtoC(TButton(Sender).Name))
-	else
-		Result := False;
+	if not zbutton(Source.Tag, DtoC(Source.Name)) then
+		Self.Origin(Sender);
 end;
 
 initialization

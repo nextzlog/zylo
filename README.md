@@ -11,7 +11,7 @@ ZyLO: Go Extension Mechanism for zLog+
 ## Features
 
 - helps develop DLLs that work together with zLog to realize flexible, dynamic definition of amateur radio contests.
-- supports importing and exporting the QSO data in any format, including QXML, [ADIF](http://adif.org), [Cabrillo](https://wwrof.org/cabrillo/), [CTESTWIN](http://e.gmobb.jp/ctestwin/Download.html), etc.
+- supports importing and exporting QSO data in any format, including QXML, [ADIF](http://adif.org), [Cabrillo](https://wwrof.org/cabrillo/), [CTESTWIN](http://e.gmobb.jp/ctestwin/Download.html), etc.
 
 ## Documents
 
@@ -25,7 +25,6 @@ $ godoc -http=localhost:8000
 
 ## Events
 
-- When zLog loads a user defined contest, zLog will try to load a DLL with the same name as the CFG file except for the file extension.
 - The following functions need to be provided to zLog by the DLL and are called by zLog as needed.
 
 ### Start & Exit
@@ -46,31 +45,39 @@ func zattach(name string, path string) {}
 func zdetach() {}
 ```
 
-### Update Score
-
-- zLog calls the `zverify` function to extract the multiplier and calculate score for each QSO, and finally calls the `zupdate` function to update the total score.
-
-```go
-func zverify(list zylo.Log) (score int) {}
-func zupdate(list zylo.Log) (total int) {}
-```
-
 ### Add & Delete
 
-- zLog calls the `zinsert` (`zdelete`) function every time zLog appends (deletes) or updates a QSO.
+- zLog calls the `zinsert` (`zdelete`) function every time before zLog appends (deletes) or updates a QSO.
 
 ```go
-func zinsert(list zylo.Log) {}
-func zdelete(list zylo.Log) {}
+func zinsert(qso *zylo.QSO) {}
+func zdelete(qso *zylo.QSO) {}
+```
+
+### Validate QSO
+
+- zLog calls the `zverify` function to calculate the score and multiplier for the latest QSO, and the mutiplier must be a member of the city list provided by the `zcities` function.
+
+```go
+func zverify(qso *zylo.QSO) {}
+func zcities() (dat string) {}
+```
+
+### Update Score
+
+- zLog calls the `zpoints` function to calculate the current total score.
+
+```go
+func zpoints(score, mults int) (total int) {}
 ```
 
 ### Key & Button
 
-- zLog calls the `zkpress` (`zfclick`) function every time the user presses a key (function button) to enter a QSO or send a Morse code.
+- zLog calls the `zeditor` (`zbutton`) function every time the user presses a key (button) to enter a QSO or send a Morse code.
 
 ```go
-func zkpress(key int, source string) (block bool) {}
-func zfclick(btn int, source string) (block bool) {}
+func zeditor(key int, name string) (block bool) {}
+func zbutton(btn int, name string) (block bool) {}
 ```
 
 ## Build Tool
