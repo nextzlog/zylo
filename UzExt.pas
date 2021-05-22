@@ -45,6 +45,7 @@ type
 
 var
 	Fmt: string;
+	Enabled: boolean;
 	CityList: TCityList;
 	ImportMenu: TMenuItem;
 	ExportMenu: TMenuItem;
@@ -110,7 +111,7 @@ end;
 
 function CtoD(str: PAnsiChar): string;
 begin
-	Result := UTF8String(str);
+	Result := string(UTF8String(str));
 end;
 
 function FindUI(Name: string): TComponent;
@@ -216,7 +217,6 @@ end;
 
 procedure zyloRuntimeLaunch;
 var
-	fil: AnsiString;
 	zHandle: THandle;
 begin
 	ImportMenu := MainForm.MergeFile1;
@@ -268,12 +268,16 @@ procedure zyloContestOpened(contest: string; cfg: string);
 var
 	idx: integer;
 begin
+	Enabled := True;
 	if @zattach <> nil then
 		zattach(DtoC(contest), DtoC(cfg));
+	for idx := 1 to Log.TotalQSO do
+		zyloLogUpdated(evInsertQSO, nil, Log.QsoList[idx]);
 end;
 
 procedure zyloContestClosed;
 begin
+	Enabled := False;
 	if @zdetach <> nil then
 		zdetach;
 end;
@@ -284,12 +288,11 @@ var
 begin
 	if (@zdelete <> nil) and (event <> evInsertQSO) then begin
 		qso := bQSO.FileRecord;
-		zdelete(@qso);
+		if Enabled then zdelete(@qso);
 	end;
 	if (@zinsert <> nil) and (event <> evDeleteQSO) then begin
-		if aQSO.Time = 0 then Exit;
 		qso := aQSO.FileRecord;
-		zinsert(@qso);
+		if Enabled then zinsert(@qso);
 	end;
 end;
 
@@ -324,7 +327,7 @@ begin
 		qso := aQSO.FileRecord;
 		zverify(@qso);
 		aQSO.FileRecord := qso;
-		mul := qso.Multi1;
+		mul := string(qso.Multi1);
 	end;
 end;
 
@@ -372,8 +375,6 @@ begin
 end;
 
 procedure TExportDialog.ExportMenuClicked(Sender: TObject);
-var
-	tmp: string;
 begin
 	FilterTypeChanged(Sender);
 	FileName := ChangeFileExt(CurrentFileName, DefaultExt);

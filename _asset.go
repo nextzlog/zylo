@@ -53,6 +53,9 @@ import (
 //go:embed qxsl.exe
 var qbin []byte
 
+//go:embed qxsl.fmt
+var qfmt string
+
 /*
  an embedded QxSL library.
  */
@@ -105,29 +108,26 @@ func zylo_permit_update(fun C.Update) {
 func zylo_permit_filter(fun C.Filter) {
 	defer zylo.CapturePanic()
 	qxsl, _ = zylo.NewQxSL(qbin)
-	if qxsl != nil {
-		ex, _ := qxsl.Filter()
-		value := C.CString(ex)
-		defer free(value)
-		C.doFilter(value, fun)
-	}
+	format := C.CString(qfmt)
+	defer free(format)
+	C.doFilter(format, fun)
 }
 
 //export zylo_permit_cities
 func zylo_permit_cities(fun C.Cities) {
 	defer zylo.CapturePanic()
-	value := C.CString(zcities())
-	defer free(value)
-	C.doCities(value, fun)
+	cities := C.CString(zcities())
+	defer free(cities)
+	C.doCities(cities, fun)
 }
 
 //export zylo_permit_editor
 func zylo_permit_editor(fun C.Editor) {
 	defer zylo.CapturePanic()
 	zylo.HookEditor = func(name string) {
-		value := C.CString(name)
-		defer free(value)
-		C.doEditor(value, fun)
+		editor := C.CString(name)
+		defer free(editor)
+		C.doEditor(editor, fun)
 	}
 }
 
@@ -135,9 +135,9 @@ func zylo_permit_editor(fun C.Editor) {
 func zylo_permit_button(fun C.Button) {
 	defer zylo.CapturePanic()
 	zylo.HookButton = func(name string) {
-		value := C.CString(name)
-		defer free(value)
-		C.doButton(value, fun)
+		button := C.CString(name)
+		defer free(button)
+		C.doButton(button, fun)
 	}
 }
 

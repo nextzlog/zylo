@@ -43,6 +43,7 @@ fn main() -> Result<(), Error> {
 	let file = Path::new(&path).file_name();
 	let name = file.unwrap().to_str().unwrap();
 	output("qxsl.exe".to_string(), include_bytes!("qxsl.exe"));
+	output("qxsl.fmt".to_string(), include_bytes!("qxsl.fmt"));
 	output("asset.go".to_string(), include_bytes!("_asset.go"));
 	output(format!("{}.go", name), include_bytes!("_toast.go"));
 	Command::new("go").arg("mod").arg("init").arg(repo).status()?;
