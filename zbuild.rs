@@ -44,8 +44,8 @@ fn main() -> Result<(), Error> {
 	let name = file.unwrap().to_str().unwrap();
 	output("qxsl.exe".to_string(), include_bytes!("qxsl.exe"));
 	output("qxsl.fmt".to_string(), include_bytes!("qxsl.fmt"));
-	output("asset.go".to_string(), include_bytes!("_asset.go"));
-	output(format!("{}.go", name), include_bytes!("_toast.go"));
+	output("asset.go".to_string(), include_bytes!("assets/asset.go"));
+	output(format!("{}.go", name), include_bytes!("assets/toast.go"));
 	Command::new("go").arg("mod").arg("init").arg(repo).status()?;
 	Command::new("go").arg("get").arg("-u").arg("all").status()?;
 	Command::new("go").arg("mod").arg("tidy").status()?;

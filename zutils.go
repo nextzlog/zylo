@@ -13,12 +13,13 @@ import (
 	"time"
 	"unsafe"
 	"encoding/binary"
+	"gopkg.in/ini.v1"
 	"gopkg.in/go-toast/toast.v1"
 	"github.com/amenzhinsky/go-memexec"
 )
 
 /*
- defines a QSO data frame in zLog binary format.
+ a single QSO data.
  */
 type QSO struct {
 	time  float64
@@ -86,6 +87,11 @@ const (
  QSO struct size.
  */
 const QBYTES = 256
+
+/*
+ path to zlog.ini.
+ */
+const INI = "zlog.ini"
 
 /*
  reference to qxsl.exe
@@ -297,9 +303,34 @@ func (qso *QSO) Dump(locale *time.Location) []byte {
 }
 
 /*
+ gets a specified value from zlog.ini
+ */
+func GetINI(section, key string) (value string) {
+	cfg, err := ini.Load(INI)
+	if err == nil {
+		value = cfg.Section(section).Key(key).String()
+	} else {
+		value = ""
+	}
+	return
+}
+
+/*
+ sets a specified value into zlog.ini
+ */
+func SetINI(section, key, value string) (err error) {
+	cfg, err := ini.Load(INI)
+	if err == nil {
+		cfg.Section(section).Key(key).SetValue(value)
+		err = cfg.SaveTo(INI)
+	}
+	return
+}
+
+/*
  loads qxsl.exe from the byte array.
  */
-func NewQxSL(bytes []byte) (qxsl *QxSL, err error) {
+func LoadQxSL(bytes []byte) (qxsl *QxSL, err error) {
 	var exe *memexec.Exec
 	exe, err = memexec.New(bytes)
 	if err == nil {
@@ -313,15 +344,15 @@ func NewQxSL(bytes []byte) (qxsl *QxSL, err error) {
 /*
  releases resources for qxsl.exe.
  */
-func (qxsl *QxSL) Close() error {
-	return qxsl.exe.Close()
+func (exe *QxSL) Close() error {
+	return exe.exe.Close()
 }
 
 /*
  calls qxsl.exe to obtain filter string for a file dialog.
  */
-func (qxsl *QxSL) Filter() (filter string, err error) {
-	cmd := qxsl.exe.Command("filter")
+func (exe *QxSL) Filter() (filter string, err error) {
+	cmd := exe.exe.Command("filter")
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	out, err := cmd.Output()
 	return string(out), err
@@ -330,8 +361,8 @@ func (qxsl *QxSL) Filter() (filter string, err error) {
 /*
  calls qxsl.exe to format the specified log into another format.
  */
-func (qxsl *QxSL) Format(source, target, format string) error {
-	cmd := qxsl.exe.Command("format", source, target, format)
+func (exe *QxSL) Format(source, target, format string) error {
+	cmd := exe.exe.Command("format", source, target, format)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	_, err := cmd.Output()
 	return err

@@ -15,13 +15,8 @@ ZyLO: Go Extension Mechanism for zLog+
 
 ## Documents
 
-- Run [GoDoc](https://godoc.org) as follows:
-
-```sh
-$ godoc -http=localhost:8000
-```
-
-- Then open http://localhost:8000 in a web browser.
+- [GoDoc](https://nextzlog.github.io/zylo)
+- [Wiki](https://github.com/nextzlog/zylo/wiki)
 
 ## Events
 
