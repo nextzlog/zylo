@@ -27,7 +27,7 @@ fn setenv() -> String {
 	return var("REPO").unwrap_or("zylo/dll".to_string());
 }
 
-fn output(name: String, data: &[u8]) {
+fn output_bin(name: String, data: &[u8]) {
 	match OpenOptions::new()
 		.create_new(true)
 		.write(true)
@@ -37,19 +37,22 @@ fn output(name: String, data: &[u8]) {
 	}
 }
 
+fn output_str(name: String, data: &str) {
+	let old = "package zylo";
+	let new = "package main";
+	output_bin(name, data.replace(old, new).as_bytes())
+}
+
 fn main() -> Result<(), Error> {
-	let repo = setenv();
-	let path = current_dir()?;
-	let file = Path::new(&path).file_name();
-	let name = file.unwrap().to_str().unwrap();
-	output("qxsl.exe".to_string(), include_bytes!("qxsl.exe"));
-	output("qxsl.fmt".to_string(), include_bytes!("qxsl.fmt"));
-	output("asset.go".to_string(), include_bytes!("assets/asset.go"));
-	output(format!("{}.go", name), include_bytes!("assets/toast.go"));
-	Command::new("go").arg("mod").arg("init").arg(repo).status()?;
+	let pkg = setenv();
+	let dir = current_dir()?;
+	let dll = Path::new(&dir).file_name().unwrap().to_str().unwrap();
+	output_str("zutils.h".to_string(), include_str!("zutils.h"));
+	output_str("zutils.go".to_string(), include_str!("zutils.go"));
+	Command::new("go").arg("mod").arg("init").arg(pkg).status()?;
 	Command::new("go").arg("get").arg("-u").arg("all").status()?;
 	Command::new("go").arg("mod").arg("tidy").status()?;
-	let arg = format!("build -o {d}.dll -buildmode=c-shared", d = name);
+	let arg = format!("build -a -v -o {}.dll -buildmode=c-shared", dll);
 	let out = Command::new("go").args(arg.split_whitespace()).output()?;
 	stdout().write_all(&out.stdout).unwrap();
 	stderr().write_all(&out.stderr).unwrap();

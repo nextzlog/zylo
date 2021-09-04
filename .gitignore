@@ -1,9 +1,6 @@
 .*
-*.h
-*.so
 *.dll
 *.exe
-*.dylib
 */zbuild
 */zbuild-*
 !.github
