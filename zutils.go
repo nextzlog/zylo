@@ -234,6 +234,8 @@ type QSO struct {
 	rsv3  uint32
 }
 
+type BinaryData []byte
+
 /*
  zLogバイナリファイルの通信方式の列挙子です。
 */
@@ -285,11 +287,11 @@ func (qso *QSO) GetTime(zone *time.Location) time.Time {
 	return d.Add(h*time.Hour).AddDate(0, 0, int(t))
 }
 
-func DtoC(field []byte) string {
+func fromDtoC(field []byte) string {
 	return string(field[1 : int(field[0])+1])
 }
 
-func CtoD(value string) []byte {
+func fromCtoD(value string) []byte {
 	return append([]byte{byte(len(value))}, value...)
 }
 
@@ -297,98 +299,98 @@ func CtoD(value string) []byte {
  呼出符号を返します。
 */
 func (qso *QSO) GetCall() string {
-	return DtoC(qso.call[:])
+	return fromDtoC(qso.call[:])
 }
 
 /*
  送信した番号を返します。
 */
 func (qso *QSO) GetSent() string {
-	return DtoC(qso.sent[:])
+	return fromDtoC(qso.sent[:])
 }
 
 /*
  受信した番号を返します。
 */
 func (qso *QSO) GetRcvd() string {
-	return DtoC(qso.rcvd[:])
+	return fromDtoC(qso.rcvd[:])
 }
 
 /*
  運用者名を返します。
 */
 func (qso *QSO) GetName() string {
-	return DtoC(qso.name[:])
+	return fromDtoC(qso.name[:])
 }
 
 /*
  備考を返します。
 */
 func (qso *QSO) GetNote() string {
-	return DtoC(qso.note[:])
+	return fromDtoC(qso.note[:])
 }
 
 /*
  第1マルチプライヤを返します。
 */
 func (qso *QSO) GetMul1() string {
-	return DtoC(qso.mul1[:])
+	return fromDtoC(qso.mul1[:])
 }
 
 /*
  第2マルチプライヤを返します。
 */
 func (qso *QSO) GetMul2() string {
-	return DtoC(qso.mul2[:])
+	return fromDtoC(qso.mul2[:])
 }
 
 /*
  第2マルチプライヤを返します。
 */
 func (qso *QSO) SetCall(value string) {
-	copy(qso.call[:], CtoD(value))
+	copy(qso.call[:], fromCtoD(value))
 }
 
 /*
  送信した番号を設定します。
 */
 func (qso *QSO) SetSent(value string) {
-	copy(qso.sent[:], CtoD(value))
+	copy(qso.sent[:], fromCtoD(value))
 }
 
 /*
  受信した番号を設定します。
 */
 func (qso *QSO) SetRcvd(value string) {
-	copy(qso.rcvd[:], CtoD(value))
+	copy(qso.rcvd[:], fromCtoD(value))
 }
 
 /*
  運用者名を設定します。
 */
 func (qso *QSO) SetName(value string) {
-	copy(qso.name[:], CtoD(value))
+	copy(qso.name[:], fromCtoD(value))
 }
 
 /*
  備考を設定します。
 */
 func (qso *QSO) SetNote(value string) {
-	copy(qso.note[:], CtoD(value))
+	copy(qso.note[:], fromCtoD(value))
 }
 
 /*
  第1マルチプライヤを設定します。
 */
 func (qso *QSO) SetMul1(value string) {
-	copy(qso.mul1[:], CtoD(value))
+	copy(qso.mul1[:], fromCtoD(value))
 }
 
 /*
  第2マルチプライヤを設定します。
 */
 func (qso *QSO) SetMul2(value string) {
-	copy(qso.mul2[:], CtoD(value))
+	copy(qso.mul2[:], fromCtoD(value))
 }
 
 /*
@@ -403,6 +405,20 @@ func (qso *QSO) Dump(locale *time.Location) []byte {
 	buf.Write(make([]byte, 0xAA))
 	binary.Write(buf, binary.LittleEndian, qso)
 	return buf.Bytes()
+}
+
+/*
+ バイト列をQSO構造体に変換します。
+*/
+func (bin BinaryData) LoadBinaryData() (log []QSO) {
+	r := bytes.NewReader(bin)
+	r.Read(make([]byte, 256))
+	for r.Len() > 0 {
+		qso := QSO{}
+		log = append(log, qso)
+		binary.Read(r, binary.LittleEndian, &qso)
+	}
+	return log
 }
 
 /*
