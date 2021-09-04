@@ -12,6 +12,7 @@ import (
 	"github.com/recws-org/recws"
 	h "net/http"
 	"os"
+	"sort"
 	"time"
 )
 
@@ -131,6 +132,11 @@ func RealTimeStreamHandlerInfiniteLoop() {
 
 func OnRealTimeStreamEvent(stations Stations) {
 	for section, stations := range stations {
+		sort.Slice(stations, func(i, j int) bool {
+			total_i := stations[i].Total
+			total_j := stations[j].Total
+			return total_i > total_j
+		})
 		for _, station := range stations {
 			if station.Call == CALL {
 				Display(section, station)
