@@ -27,7 +27,6 @@ const (
 )
 
 var UID string
-var CALL string
 
 //go:embed rttest.dat
 var cityMultiList string
@@ -48,7 +47,7 @@ type Station struct {
 	Total int    `json:"total"`
 }
 
-type Stations map[string]([]Station)
+type Sections map[string]([]Station)
 
 func init() {
 	stopCh = make(chan bool)
@@ -66,13 +65,12 @@ func wait(w h.ResponseWriter, r *h.Request) {
 	UID = r.FormValue("id")
 	if UID != "" {
 		SetINI(SEC, KEY, UID)
-		onAssignEvent("", "")
+		connectWebSocketAPI()
 	}
 }
 
-func onAssignEvent(contest, configs string) {
+func connectWebSocketAPI() {
 	UID = GetINI(SEC, KEY)
-	CALL = Query("{C}")
 	ws.Dial(fmt.Sprintf(WSS, UID), nil)
 	if ws.GetDialError() != nil {
 		DisplayModal("authenticate via ATS-4")
@@ -85,7 +83,13 @@ func onAssignEvent(contest, configs string) {
 	}
 }
 
+func onAssignEvent(contest, configs string) {
+	ShowLeaderWindow()
+	connectWebSocketAPI()
+}
+
 func onDetachEvent(contest, configs string) {
+	CloseLeaderWindow()
 	if ws.IsConnected() {
 		close(stopCh)
 		ws.Close()
@@ -120,31 +124,28 @@ func onDeleteEvent(qso *QSO) {
 }
 
 func RealTimeStreamHandlerInfiniteLoop() {
-	for ok := true; ok; _, ok = <-stopCh {
-		_, data, err := ws.ReadMessage()
-		if err == nil {
-			var stations Stations
-			json.Unmarshal(data, &stations)
-			OnRealTimeStreamEvent(stations)
-		}
-	}
-}
-
-func OnRealTimeStreamEvent(stations Stations) {
-	for section, stations := range stations {
-		sort.Slice(stations, func(i, j int) bool {
-			total_i := stations[i].Total
-			total_j := stations[j].Total
-			return total_i > total_j
-		})
-		for _, station := range stations {
-			if station.Call == CALL {
-				Display(section, station)
+	for {
+		select {
+		case <-stopCh:
+			return
+		default:
+			_, data, err := ws.ReadMessage()
+			if err == nil {
+				var sections Sections
+				json.Unmarshal(data, &sections)
+				OnRealTimeStreamEvent(sections)
 			}
 		}
 	}
 }
 
-func Display(section string, station Station) {
-	DisplayToast("%s: %d", section, station.Total)
+func OnRealTimeStreamEvent(sections Sections) {
+	for section, stations := range sections {
+		sort.Slice(stations, func(i, j int) bool {
+			total_i := stations[i].Total
+			total_j := stations[j].Total
+			return total_i > total_j
+		})
+		Display(section, stations)
+	}
 }
