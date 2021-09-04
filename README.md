@@ -67,6 +67,13 @@ dll foo.dll
 
 - Start zLog (and select the contest CFG file that uses the DLL).
 
+## Bundled DLLs
+
+- `format.dll` ([Project](rules/format))
+- `latest.dll` ([Project](rules/latest))
+- `rttest.dll` ([Project](rules/rttest))
+- `toasty.dll` ([Project](rules/toasty))
+
 ## Contribution
 
 Feel free to contact [@nextzlog](https://twitter.com/nextzlog) on Twitter.
