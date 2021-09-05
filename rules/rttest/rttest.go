@@ -36,7 +36,6 @@ var ws = recws.RecConn{
 }
 
 var (
-	LOCALE = time.Local
 	BINARY = websocket.BinaryMessage
 	stopCh chan bool
 )
@@ -111,14 +110,14 @@ func submit(cmd byte, data []byte) {
 
 func onInsertEvent(qso *QSO) {
 	if ws.IsConnected() {
-		submit(INSERT, qso.Dump(LOCALE))
+		submit(INSERT, DumpZLO(*qso))
 		DisplayToast("insert %s", qso.GetCall())
 	}
 }
 
 func onDeleteEvent(qso *QSO) {
 	if ws.IsConnected() {
-		submit(DELETE, qso.Dump(LOCALE))
+		submit(DELETE, DumpZLO(*qso))
 		DisplayToast("delete %s", qso.GetCall())
 	}
 }
