@@ -405,7 +405,9 @@ func (qso *QSO) DumpWithoutHead(w io.Writer) {
  QSO構造体をヘッダ情報なしで読み取ります。
 */
 func (qso *QSO) LoadWithoutHead(r io.Reader) {
-	binary.Read(r, binary.LittleEndian, qso)
+	raw := make([]byte, 256)
+	binary.Read(r, binary.LittleEndian, raw)
+	*qso = *(*QSO)(unsafe.Pointer(&raw[0]))
 }
 
 /*
@@ -427,7 +429,7 @@ func DumpZLO(qso ...QSO) (bin []byte) {
 */
 func LoadZLO(bin []byte) (logs []QSO) {
 	buf := bytes.NewReader(bin)
-	buf.Read(make([]byte, 256))
+	new(QSO).LoadWithoutHead(buf)
 	for buf.Len() > 0 {
 		qso := QSO{}
 		qso.LoadWithoutHead(buf)
