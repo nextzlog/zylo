@@ -21,8 +21,8 @@ ZyLO is a plugin mechanism for [zLog](http://zlog.org) based on DLLs, that is a 
 
 ## Documents
 
-- [GoDoc](https://nextzlog.github.io/zylo)
-- [Wiki](https://github.com/nextzlog/zylo/wiki)
+- [API](https://nextzlog.github.io/zylo)
+- [日本語案内](https://github.com/nextzlog/zylo/blob/master/USAGE.md)
 
 ## Bundled DLLs
 
