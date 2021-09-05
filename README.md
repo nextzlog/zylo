@@ -30,6 +30,7 @@ ZyLO is a plugin mechanism for [zLog](http://zlog.org) based on DLLs, that is a 
 - `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/latest))
 - `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
 - `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/toasty))
+- `yltest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/yltest))
 
 ## Install DLL
 

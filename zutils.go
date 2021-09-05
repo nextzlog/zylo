@@ -19,6 +19,7 @@ import (
 	"io"
 	"math"
 	"runtime/debug"
+	"strings"
 	"time"
 	"unsafe"
 )
@@ -385,7 +386,8 @@ func (qso *QSO) SetMul2(value string) {
 }
 
 func stringFromDtoC(f []byte) string {
-	return string(f[1 : int(f[0])+1])
+	v := string(f[1 : int(f[0])+1])
+	return strings.TrimSpace(v)
 }
 
 func stringFromCtoD(v string) []byte {
