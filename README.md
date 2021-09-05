@@ -14,10 +14,41 @@ ZyLO is a plugin mechanism for [zLog](http://zlog.org) based on DLLs, that is a 
 - helps realize flexible, dynamic definition of amateur radio contests.
 - helps customize the zLog import/export formats.
 
+## Releases
+
+- [zLog v2.7.0.0+](https://github.com/jr8ppg/zlog/releases)
+- [Extension DLLs](https://github.com/nextzlog/zylo/releases/tag/nightly)
+
 ## Documents
 
 - [GoDoc](https://nextzlog.github.io/zylo)
 - [Wiki](https://github.com/nextzlog/zylo/wiki)
+
+## Bundled DLLs
+
+- `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/format))
+- `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/latest))
+- `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
+- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/toasty))
+
+## Install DLL
+
+- First, download [zLog](https://github.com/jr8ppg/zlog/releases).
+- Place the plugin DLL in the same directory as `zlog.exe` and add the following lines to `zlog.ini`.
+
+```ini
+[zylo]
+DLLs=foo.dll,bar.dll,baz.dll
+```
+
+- To define a contest that uses the DLL, add the following lines to the CFG file.
+
+```
+exit
+dll foo.dll
+```
+
+- Start zLog (and select the contest CFG file that uses the DLL).
 
 ## Build DLL
 
@@ -47,32 +78,6 @@ $ ./zbuild-macos
 ```
 
 - `zbuild` creates `zutils.go` and `zutils.h` and then compiles the Go files to create a DLL.
-
-## Use DLL
-
-- First, download [zLog](https://github.com/jr8ppg/zlog/releases).
-- Place the plugin DLL in the same directory as `zlog.exe` and add the following lines to `zlog.ini`.
-
-```ini
-[zylo]
-DLLs=foo.dll,bar.dll,baz.dll
-```
-
-- To define a contest that uses the DLL, add the following lines to the CFG file.
-
-```
-exit
-dll foo.dll
-```
-
-- Start zLog (and select the contest CFG file that uses the DLL).
-
-## Bundled DLLs
-
-- `format.dll` ([Project](rules/format))
-- `latest.dll` ([Project](rules/latest))
-- `rttest.dll` ([Project](rules/rttest))
-- `toasty.dll` ([Project](rules/toasty))
 
 ## Contribution
 
