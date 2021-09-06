@@ -44,9 +44,12 @@ dll foo.dll
 従来zLogで対応困難だったコンテストを中心に、DLLを実装しています。
 
 - [YLコンテスト](https://github.com/nextzlog/zylo/tree/master/rules/yltest)
+- [高校コンテスト](https://github.com/nextzlog/zylo/tree/master/rules/hstest)
 - [リアルタイムコンテスト](https://github.com/nextzlog/zylo/tree/master/rules/rttest)
 
 ## その他の拡張機能
+
+ネットワークプログラミングを得意とするGo言語の強みと生産性を活かした便利機能を提供しています。
 
 - [電子ログ変換機能](https://github.com/nextzlog/zylo/tree/master/rules/format)
 - [更新自動通知機能](https://github.com/nextzlog/zylo/tree/master/rules/latest)

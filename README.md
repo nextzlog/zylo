@@ -12,6 +12,7 @@ ZyLO is a plugin mechanism for [zLog](http://zlog.org) based on DLLs, that is a 
 ## Features
 
 - helps realize flexible, dynamic definition of amateur radio contests.
+- helps zLog work together with other software and hardware.
 - helps customize the zLog import/export formats.
 
 ## Releases
