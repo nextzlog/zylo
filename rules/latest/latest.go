@@ -29,6 +29,10 @@ func FixVersionString(number string) string {
 }
 
 func onLaunchEvent() {
+	go fetchReleases()
+}
+
+func fetchReleases() {
 	res, _ := latest.Check(&tag, Query("{V}"))
 	if res != nil && res.Outdated {
 		DisplayToast("%s is now available", res.Current)
