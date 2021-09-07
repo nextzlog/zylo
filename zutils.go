@@ -10,7 +10,6 @@ package zylo
 import "C"
 import (
 	"bytes"
-	_ "embed"
 	"encoding/binary"
 	"fmt"
 	"golang.org/x/text/encoding/japanese"
@@ -213,7 +212,7 @@ func zylo_add_editor_handler(name string) (evID int) {
 }
 
 /*
- zLogバイナリファイルのQSO構造体です。
+ QSO構造体です。
 */
 type QSO struct {
 	time  float64
@@ -244,7 +243,7 @@ type QSO struct {
 }
 
 /*
- zLogバイナリファイルの通信方式の列挙子です。
+ QSO構造体の通信方式の列挙子です。
 */
 const (
 	CW    = 0
@@ -256,7 +255,7 @@ const (
 )
 
 /*
- zLogバイナリファイルの周波数帯の列挙子です。
+ QSO構造体の周波数帯の列挙子です。
 */
 const (
 	M1_9  = 0
