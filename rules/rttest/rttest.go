@@ -38,6 +38,7 @@ var ws = recws.RecConn{
 var (
 	BINARY = websocket.BinaryMessage
 	stopCh chan bool
+	server *h.Server
 )
 
 type Station struct {
@@ -56,7 +57,7 @@ func init() {
 	OnInsertEvent = onInsertEvent
 	OnDeleteEvent = onDeleteEvent
 	h.HandleFunc("/", wait)
-	go h.ListenAndServe(":8873", nil)
+	server = &h.Server{Addr: ":8873"}
 }
 
 func wait(w h.ResponseWriter, r *h.Request) {
@@ -85,6 +86,7 @@ func connectWebSocketAPI() {
 func onAssignEvent(contest, configs string) {
 	ShowLeaderWindow()
 	connectWebSocketAPI()
+	go server.ListenAndServe()
 }
 
 func onDetachEvent(contest, configs string) {
@@ -93,6 +95,7 @@ func onDetachEvent(contest, configs string) {
 		close(stopCh)
 		ws.Close()
 	}
+	server.Close()
 }
 
 const (

@@ -81,7 +81,9 @@ func CloseLeaderWindow() {
 	SetINI(RT, "y", strconv.Itoa(y))
 	SetINI(RT, "w", strconv.Itoa(w))
 	SetINI(RT, "h", strconv.Itoa(h))
-	form.Close()
+	if form.Visible() {
+		form.Close()
+	}
 }
 
 func AddSection(section string) (view ScoreView) {

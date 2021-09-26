@@ -7,7 +7,7 @@ zLog+ ZyLO
 ![image](https://img.shields.io/badge/license-GPL3-darkblue.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
 
-ZyLO is a plugin mechanism for [zLog](http://zlog.org) based on DLLs, that is a simple but powerful logging software for amateur radio contests, originally developed at the [University of Tokyo Amateur Radio Club](http://ja1zlo.u-tokyo.org), and loved by many ham contesters for 30 years.
+[ZyLO](https://github.com/nextzlog/zylo) is a plugin mechanism for [zLog](http://zlog.org) based on DLLs, that is a simple but powerful logging software for amateur radio contests, originally developed at the [University of Tokyo Amateur Radio Club](http://ja1zlo.u-tokyo.org), and loved by many ham contesters for 30 years.
 
 ## Features
 
