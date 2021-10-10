@@ -1,11 +1,55 @@
 /*
  zLogの拡張機能を開発するためのフレームワークです。
 */
-package zylo
+package main
 
 /*
 #include <stdlib.h>
-#include "zutils.h"
+typedef void (*InsertCB)(void*);
+typedef void (*DeleteCB)(void*);
+typedef void (*UpdateCB)(void*);
+typedef void (*DialogCB)(char*);
+typedef void (*AccessCB)(void*);
+typedef long (*ButtonCB)(char*);
+typedef long (*EditorCB)(char*);
+typedef void (*FormatCB)(char*);
+typedef void (*CitiesCB)(char*);
+
+inline void insert(void *qso, InsertCB cb) {
+	cb(qso);
+}
+
+inline void delete(void *qso, DeleteCB cb) {
+	cb(qso);
+}
+
+inline void update(void *qso, UpdateCB cb) {
+	cb(qso);
+}
+
+inline void dialog(char *str, DialogCB cb) {
+	cb(str);
+}
+
+inline void access(void *str, AccessCB cb) {
+	cb(str);
+}
+
+inline long button(char *str, ButtonCB cb) {
+	return cb(str);
+}
+
+inline long editor(char *str, EditorCB cb) {
+	return cb(str);
+}
+
+inline void format(char *str, FormatCB cb) {
+	cb(str);
+}
+
+inline void cities(char *str, CitiesCB cb) {
+	cb(str);
+}
 */
 import "C"
 import (
@@ -39,57 +83,65 @@ var zone = time.Local
 var buttons = make(map[int]func(int))
 var editors = make(map[int]func(int))
 
+var insertCB C.InsertCB;
+var deleteCB C.DeleteCB;
+var updateCB C.UpdateCB;
+var dialogCB C.DialogCB;
+var accessCB C.AccessCB;
+var buttonCB C.ButtonCB;
+var editorCB C.EditorCB;
+
 func main() {}
 
 //export zylo_allow_insert
-func zylo_allow_insert(callback C.InsertCallBack) {
-	C.insertCallBack = callback
+func zylo_allow_insert(callback C.InsertCB) {
+	insertCB = callback
 }
 
 //export zylo_allow_delete
-func zylo_allow_delete(callback C.DeleteCallBack) {
-	C.deleteCallBack = callback
+func zylo_allow_delete(callback C.DeleteCB) {
+	deleteCB = callback
 }
 
 //export zylo_allow_update
-func zylo_allow_update(callback C.UpdateCallBack) {
-	C.updateCallBack = callback
+func zylo_allow_update(callback C.UpdateCB) {
+	updateCB = callback
 }
 
 //export zylo_allow_dialog
-func zylo_allow_dialog(callback C.DialogCallBack) {
-	C.dialogCallBack = callback
+func zylo_allow_dialog(callback C.DialogCB) {
+	dialogCB = callback
 }
 
 //export zylo_allow_access
-func zylo_allow_access(callback C.AccessCallBack) {
-	C.accessCallBack = callback
+func zylo_allow_access(callback C.AccessCB) {
+	accessCB = callback
 }
 
 //export zylo_allow_button
-func zylo_allow_button(callback C.ButtonCallBack) {
-	C.buttonCallBack = callback
+func zylo_allow_button(callback C.ButtonCB) {
+	buttonCB = callback
 }
 
 //export zylo_allow_editor
-func zylo_allow_editor(callback C.EditorCallBack) {
-	C.editorCallBack = callback
+func zylo_allow_editor(callback C.EditorCB) {
+	editorCB = callback
 }
 
 //export zylo_query_format
-func zylo_query_format(callback C.FormatCallBack) {
+func zylo_query_format(callback C.FormatCB) {
 	defer zylo_recover_capture_panic()
 	f := C.CString(FileExtFilter)
 	defer C.free(unsafe.Pointer(f))
-	C.callFormat(f, callback)
+	C.format(f, callback)
 }
 
 //export zylo_query_cities
-func zylo_query_cities(callback C.CitiesCallBack) {
+func zylo_query_cities(callback C.CitiesCB) {
 	defer zylo_recover_capture_panic()
 	c := C.CString(CityMultiList)
 	defer C.free(unsafe.Pointer(c))
-	C.callCities(c, callback)
+	C.cities(c, callback)
 }
 
 //export zylo_launch_event
@@ -202,13 +254,13 @@ func zylo_recover_capture_panic() {
 func zylo_add_button_handler(name string) (evID int) {
 	n := C.CString(name)
 	defer C.free(unsafe.Pointer(n))
-	return int(C.callButton(n))
+	return int(C.button(n, buttonCB))
 }
 
 func zylo_add_editor_handler(name string) (evID int) {
 	n := C.CString(name)
 	defer C.free(unsafe.Pointer(n))
-	return int(C.callEditor(n))
+	return int(C.editor(n, editorCB))
 }
 
 /*
@@ -441,21 +493,21 @@ func LoadZLO(bin []byte) (logs []QSO) {
  指定された交信記録を追加します。
 */
 func (qso *QSO) Insert() {
-	C.callInsert(unsafe.Pointer(qso))
+	C.insert(unsafe.Pointer(qso), insertCB)
 }
 
 /*
  指定された交信記録を削除します。
 */
 func (qso *QSO) Delete() {
-	C.callDelete(unsafe.Pointer(qso))
+	C.delete(unsafe.Pointer(qso), deleteCB)
 }
 
 /*
  指定された交信記録を更新します。
 */
 func (qso *QSO) Update() {
-	C.callUpdate(unsafe.Pointer(qso))
+	C.update(unsafe.Pointer(qso), updateCB)
 }
 
 /*
@@ -502,7 +554,7 @@ func DisplayToast(msg string, args ...interface{}) {
 func DisplayModal(msg string, args ...interface{}) {
 	text := C.CString(fmt.Sprintf(msg, args...))
 	defer C.free(unsafe.Pointer(text))
-	C.callDialog(text)
+	C.dialog(text, dialogCB)
 }
 
 /*
@@ -511,7 +563,7 @@ func DisplayModal(msg string, args ...interface{}) {
 func Query(text string) string {
 	buf := make([]byte, ResponseCapacity+1)
 	copy(buf[:ResponseCapacity], text[:])
-	C.callAccess(unsafe.Pointer(&buf[0]))
+	C.access(unsafe.Pointer(&buf[0]), accessCB)
 	return string(buf[:bytes.IndexByte(buf, 0)])
 }
 

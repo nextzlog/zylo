@@ -47,7 +47,6 @@ fn main() -> Result<(), Error> {
 	let pkg = setenv();
 	let dir = current_dir()?;
 	let dll = Path::new(&dir).file_name().unwrap().to_str().unwrap();
-	output_str("zutils.h".to_string(), include_str!("zutils.h"));
 	output_str("zutils.go".to_string(), include_str!("zutils.go"));
 	Command::new("go").arg("mod").arg("init").arg(pkg).status()?;
 	Command::new("go").arg("get").arg("-u").arg("all").status()?;

@@ -23,7 +23,7 @@ zLog+ ZyLO
 ## Documents
 
 - [API](https://nextzlog.github.io/zylo)
-- [日本語案内](https://github.com/nextzlog/zylo/blob/master/USAGE.md)
+- [日本語案内](https://github.com/nextzlog/zylo/blob/master/MANUAL.md)
 
 ## Bundled DLLs
 
