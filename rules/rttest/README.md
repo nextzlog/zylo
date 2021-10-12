@@ -1,7 +1,7 @@
-zLog Real-Time Contest Client
+UT realtime contest plugin
 ====
 
-The DLL provides a simple client functionality for the [REAL-TIME](http://ja1zlo.u-tokyo.org/rt/) contest.
+This plugin communicates with JA1ZLO's [realtime contest](http://ja1zlo.u-tokyo.org/rt/) cloud system.
 
 ## Releases
 

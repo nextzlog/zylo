@@ -3,57 +3,96 @@
  Copyright (C) 2020 JA1ZLO.
  */
 
-use std::env::current_dir;
-use std::env::set_var;
-use std::env::var;
-use std::env::vars_os;
-use std::fs::OpenOptions;
-use std::io::Error;
+use itertools::join;
+use jsonschema::JSONSchema;
+use reqwest::blocking::get;
+use serde_json::Serializer;
+use serde_transcode::transcode;
+use std::error::Error;
 use std::io::Write;
-use std::io::stderr;
-use std::io::stdout;
-use std::path::Path;
-use std::process::Command;
 use std::process::exit;
+use std::process::Command as Cmd;
+use std::{env, fs, io, path};
+use toml::Deserializer;
+use toml::Value;
 
-fn setenv() -> String {
-	set_var("GOOS", "windows");
-	set_var("GOARCH", "amd64");
-	set_var("CGO_ENABLED", "1");
-	set_var("CC", "x86_64-w64-mingw32-gcc");
-	for (key, value) in vars_os() {
-		println!("{:?}: {:?}", key, value);
-	}
-	return var("REPO").unwrap_or("zylo/dll".to_string());
-}
+type CommandResult<E> = Result<E, Box<dyn Error>>;
 
-fn output_bin(name: String, data: &[u8]) {
-	match OpenOptions::new()
-		.create_new(true)
-		.write(true)
-		.open(&name) {
+const CSHARED: &str = "-buildmode=c-shared";
+const MALFORM: &str = "malformed TOML file";
+
+fn save(dir: &path::Path, name: &str, data: &[u8]) {
+	let mut opts = fs::OpenOptions::new();
+	opts.create_new(true).write(true);
+	match opts.open(dir.join(&name)) {
 		Ok(mut file) => file.write_all(data).unwrap_or(()),
-		Err(e) => eprintln!("{} not saved by {}", name, e),
+		Err(e) => eprintln!("{} is not saved {}", name, e),
 	}
 }
 
-fn output_str(name: String, data: &str) {
-	let old = "package zylo";
-	let new = "package main";
-	output_bin(name, data.replace(old, new).as_bytes())
+fn check(mut table: Value) -> CommandResult<String> {
+	for (_class, items) in table.as_table_mut().ok_or(MALFORM)? {
+		for (_name, item) in items.as_table_mut().ok_or(MALFORM)? {
+			let val = item.as_table_mut().ok_or(MALFORM)?;
+			let url = val["url"].as_str().ok_or(MALFORM)?;
+			let bin = get(&url.to_string())?.bytes()?;
+			let sum = format!("{:x}", md5::compute(bin));
+			val.insert("sum".to_string(), Value::String(sum));
+		}
+	}
+	Ok(table.to_string())
 }
 
-fn main() -> Result<(), Error> {
-	let pkg = setenv();
-	let dir = current_dir()?;
-	let dll = Path::new(&dir).file_name().unwrap().to_str().unwrap();
-	output_str("zutils.go".to_string(), include_str!("zutils.go"));
-	Command::new("go").arg("mod").arg("init").arg(pkg).status()?;
-	Command::new("go").arg("get").arg("-u").arg("all").status()?;
-	Command::new("go").arg("mod").arg("tidy").status()?;
-	let arg = format!("build -a -v -o {}.dll -buildmode=c-shared", dll);
-	let out = Command::new("go").args(arg.split_whitespace()).output()?;
-	stdout().write_all(&out.stdout).unwrap();
-	stderr().write_all(&out.stderr).unwrap();
-	exit(out.status.code().unwrap_or(1));
+fn fetch(url: &str) -> CommandResult<String> {
+	let spec = include_str!("schema.yaml");
+	let temp = serde_yaml::from_str(spec)?;
+	let test = JSONSchema::compile(&temp).unwrap();
+	let toml = get(url)?.text()?.parse::<Value>()?;
+	let json = serde_json::to_value(toml.clone())?;
+	if let Err(error) = test.validate(&json) {
+		eprintln!("{}", join(error, ", "));
+		exit(1);
+	}
+	check(toml)
+}
+
+fn merge() -> CommandResult<String> {
+	let mut toml = String::new();
+	for url in include_str!("market.list").lines() {
+		toml.push_str(&format!("{}\n", fetch(url)?));
+	}
+	Ok(toml)
+}
+
+#[argopt::subcmd]
+fn compile() -> CommandResult<()> {
+	let dir = env::current_dir()?.canonicalize()?;
+	let lib = dir.file_name().unwrap().to_str().unwrap();
+	save(&dir, "zutils.go", include_bytes!("zutils.go"));
+	Cmd::new("go").arg("mod").arg("init").arg(lib).status()?;
+	Cmd::new("go").arg("get").arg("-u").arg("all").status()?;
+	Cmd::new("go").arg("mod").arg("tidy").status()?;
+	let dll = &format!("{}.dll", lib);
+	let arg = ["build", "-a", "-o", dll, CSHARED];
+	let cmd = Cmd::new("go").args(&arg).output()?;
+	io::stdout().write_all(&cmd.stdout)?;
+	io::stderr().write_all(&cmd.stderr)?;
+	std::process::exit(cmd.status.code().unwrap());
+}
+
+#[argopt::subcmd]
+fn markets() -> CommandResult<()> {
+	let source = merge()?;
+	let target = io::stdout();
+	let mut de = Deserializer::new(&source);
+	let mut en = Serializer::pretty(target);
+	Ok(transcode(&mut de, &mut en)?)
+}
+
+#[argopt::cmd_group(commands = [compile, markets])]
+fn main() -> CommandResult<()> {
+	env::set_var("GOOS", "windows");
+	env::set_var("GOARCH", "amd64");
+	env::set_var("CGO_ENABLED", "1");
+	env::set_var("CC", "x86_64-w64-mingw32-gcc");
 }

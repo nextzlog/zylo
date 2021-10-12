@@ -1,7 +1,7 @@
 .*
 *.dll
 *.exe
-*/zbuild
-*/zbuild-*
+*.lock
+/target
 !.github
 !.gitignore

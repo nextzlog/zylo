@@ -16,16 +16,7 @@ DLLのプログラミング次第でzLogに無限の可能性を付加します�
 
 ## インストール方法
 
-ZyLOは最新のzLogに統合されており、DLLをzLogと同じ場所に配置して、設定を変更するだけで利用できます。
-例えば、`foo.dll`と`bar.dll`を利用する場合は、`zlog.ini`を開いて、
-
-```ini
-[zylo]
-DLLs=foo.dll,bar.dll
-```
-
-設定項目`[zylo]`を作成し、カンマ区切りでDLLの名前を並べて、保存します。
-この状態でzLogを起動すると、DLLの機能と連携し始めます。
+ZyLOは最新のzLogに統合されており、マーケットプレイスを通じて利用できます。
 
 ## 得点計算の移譲方法
 
@@ -61,7 +52,7 @@ ZyLOではGoogleが開発した[Go言語](https://golang.org)によりDLLを開�
 ### ビルド環境
 
 - `x86_64-w64-mingw32-gcc`
-- Go 1.16
+- Go 1.17
 
 ### ビルド方法
 
@@ -70,23 +61,23 @@ ZyLOではGoogleが開発した[Go言語](https://golang.org)によりDLLを開�
 Windowsで開発している場合は、
 
 ```bat
-> build-windows.exe
+> build-windows.exe compile
 ```
 
-Ubuntuで開発している場合は、
+Linuxで開発している場合は、
 
 ```sh
-$ ./zbuild-ubuntu
+$ ./zbuild-linux compile
 ```
 
 macOSで開発している場合は、
 
 ```sh
-$ ./zbuild-macos
+$ ./zbuild-macos compile
 ```
 
 必要に応じて`zbuild`がGoプロジェクトを初期化し、`go.mod`を生成すると同時に、ライブラリとして`zutils.go`を生成し、DLLをビルドします。
 
 ### イベントハンドラ
 
-DLLでは、得点計算やQSOの追加・削除を受信するためのイベントハンドラ([詳細](https://nextzlog.github.io/zylo))を適宜実装します。
+DLLでは、得点計算やQSOの追加・削除を受信するためのイベントハンドラ([詳細](https://nextzlog.github.io/zylo/DETAIL))を適宜実装します。

@@ -1,7 +1,7 @@
-zLog Toast Notification Demo
+ZyLO extension demo plugin
 ====
 
-The DLL displays toasts, calculates QSO scores, and notifies GUI events.
+This plugin is a demo which displays toast in response to user input.
 
 ## Releases
 

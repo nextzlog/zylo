@@ -1,0 +1,21 @@
+[package]
+name = 'zylo'
+version = '0.0.1'
+authors = ['JA1ZLO <nextzlog@gmail.com>']
+edition = '2018'
+
+[dependencies]
+argopt = '*'
+itertools = '*'
+jsonschema = '*'
+md5 = '*'
+reqwest = {version = '*', features=['blocking']}
+serde-transcode = '*'
+serde_json = '*'
+serde_yaml = '*'
+structopt = '*'
+toml = '*'
+
+[[bin]]
+name = 'zbuild'
+path = 'zbuild.rs'

@@ -1,48 +1,63 @@
-zLog+ ZyLO
+zLog+ ZyLO for Windows
 ====
 
-![image](https://img.shields.io/badge/Go-1.16-red.svg)
-![image](https://img.shields.io/badge/Rust-1.51-red.svg)
+![image](https://img.shields.io/badge/Go-1.17-red.svg)
+![image](https://img.shields.io/badge/Rust-1.55-red.svg)
 ![image](https://img.shields.io/badge/Delphi-10.4-red.svg)
 ![image](https://img.shields.io/badge/license-GPL3-darkblue.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
 
-[ZyLO](https://github.com/nextzlog/zylo) is a plugin mechanism for [zLog](http://zlog.org) based on DLLs, that is a simple but powerful logging software for amateur radio contests, originally developed at the [University of Tokyo Amateur Radio Club](http://ja1zlo.u-tokyo.org), and loved by many ham contesters for 30 years.
-
-## Features
-
-- helps realize flexible, dynamic definition of amateur radio contests.
-- helps zLog work together with other software and hardware.
-- helps customize the zLog import/export formats.
-
-## Releases
-
-- [zLog v2.7.0.0+](https://github.com/jr8ppg/zlog/releases)
-- [Extension DLLs](https://github.com/nextzlog/zylo/releases/tag/nightly)
+[ZyLO](https://github.com/nextzlog/zylo) is a plugin and marketplace mechanism integrated into [zLog](http://zlog.org).
+zLog is a simple yet powerful logging software for ham radio contests, which has been loved by many users for 30 years.
 
 ## Documents
 
-- [API](https://nextzlog.github.io/zylo)
+- [API](https://nextzlog.github.io/zylo/DETAIL)
 - [日本語案内](https://github.com/nextzlog/zylo/blob/master/MANUAL.md)
 
-## Bundled DLLs
+## Samples
 
-### Contest DLLs
-
+- `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/format))
+- `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/latest))
 - `hstest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/hstest))
 - `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
 - `yltest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/yltest))
 
-### Example DLLs
+## Build DLL
 
-- `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/format))
-- `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/latest))
-- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/toasty))
+- First, clone the sample project [toasty](https://github.com/nextzlog/zylo/tree/master/rules/toasty) as follows.
+
+```sh
+$ git clone https://github.com/nextzlog/zylo
+$ cd zylo/rules/toasty
+```
+
+- Next, create `toasty.dll` by the [`zbuild`](https://github.com/nextzlog/zylo/releases/tag/zbuild) command as follows, and you will find `toasty.dll` in the directory.
+
+### Build DLL on Linux
+
+```sh
+$ apt install gcc-mingw-w64 golang-go
+$ ./zbuild-linux compile
+```
+
+### Build DLL on macOS
+
+```sh
+$ brew install mingw-w64 go
+$ ./zbuild-macos compile
+```
+
+### Build DLL on Windows
+
+```bat
+> choco install mingw golang
+> zbuild-windows.exe compile
+```
 
 ## Install DLL
 
-- First, download [zLog](https://github.com/jr8ppg/zlog/releases).
-- Place the plugin DLL in the same directory as `zlog.exe` and add the following lines to `zlog.ini`.
+- To install the DLL manually, place it in the same directory as zLog and add the following lines to `zlog.ini`.
 
 ```ini
 [zylo]
@@ -56,36 +71,21 @@ exit
 dll foo.dll
 ```
 
-- Start zLog (and select the contest CFG file that uses the DLL).
+## Publish DLL
 
-## Build DLL
+- Ask one of the [market managers](https://github.com/nextzlog/zylo/blob/master/market.list) to add the release URL of the DLL to `market.toml`.
 
-- First, download the `zbuild` tool [here](https://github.com/nextzlog/zylo/releases/tag/zbuild) and place it in the working directory.
-- For Windows,
-
-```bat
-> choco install mingw
-> choco install golang
-> zbuild-windows.exe
+```toml
+[dll.MyDLL]
+sub = "subtitle"
+sum = "checksum"
+msg = "description"
+url = "release URL"
+web = "website URL"
+use = ["dependencies"]
 ```
 
-- For Ubuntu,
-
-```sh
-$ apt install gcc-mingw-w64
-$ apt install golang-go
-$ ./zbuild-ubuntu
-```
-
-- For macOS,
-
-```sh
-$ brew install mingw-w64
-$ brew install go
-$ ./zbuild-macos
-```
-
-- `zbuild` creates `zutils.go` and `zutils.h` and then compiles the Go files to create a DLL.
+- Crawler generates [market.json](https://nextzlog.github.io/zylo/market.json) every Saturday at 0:00 from the TOML files to notify zLog of the update.
 
 ## Contribution
 

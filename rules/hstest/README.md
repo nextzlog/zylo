@@ -1,7 +1,7 @@
-zLog High-School Contest Extension
+high-school contest plugin
 ====
 
-The DLL defines the rule for the [high-school](http://hstest.mg-sci.com) contest.
+This plugin installs scoring rules for [high school ham-radio contest](http://hstest.mg-sci.com).
 
 ## Releases
 

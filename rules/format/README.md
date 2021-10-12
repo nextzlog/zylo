@@ -1,7 +1,7 @@
-zLog I/O Format Utility
+zLog additional I/O plugin
 ====
 
-The DLL supports importing and exporting QSO data in any format, including QXML, [ADIF](http://adif.org), [Cabrillo](https://wwrof.org/cabrillo/), [CTESTWIN](http://e.gmobb.jp/ctestwin/Download.html), etc.
+This plugin installs several I/O formats, including [ADI, ADX](http://adif.org) and [LG8](http://e.gmobb.jp/ctestwin/Download.html).
 
 ## Releases
 

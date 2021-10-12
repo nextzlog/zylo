@@ -1,0 +1,29 @@
+type: object
+patternProperties:
+  (cfg|dll|exe):
+    type: object
+    patternProperties:
+      '[0-9A-Za-z]+':
+        type: object
+        properties:
+          sub:
+            type: string
+          sum:
+            type: string
+          msg:
+            type: string
+          url:
+            type: string
+          web:
+            type: string
+          use:
+            type: array
+            items:
+              type: string
+        required:
+          - sub
+          - msg
+          - url
+          - web
+    additionalProperties: false
+additionalProperties: false

@@ -1,7 +1,7 @@
-zLog Update Utility
+zLog update checker plugin
 ====
 
-The DLL fetches GitHub and notifies the user of the latest zLog release.
+This plugin notifies the user of the latest zLog release from GitHub.
 
 ## Releases
 

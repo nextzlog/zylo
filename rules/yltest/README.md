@@ -1,7 +1,7 @@
-zLog YL Contest Extension
+JLRS annual contest plugin
 ====
 
-The DLL defines the rule for the [JLRS YL](https://www.jarl.com/jlrs/) contest.
+This plugin installs scoring rules for [JLRS annual ham-radio contest](https://www.jarl.com/jlrs/).
 
 ## Releases
 
