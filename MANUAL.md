@@ -1,83 +1,77 @@
-zLog+ ZyLO
-====
-
-ZyLOは[zLog](http://zlog.org)の拡張機能を提供するDLLを作るための仕組みです。
-DLLのプログラミング次第でzLogに無限の可能性を付加します。
+ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開発できます。
 例えば、
 
 - 独自のユーザインタフェースや機能の追加
 - 従来対応できなかった複雑な規約への対応
 - 他のソフトウェアやハードウェアとの連携
 
-## 動作条件
+利用者はzLogのマーケットプレイス機能を通じて多彩な拡張機能を入手できます。
+無限の可能性を切り開きましょう。
 
-- Window 10 (64bit版)
-- [zLog 2.7.0.0+](https://github.com/jr8ppg/zlog) (64bit版)
+## 具体例
 
-## インストール方法
+- `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/format))
+- `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/latest))
+- `hstest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/hstest))
+- `yltest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/yltest))
+- `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
+- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/toasty))
 
-ZyLOは最新のzLogに統合されており、マーケットプレイスを通じて利用できます。
+## 拡張機能のビルド例
+
+- 通知欄に文字列を表示するだけの簡単な拡張機能として、`toasty.dll`のソースファイルを入手します。
+
+```sh
+> git clone https://github.com/nextzlog/zylo
+> cd zylo/rules/toasty
+```
+
+- 開発環境を用意して[zbuild](https://github.com/nextzlog/zylo/releases/tag/zbuild)を実行します。
+
+```bat
+> choco install mingw golang
+> zbuild-windows.exe compile
+```
+
+- これで`toasty.dll`が生成されます。
+
+## 拡張機能の起動方法
+
+- DLLをzLogと連携させるには、DLLをzLogと同じ場所に配置して、`zlog.ini`に以下の項目を追記します。
+
+```ini
+[zylo]
+DLLs=hstest.dll,yltest.dll,rttest.dll
+```
 
 ## 得点計算の移譲方法
 
-ZyLOに対応したCFGファイルの末尾には、以下の2行があります。
+- CFGファイルに以下の項目を追記することで、そのコンテストの得点計算をDLLに委ねることができます。
 
 ```
 exit
-dll foo.dll
+dll rttest.dll
 ```
 
-この場合は、得点計算が`foo.dll`側で行われます。
-なお、`foo.dll`は事前にインストールが必要です。
+## マーケットプレイス
 
-## 対応済みコンテスト
+- zLogの利用者は、zLogのマーケットプレイス機能を通じて、DLLやCFGファイルをインストールできます。
 
-従来zLogで対応困難だったコンテストを中心に、DLLを実装しています。
+## 拡張機能の頒布方法
 
-- [YLコンテスト](https://github.com/nextzlog/zylo/tree/master/rules/yltest)
-- [高校コンテスト](https://github.com/nextzlog/zylo/tree/master/rules/hstest)
-- [リアルタイムコンテスト](https://github.com/nextzlog/zylo/tree/master/rules/rttest)
+- 適当なマーケット管理者に依頼して、その管理者が公開する`market.toml`に、DLLの詳細を追記します。
 
-## その他の拡張機能
-
-ネットワークプログラミングを得意とするGo言語の強みと生産性を活かした便利機能を提供しています。
-
-- [電子ログ変換機能](https://github.com/nextzlog/zylo/tree/master/rules/format)
-- [更新自動通知機能](https://github.com/nextzlog/zylo/tree/master/rules/latest)
-
-## 拡張機能の開発方法
-
-ZyLOではGoogleが開発した[Go言語](https://golang.org)によりDLLを開発します。
-
-### ビルド環境
-
-- `x86_64-w64-mingw32-gcc`
-- Go 1.17
-
-### ビルド方法
-
-[zbuild](https://github.com/nextzlog/zylo/releases/tag/zbuild)を入手して、DLLのソースコードと同じ場所で`zbuild`を実行します。
-
-Windowsで開発している場合は、
-
-```bat
-> build-windows.exe compile
+```toml
+[dll.MyDLL]
+sub = "subtitle"
+msg = "description"
+url = "release URL"
+web = "website URL"
+use = ["dependencies"]
 ```
 
-Linuxで開発している場合は、
+## クローラの定期巡回
 
-```sh
-$ ./zbuild-linux compile
-```
+- 毎週末にクローラが巡回し、`market.toml`の内容を検査して、DLLをマーケットプレイスに公開します。
 
-macOSで開発している場合は、
-
-```sh
-$ ./zbuild-macos compile
-```
-
-必要に応じて`zbuild`がGoプロジェクトを初期化し、`go.mod`を生成すると同時に、ライブラリとして`zutils.go`を生成し、DLLをビルドします。
-
-### イベントハンドラ
-
-DLLでは、得点計算やQSOの追加・削除を受信するためのイベントハンドラ([詳細](https://nextzlog.github.io/zylo/DETAIL))を適宜実装します。
+{{.EmitUsage}}

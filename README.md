@@ -12,8 +12,7 @@ zLog is a simple yet powerful logging software for ham radio contests, which has
 
 ## Documents
 
-- [API](https://nextzlog.github.io/zylo/DETAIL)
-- [日本語案内](https://github.com/nextzlog/zylo/blob/master/MANUAL.md)
+- [API](https://nextzlog.github.io/zylo)
 
 ## Samples
 
