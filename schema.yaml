@@ -6,7 +6,7 @@ patternProperties:
       '[0-9A-Za-z]+':
         type: object
         properties:
-          sub:
+          tag:
             type: string
           sum:
             type: string
@@ -21,7 +21,7 @@ patternProperties:
             items:
               type: string
         required:
-          - sub
+          - tag
           - msg
           - url
           - web

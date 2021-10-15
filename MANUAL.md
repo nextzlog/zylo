@@ -63,7 +63,7 @@ dll rttest.dll
 
 ```toml
 [dll.MyDLL]
-sub = "subtitle"
+tag = "title"
 msg = "description"
 url = "release URL"
 web = "website URL"

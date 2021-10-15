@@ -1,42 +1,42 @@
 [exe.qxsl]
-sub = "QxSL"
+tag = "QxSL"
 msg = "QxSL provides en/decoders for QXML, ADIF, Cabrillo, zLog, and CTESTWIN."
 url = "https://github.com/nextzlog/qxsl/releases/download/qxsl-native/qxsl.exe"
 web = "https://github.com/nextzlog/qxsl"
 
 [dll.format]
-sub = "zLog additional I/O plugin"
+tag = "zLog additional I/O plugin"
 msg = "This plugin installs several I/O formats, including ADI, ADX and LG8."
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll"
 web = "https://github.com/nextzlog/zylo/tree/master/rules/format"
 use = ["exe.qxsl"]
 
 [dll.latest]
-sub = "zLog update checker plugin"
+tag = "zLog update checker plugin"
 msg = "This plugin notifies the user of the latest zLog release from GitHub."
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/latest.dll"
 web = "https://github.com/nextzlog/zylo/tree/master/rules/latest"
 
 [dll.hstest]
-sub = "high-school contest plugin"
+tag = "high-school contest plugin"
 msg = "This plugin installs scoring rules for high school ham-radio contest."
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll"
 web = "https://github.com/nextzlog/zylo/tree/master/rules/hstest"
 
 [dll.yltest]
-sub = "JLRS annual contest plugin"
+tag = "JLRS annual contest plugin"
 msg = "This plugin installs scoring rules for JLRS annual ham-radio contest."
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll"
 web = "https://github.com/nextzlog/zylo/tree/master/rules/yltest"
 
 [dll.rttest]
-sub = "UT realtime contest plugin"
+tag = "UT realtime contest plugin"
 msg = "This plugin communicates with JA1ZLO's realtime contest cloud system."
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/rttest.dll"
 web = "https://github.com/nextzlog/zylo/tree/master/rules/rttest"
 
 [dll.toasty]
-sub = "ZyLO extension demo plugin"
+tag = "ZyLO extension demo plugin"
 msg = "This plugin is a demo which displays toast in response to user input."
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/toasty.dll"
 web = "https://github.com/nextzlog/zylo/tree/master/rules/toasty"
