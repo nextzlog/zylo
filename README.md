@@ -77,7 +77,6 @@ dll foo.dll
 ```toml
 [dll.MyDLL]
 tag = "title"
-sum = "checksum"
 msg = "description"
 url = "release URL"
 web = "website URL"

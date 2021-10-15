@@ -15,8 +15,8 @@ import (
 const RT = "rttest"
 
 var (
-	form *winc.Form
-	tabs *winc.TabView
+	form = winc.NewForm(nil)
+	tabs = winc.NewTabView(form)
 )
 
 //go:embed rtview.tab
@@ -45,7 +45,6 @@ func (item ScoreItem) ImageIndex() int {
 }
 
 func ShowLeaderWindow() {
-	form = winc.NewForm(nil)
 	form.SetText("ATS-4 Stream Service")
 	x, _ := strconv.Atoi(GetINI(RT, "x"))
 	y, _ := strconv.Atoi(GetINI(RT, "y"))
@@ -61,7 +60,6 @@ func ShowLeaderWindow() {
 	} else {
 		form.SetPos(x, y)
 	}
-	tabs = winc.NewTabView(form)
 	dock := winc.NewSimpleDock(form)
 	dock.Dock(tabs, winc.Top)
 	dock.Dock(tabs.Panels(), winc.Fill)
