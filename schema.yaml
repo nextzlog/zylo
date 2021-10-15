@@ -1,6 +1,6 @@
 type: object
 patternProperties:
-  (cfg|dll|exe):
+  (cfg|dat|dll|exe):
     type: object
     patternProperties:
       '[0-9A-Za-z]+':

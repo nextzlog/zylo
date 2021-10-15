@@ -1,8 +1,11 @@
-[cfg]
-tag = "contest CFGs"
-
 [exe]
 tag = "applications"
 
 [dll]
 tag = "ZyLO plugins"
+
+[cfg]
+tag = "contest CFGs"
+
+[dat]
+tag = "contest DATs"

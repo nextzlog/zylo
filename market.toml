@@ -22,21 +22,39 @@ tag = "high-school contest plugin"
 msg = "This plugin installs scoring rules for high school ham-radio contest."
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll"
 web = "https://github.com/nextzlog/zylo/tree/master/rules/hstest"
+use = ["cfg.hstest"]
 
 [dll.yltest]
 tag = "JLRS annual contest plugin"
 msg = "This plugin installs scoring rules for JLRS annual ham-radio contest."
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll"
 web = "https://github.com/nextzlog/zylo/tree/master/rules/yltest"
+use = ["cfg.yltest"]
 
 [dll.rttest]
 tag = "UT realtime contest plugin"
-msg = "This plugin communicates with JA1ZLO's realtime contest cloud system."
+msg = "This plugin installs scoring rules for JA1ZLO(YWX) real-time contest."
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/rttest.dll"
 web = "https://github.com/nextzlog/zylo/tree/master/rules/rttest"
+use = ["cfg.rttest"]
 
-[dll.toasty]
-tag = "ZyLO extension demo plugin"
-msg = "This plugin is a demo which displays toast in response to user input."
-url = "https://github.com/nextzlog/zylo/releases/download/nightly/toasty.dll"
-web = "https://github.com/nextzlog/zylo/tree/master/rules/toasty"
+[cfg.hstest]
+tag = "hstest.CFG"
+msg = "CFG file for high school ham-radio contest. Install this file with hstest.DLL."
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/hstest/hstest.cfg"
+web = "https://github.com/nextzlog/zylo/tree/master/rules/hstest"
+use = ["dll.hstest"]
+
+[cfg.yltest]
+tag = "yltest.CFG"
+msg = "CFG file for JLRS annual ham-radio contest. Install this file with yltest.DLL."
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/hstest/yltest.cfg"
+web = "https://github.com/nextzlog/zylo/tree/master/rules/yltest"
+use = ["dll.yltest"]
+
+[cfg.rttest]
+tag = "rttest.CFG"
+msg = "CFG file for JA1ZLO(YWX) real-time contest. Install this file with rttest.DLL."
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/hstest/rttest.cfg"
+web = "https://github.com/nextzlog/zylo/tree/master/rules/rttest"
+use = ["dll.rttest"]
