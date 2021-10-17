@@ -1,29 +1,42 @@
 type: object
 patternProperties:
-  (cfg|dat|dll|exe):
+  '^pkg$':
     type: object
     patternProperties:
-      '[0-9A-Za-z]+':
+      '':
         type: object
         properties:
           tag:
             type: string
-          sum:
-            type: string
           msg:
-            type: string
-          url:
             type: string
           web:
             type: string
+            format: uri
           use:
             type: array
             items:
               type: string
+              pattern: '^(?!pkg\.)'
+            minContains: 1
         required:
           - tag
           - msg
-          - url
           - web
-    additionalProperties: false
+          - use
+        additionalProperties: false
+  '^(cfg|dat|dll|exe)$':
+    type: object
+    patternProperties:
+      '':
+        type: object
+        properties:
+          sum:
+            type: string
+          url:
+            type: string
+            format: uri
+        required:
+          - url
+        additionalProperties: false
 additionalProperties: false

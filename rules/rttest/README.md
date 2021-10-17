@@ -1,7 +1,7 @@
-UT realtime contest plugin
+real-time contest plugin
 ====
 
-This plugin communicates with JA1ZLO's [realtime contest](http://ja1zlo.u-tokyo.org/rt/) cloud system.
+Installs scoring rules and monitors for [realtime contest](http://ja1zlo.u-tokyo.org/rt/).
 
 ## Releases
 

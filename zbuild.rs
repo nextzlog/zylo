@@ -46,32 +46,27 @@ fn save(name: &str, data: &[u8]) {
 	}
 }
 
-fn item(item: &mut Value) -> Return<String> {
+fn leaf(item: &mut Value) -> Return<String> {
 	let mal = "malformed TOML file";
 	let val = item.as_table_mut().ok_or(mal)?;
 	let url = val["url"].as_str().ok_or(mal)?;
 	let bin = get(&url.to_string())?.bytes()?;
-	let sum = format!("{:x}", md5::compute(bin));
+	let sum = format!("{v:x}", v = md5::compute(bin));
 	val.insert("sum".to_string(), Value::String(sum));
-	Ok(format!("{}\n", item))
+	Ok(item.to_string())
 }
 
-fn kind(list: &mut Value) -> Return<String> {
+fn tree(list: &mut Value) -> Return<String> {
 	let mal = "malformed TOML file";
 	let items = list.as_table_mut();
 	for (_, it) in items.ok_or(mal)? {
-		item(it)?;
+		if it.get("url").is_some() {
+			leaf(it)?;
+		} else if it.is_table() {
+			tree(it)?;
+		}
 	}
-	Ok(format!("{}\n", list))
-}
-
-fn table(mut list: Value) -> Return<String> {
-	let mal = "malformed TOML file";
-	let items = list.as_table_mut();
-	for (_, it) in items.ok_or(mal)? {
-		kind(it)?;
-	}
-	Ok(format!("{}\n", list))
+	Ok(list.to_string())
 }
 
 fn fetch(url: &str) -> Return<String> {
@@ -84,15 +79,13 @@ fn fetch(url: &str) -> Return<String> {
 		eprintln!("{}", join(error, ", "));
 		exit(1);
 	}
-	table(toml)
+	tree(&mut toml.clone())
 }
 
 fn merge() -> Return<String> {
-	let head = include_str!("master.toml");
-	let list = include_str!("market.list");
-	let mut toml = head.to_string();
-	for url in list.lines() {
-		toml.push_str(&fetch(url)?);
+	let mut toml = String::new();
+	for url in include_str!("market.list").lines() {
+		toml.push_str(&format!("{}\n", fetch(url)?));
 	}
 	Ok(toml)
 }

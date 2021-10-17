@@ -12,10 +12,10 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 
 - `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/format))
 - `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/latest))
+- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/toasty))
 - `hstest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/hstest))
 - `yltest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/yltest))
 - `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
-- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/toasty))
 
 ## 拡張機能のビルド例
 
@@ -62,12 +62,14 @@ dll rttest.dll
 - 適当なマーケット管理者に依頼して、その管理者が公開する`market.toml`に、DLLの詳細を追記します。
 
 ```toml
-[dll.MyDLL]
+[pkg.toasty]
 tag = "title"
 msg = "description"
-url = "release URL"
 web = "website URL"
-use = ["dependencies"]
+use = ["dll.toasty"]
+
+[dll.toasty]
+url = "release URL"
 ```
 
 ## クローラの定期巡回

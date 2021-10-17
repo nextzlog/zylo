@@ -18,6 +18,7 @@ zLog is a simple yet powerful logging software for ham radio contests, which has
 
 - `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/format))
 - `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/latest))
+- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/toasty))
 - `hstest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/hstest))
 - `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
 - `yltest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/yltest))
@@ -75,12 +76,14 @@ dll foo.dll
 - Ask one of the [market managers](https://github.com/nextzlog/zylo/blob/master/market.list) to add the release URL of the DLL to `market.toml`.
 
 ```toml
-[dll.MyDLL]
+[pkg.toasty]
 tag = "title"
 msg = "description"
-url = "release URL"
 web = "website URL"
-use = ["dependencies"]
+use = ["dll.toasty"]
+
+[dll.toasty]
+url = "release URL"
 ```
 
 - Crawler generates [market.json](https://nextzlog.github.io/zylo/market.json) every Saturday at 0:00 from the TOML files to notify zLog of the update.

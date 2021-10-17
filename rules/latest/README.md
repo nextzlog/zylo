@@ -1,7 +1,7 @@
 zLog update checker plugin
 ====
 
-This plugin notifies the user of the latest zLog release from GitHub.
+Notifies the user of the latest zLog release from GitHub.
 
 ## Releases
 

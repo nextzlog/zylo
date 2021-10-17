@@ -1,7 +1,7 @@
 high-school contest plugin
 ====
 
-This plugin installs scoring rules for [high school ham-radio contest](http://hstest.mg-sci.com).
+Installs scoring rules for [high school ham-radio contest](http://hstest.mg-sci.com).
 
 ## Releases
 

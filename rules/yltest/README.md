@@ -1,7 +1,7 @@
-JLRS annual contest plugin
+JLRS (YL) contest plugin
 ====
 
-This plugin installs scoring rules for [JLRS annual ham-radio contest](https://www.jarl.com/jlrs/).
+Installs scoring rules for [JLRS annual ham-radio contest](https://www.jarl.com/jlrs/).
 
 ## Releases
 
