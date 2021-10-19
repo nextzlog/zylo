@@ -66,10 +66,16 @@ dll rttest.dll
 tag = "title"
 msg = "description"
 web = "website URL"
-use = ["dll.toasty"]
+use = ["cfg.toasty", "dat.toasty", "dll.toasty"]
+
+[cfg.toasty]
+url = "https://example.com/releases/toasty.cfg"
+
+[dat.toasty]
+url = "https://example.com/releases/toasty.dat"
 
 [dll.toasty]
-url = "release URL"
+url = "https://example.com/releases/toasty.dll"
 ```
 
 ## クローラの定期巡回

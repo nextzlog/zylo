@@ -80,10 +80,16 @@ dll foo.dll
 tag = "title"
 msg = "description"
 web = "website URL"
-use = ["dll.toasty"]
+use = ["cfg.toasty", "dat.toasty", "dll.toasty"]
+
+[cfg.toasty]
+url = "https://example.com/releases/toasty.cfg"
+
+[dat.toasty]
+url = "https://example.com/releases/toasty.dat"
 
 [dll.toasty]
-url = "release URL"
+url = "https://example.com/releases/toasty.dll"
 ```
 
 - Crawler generates [market.json](https://nextzlog.github.io/zylo/market.json) every Saturday at 0:00 from the TOML files to notify zLog of the update.
