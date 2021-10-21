@@ -37,21 +37,21 @@ $ cd zylo/rules/toasty
 ### Build DLL on Linux
 
 ```sh
-$ apt install gcc-mingw-w64 golang-go
+$ ./zbuild-linux setup
 $ ./zbuild-linux compile
 ```
 
 ### Build DLL on macOS
 
 ```sh
-$ brew install mingw-w64 go
+$ ./zbuild-macos setup
 $ ./zbuild-macos compile
 ```
 
 ### Build DLL on Windows
 
 ```bat
-> choco install mingw golang
+> zbuild-windows.exe setup
 > zbuild-windows.exe compile
 ```
 

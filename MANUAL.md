@@ -29,7 +29,7 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 - 開発環境を用意して[zbuild](https://github.com/nextzlog/zylo/releases/tag/zbuild)を実行します。
 
 ```bat
-> choco install mingw golang
+> zbuild-windows.exe setup
 > zbuild-windows.exe compile
 ```
 
