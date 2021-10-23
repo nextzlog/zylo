@@ -77,10 +77,10 @@ fn tree(list: &mut Value) -> Return<String> {
 
 fn fetch(url: &str) -> Return<String> {
 	let spec = from_str(include_str!("schema.yaml"))?;
-	let test = JSONSchema::compile(&spec).unwrap();
+	let form = JSONSchema::compile(&spec).unwrap();
 	let toml = get(url)?.text()?.parse::<Value>()?;
 	let json = serde_json::to_value(toml.clone())?;
-	if let Err(error) = test.validate(&json) {
+	if let Err(error) = form.validate(&json) {
 		eprintln!("{}", join(error, ", "));
 		ok(1);
 	}
@@ -103,9 +103,9 @@ fn shell(cmd: &str, arg: &str) {
 
 #[argopt::subcmd]
 fn compile() -> Return<()> {
-	let error = "failed to determine project name";
-	save("zutils.go", include_bytes!("zutils.go"));
-	make(&name(&env::current_dir()?).ok_or(error)?)
+	let err = "failed to determine project name";
+	save("zutils.go", include_bytes!("zylo.go"));
+	make(&name(&env::current_dir()?).ok_or(err)?)
 }
 
 #[argopt::subcmd]

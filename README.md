@@ -2,7 +2,7 @@ zLog+ ZyLO for Windows
 ====
 
 ![image](https://img.shields.io/badge/Go-1.17-red.svg)
-![image](https://img.shields.io/badge/Rust-1.55-red.svg)
+![image](https://img.shields.io/badge/Rust-1.56-red.svg)
 ![image](https://img.shields.io/badge/Delphi-10.4-red.svg)
 ![image](https://img.shields.io/badge/license-GPL3-darkblue.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
@@ -73,7 +73,7 @@ dll foo.dll
 
 ## Publish DLL
 
-- Ask one of the [market managers](https://github.com/nextzlog/zylo/blob/master/market.list) to add the release URL of the DLL to `market.toml`.
+- Ask one of the [market managers](https://github.com/nextzlog/zylo/blob/master/src/market.list) to add the release URL of the DLL to `market.toml`.
 
 ```toml
 [pkg.toasty]
