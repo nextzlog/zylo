@@ -41,10 +41,10 @@ url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/toasty/toast
 url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/hstest/hstest.cfg"
 
 [cfg.yltest]
-url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/hstest/yltest.cfg"
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/yltest/yltest.cfg"
 
 [cfg.rttest]
-url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/hstest/rttest.cfg"
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/rttest/rttest.cfg"
 
 [dll.format]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll"

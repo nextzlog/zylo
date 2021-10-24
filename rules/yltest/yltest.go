@@ -71,8 +71,10 @@ func score(rcvd, sent int) int {
 }
 
 func onVerifyEvent(qso *QSO) {
-	qso.SetMul1(qso.GetCall()[:3])
-	qso.SetMul2(qso.GetRcvd())
+	if len(qso.GetCall()) > 3 {
+		qso.SetMul1(qso.GetCall()[:3])
+		qso.SetMul2(qso.GetRcvd())
+	}
 	rcvd, e1 := strconv.Atoi(qso.GetRcvd())
 	sent, e2 := strconv.Atoi(qso.GetSent())
 	qso.Score = byte(score(rcvd, sent))
