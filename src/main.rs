@@ -76,15 +76,16 @@ fn tree(list: &mut Value) -> Return<String> {
 }
 
 fn fetch(url: &str) -> Return<String> {
-	let spec = from_str(include_str!("schema.yaml"))?;
-	let form = JSONSchema::compile(&spec).unwrap();
-	let toml = get(url)?.text()?.parse::<Value>()?;
-	let json = serde_json::to_value(toml.clone())?;
-	if let Err(error) = form.validate(&json) {
+	let res = get(url)?.error_for_status()?;
+	let val = res.text()?.parse::<Value>()?;
+	let sch = from_str(include_str!("schema.yaml"))?;
+	let cmp = JSONSchema::compile(&sch).unwrap();
+	let tmp = serde_json::to_value(val.clone())?;
+	if let Err(error) = cmp.validate(&tmp) {
 		eprintln!("{}", join(error, ", "));
 		ok(1);
 	}
-	tree(&mut toml.clone())
+	tree(&mut val.clone())
 }
 
 fn merge() -> Return<String> {

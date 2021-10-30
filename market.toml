@@ -1,19 +1,19 @@
 [pkg.format]
 tag = "zLog additional I/O"
 msg = "Installs several I/O formats, including ADI, ADX and LG8."
-web = "https://github.com/nextzlog/zylo/tree/master/rules/format"
+web = "https://github.com/nextzlog/zylo/tree/master/utils/format"
 use = ["dll.format", "exe.qxsl"]
 
 [pkg.latest]
 tag = "zLog update checker"
 msg = "Notifies the user of the latest zLog release from GitHub."
-web = "https://github.com/nextzlog/zylo/tree/master/rules/latest"
+web = "https://github.com/nextzlog/zylo/tree/master/utils/latest"
 use = ["dll.latest"]
 
 [pkg.toasty]
 tag = "ZyLO extension demo"
 msg = "Demonstration that displays toasts in response to typing."
-web = "https://github.com/nextzlog/zylo/tree/master/rules/toasty"
+web = "https://github.com/nextzlog/zylo/tree/master/utils/toasty"
 use = ["dll.toasty", "cfg.toasty"]
 
 [pkg.hstest]
@@ -21,6 +21,12 @@ tag = "high-school contest"
 msg = "Installs scoring rules for high school ham-radio contest."
 web = "https://github.com/nextzlog/zylo/tree/master/rules/hstest"
 use = ["dll.hstest", "cfg.hstest"]
+
+[pkg.tmtest]
+tag = "tokai marathon contest"
+msg = "Installs scoring rules for tokai region marathon contest."
+web = "https://github.com/nextzlog/zylo/tree/master/rules/tmtest"
+use = ["dll.tmtest", "cfg.tmtest"]
 
 [pkg.yltest]
 tag = "JLRS (YL) contest"
@@ -35,10 +41,13 @@ web = "https://github.com/nextzlog/zylo/tree/master/rules/rttest"
 use = ["dll.rttest", "cfg.rttest"]
 
 [cfg.toasty]
-url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/toasty/toasty.cfg"
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/utils/toasty/toasty.cfg"
 
 [cfg.hstest]
 url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/hstest/hstest.cfg"
+
+[cfg.tmtest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/tmtest/tmtest.cfg"
 
 [cfg.yltest]
 url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/yltest/yltest.cfg"
@@ -57,6 +66,9 @@ url = "https://github.com/nextzlog/zylo/releases/download/nightly/toasty.dll"
 
 [dll.hstest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll"
+
+[dll.tmtest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll"
 
 [dll.yltest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll"

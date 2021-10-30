@@ -33,13 +33,13 @@ func onAssignEvent(contest, configs string) {
 
 func onInsertEvent(qso *QSO) {
 	if qso.GetMul2() == "HS" {
-		hsmults = hsmults + 1
+		hsmults += 1
 	}
 }
 
 func onDeleteEvent(qso *QSO) {
 	if qso.GetMul2() == "HS" {
-		hsmults = hsmults - 1
+		hsmults -= 1
 	}
 }
 

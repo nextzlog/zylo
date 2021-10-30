@@ -10,12 +10,19 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 
 ## 具体例
 
-- `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/format))
-- `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/latest))
-- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/toasty))
+- `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/format))
+- `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/latest))
+- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/toasty))
 - `hstest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/hstest))
+- `tmtest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/tmtest))
 - `yltest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/yltest))
 - `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
+
+## プラグイン管理機能
+
+- zLogのエンドユーザは、zLogのプラグイン管理機能を通じて、拡張機能を簡単にインストールできます。
+
+![marketplace](market.png)
 
 ## 拡張機能のビルド例
 
@@ -23,7 +30,7 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 
 ```sh
 > git clone https://github.com/nextzlog/zylo
-> cd zylo/rules/toasty
+> cd zylo/utils/toasty
 ```
 
 - 開発環境を用意して[zbuild](https://github.com/nextzlog/zylo/releases/tag/zbuild)を実行します。
@@ -37,7 +44,7 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 
 ## 拡張機能の起動方法
 
-- DLLをzLogと連携させるには、DLLをzLogと同じ場所に配置して、`zlog.ini`に以下の項目を追記します。
+- 開発時にDLLをzLogと連携させるには、DLLをzLogの場所に置き、`zlog.ini`に以下の項目を追記します。
 
 ```ini
 [zylo]
@@ -52,10 +59,6 @@ DLLs=hstest.dll,yltest.dll,rttest.dll
 exit
 dll rttest.dll
 ```
-
-## マーケットプレイス
-
-- zLogの利用者は、zLogのマーケットプレイス機能を通じて、DLLやCFGファイルをインストールできます。
 
 ## 拡張機能の頒布方法
 

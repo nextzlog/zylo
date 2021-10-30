@@ -4,7 +4,7 @@ zLog+ ZyLO for Windows
 ![image](https://img.shields.io/badge/Go-1.17-red.svg)
 ![image](https://img.shields.io/badge/Rust-1.56-red.svg)
 ![image](https://img.shields.io/badge/Delphi-10.4-red.svg)
-![image](https://img.shields.io/badge/license-GPL3-darkblue.svg)
+![image](https://img.shields.io/badge/license-MIT-darkblue.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
 
 [ZyLO](https://github.com/nextzlog/zylo) is a plugin and marketplace mechanism integrated into [zLog](http://zlog.org).
@@ -16,16 +16,17 @@ zLog is a simple yet powerful logging software for ham radio contests, which has
 
 ## Samples
 
-- `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/format))
-- `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/latest))
-- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/toasty))
+- `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/format))
+- `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/latest))
+- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/toasty))
 - `hstest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/hstest))
-- `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
+- `tmtest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/tmtest))
 - `yltest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/yltest))
+- `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
 
 ## Build DLL
 
-- First, clone the sample project [toasty](https://github.com/nextzlog/zylo/tree/master/rules/toasty) as follows.
+- First, clone the sample project [toasty](https://github.com/nextzlog/zylo/tree/master/utils/toasty) as follows.
 
 ```sh
 $ git clone https://github.com/nextzlog/zylo
@@ -110,10 +111,4 @@ Feel free to contact [@nextzlog](https://twitter.com/nextzlog) on Twitter.
 
 ### Clauses
 
-- This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
-- This program is distributed in the hope that it will be useful, but **without any warranty**; without even the implied warranty of **merchantability or fitness for a particular purpose**.
-See the GNU General Public License for more details.
-
-- You should have received a copy of the GNU General Public License along with this program.
-If not, see <http://www.gnu.org/licenses/>.
+[MIT License](LICENSE)
