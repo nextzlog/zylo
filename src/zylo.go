@@ -336,6 +336,13 @@ func (qso *QSO) GetTime() time.Time {
 }
 
 /*
+ 呼出符号のポータブル表記を除く部分を返します。
+*/
+func (qso *QSO) GetCallSign() string {
+	return strings.Split(qso.GetCall(), "/")[0]
+}
+
+/*
  呼出符号を返します。
 */
 func (qso *QSO) GetCall() string {

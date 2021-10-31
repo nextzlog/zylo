@@ -10,8 +10,8 @@ import (
 )
 
 var days = make(map[int]int)
-var code = regexp.MustCompile(`^\d{3}$`)
-var call = regexp.MustCompile(`^\w{3,}$`)
+var code = regexp.MustCompile(`^\d{3,}$`)
+var call = regexp.MustCompile(`^\w{3,}`)
 
 //go:embed tmtest.dat
 var cityMultiList string
@@ -46,7 +46,7 @@ func onDeleteEvent(qso *QSO) {
 }
 
 func mult(qso *QSO) string {
-	call := qso.GetCall()
+	call := qso.GetCallSign()
 	return call[len(call)-1:]
 }
 
