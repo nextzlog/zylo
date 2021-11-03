@@ -1,0 +1,6 @@
+lang: ja
+title: zLog+ ZyLO for Windows
+description: Golang Plugin and Marketplace Framework for zLog
+github:
+  is_project_page: true
+theme: jekyll-theme-hacker

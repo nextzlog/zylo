@@ -103,14 +103,15 @@ fn shell(cmd: &str, arg: &str) {
 }
 
 #[argopt::subcmd]
-fn compile() -> Return<()> {
+fn compile(#[opt(default_value = ".")]dir: String) -> Return<()> {
+	env::set_current_dir(path::Path::new(&dir))?;
 	let err = "failed to determine project name";
 	save("zutils.go", include_bytes!("zylo.go"));
 	make(&name(&env::current_dir()?).ok_or(err)?)
 }
 
 #[argopt::subcmd]
-fn markets() -> Return<()> {
+fn market() -> Return<()> {
 	let source = merge()?;
 	let target = io::stdout();
 	let mut de = Deserializer::new(&source);
@@ -129,7 +130,7 @@ fn setup() -> Return<()> {
 	Ok(())
 }
 
-#[argopt::cmd_group(commands = [compile, markets, setup])]
+#[argopt::cmd_group(commands = [compile, market, setup])]
 fn main() -> Return<()> {
 	env::set_var("GOOS", "windows");
 	env::set_var("GOARCH", "amd64");

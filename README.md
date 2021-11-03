@@ -12,13 +12,12 @@ zLog is a simple yet powerful logging software for ham radio contests, which has
 
 ## Documents
 
-- [API](https://nextzlog.github.io/zylo)
+- [Read me](https://nextzlog.github.io/zylo/manual).
 
 ## Samples
 
 - `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/format))
 - `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/latest))
-- `toasty.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/toasty))
 - `hstest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/hstest))
 - `tmtest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/tmtest))
 - `yltest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/yltest))
@@ -26,14 +25,14 @@ zLog is a simple yet powerful logging software for ham radio contests, which has
 
 ## Build DLL
 
-- First, clone the sample project [toasty](https://github.com/nextzlog/zylo/tree/master/utils/toasty) as follows.
+- First, clone the sample project [hstest](https://github.com/nextzlog/zylo/tree/master/rules/hstest) as follows.
 
 ```sh
 $ git clone https://github.com/nextzlog/zylo
-$ cd zylo/rules/toasty
+$ cd zylo/rules/hstest
 ```
 
-- Next, create `toasty.dll` by the [`zbuild`](https://github.com/nextzlog/zylo/releases/tag/zbuild) command as follows, and you will find `toasty.dll` in the directory.
+- Next, create `hstest.dll` by the [`zbuild`](https://github.com/nextzlog/zylo/releases/tag/zbuild) command as follows, and you will find `hstest.dll` in the directory.
 
 ### Build DLL on Linux
 
@@ -77,20 +76,20 @@ dll foo.dll
 - Ask one of the [market managers](https://github.com/nextzlog/zylo/blob/master/src/market.list) to add the release URL of the DLL to `market.toml`.
 
 ```toml
-[pkg.toasty]
+[pkg.sample]
 tag = "title"
 msg = "description"
 web = "website URL"
-use = ["cfg.toasty", "dat.toasty", "dll.toasty"]
+use = ["cfg.sample", "dat.sample", "dll.sample"]
 
-[cfg.toasty]
-url = "https://example.com/releases/toasty.cfg"
+[cfg.sample]
+url = "https://example.com/releases/sample.cfg"
 
-[dat.toasty]
-url = "https://example.com/releases/toasty.dat"
+[dat.sample]
+url = "https://example.com/releases/sample.dat"
 
-[dll.toasty]
-url = "https://example.com/releases/toasty.dll"
+[dll.sample]
+url = "https://example.com/releases/sample.dll"
 ```
 
 - Crawler generates [market.json](https://nextzlog.github.io/zylo/market.json) every Saturday at 0:00 from the TOML files to notify zLog of the update.

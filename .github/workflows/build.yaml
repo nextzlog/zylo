@@ -1,0 +1,93 @@
+name: 'build'
+on:
+  push:
+    branches:
+    - 'master'
+  schedule:
+  - cron: '0 0 * * 6'
+jobs:
+  BuildZyLO:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        include:
+        - os: macos-latest
+          name: zbuild-macos
+          path: target/release/zbuild
+        - os: ubuntu-latest
+          name: zbuild-linux
+          path: target/release/zbuild
+        - os: windows-latest
+          name: zbuild-windows.exe
+          path: target/release/zbuild.exe
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+    - run: cargo build --release
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{matrix.name}}
+        path: ${{matrix.path}}
+    - uses: svenstaro/upload-release-action@v2
+      with:
+        tag: zbuild
+        file: ${{matrix.path}}
+        asset_name: ${{matrix.name}}
+        repo_token: ${{secrets.GITHUB_TOKEN}}
+        overwrite: true
+  BuildDemo:
+    needs: BuildZyLO
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - name: rules/hstest
+        - name: rules/rttest
+        - name: rules/tmtest
+        - name: rules/yltest
+        - name: utils/format
+        - name: utils/latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+    - uses: actions/download-artifact@v2
+      with:
+        name: zbuild-linux
+    - run: chmod a+x zbuild
+    - run: ./zbuild setup
+    - run: ./zbuild compile ${{matrix.name}}
+    - uses: svenstaro/upload-release-action@v2
+      with:
+        tag: nightly
+        file: '*/*/*.dll'
+        file_glob: true
+        overwrite: true
+        repo_token: ${{secrets.GITHUB_TOKEN}}
+  Documents:
+    needs: BuildDemo
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/download-artifact@v2
+      with:
+        name: zbuild-linux
+    - run: mkdir docs
+    - run: chmod a+x zbuild
+    - run: ./zbuild setup
+    - run: ./zbuild market > docs/market.json
+    - run: echo `go env GOPATH`/bin >> $GITHUB_PATH
+    - run: go get github.com/robertkrimen/godocdown/godocdown
+    - run: godocdown -o docs/manual.md -template manual.md src
+    - run: cp README.md _config.yml docs
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        cname: zylo.pafelog.net
+        enable_jekyll: true
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        publish_dir: docs
