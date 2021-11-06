@@ -12,6 +12,7 @@ typedef void (*DeleteCB)(void*);
 typedef void (*UpdateCB)(void*);
 typedef void (*DialogCB)(char*);
 typedef void (*AccessCB)(void*);
+typedef long (*HandleCB)(char*);
 typedef long (*ButtonCB)(char*);
 typedef long (*EditorCB)(char*);
 typedef void (*FormatCB)(char*);
@@ -35,6 +36,10 @@ inline void dialog(char *str, DialogCB cb) {
 
 inline void access(void *str, AccessCB cb) {
 	cb(str);
+}
+
+inline long handle(char *str, HandleCB cb) {
+	return cb(str);
 }
 
 inline long button(char *str, ButtonCB cb) {
@@ -90,6 +95,7 @@ var deleteCB C.DeleteCB;
 var updateCB C.UpdateCB;
 var dialogCB C.DialogCB;
 var accessCB C.AccessCB;
+var handleCB C.HandleCB;
 var buttonCB C.ButtonCB;
 var editorCB C.EditorCB;
 
@@ -118,6 +124,11 @@ func zylo_allow_dialog(callback C.DialogCB) {
 //export zylo_allow_access
 func zylo_allow_access(callback C.AccessCB) {
 	accessCB = callback
+}
+
+//export zylo_allow_handle
+func zylo_allow_handle(callback C.HandleCB) {
+	handleCB = callback
 }
 
 //export zylo_allow_button
@@ -574,6 +585,15 @@ func Query(text string) string {
 	copy(buf[:ResponseCapacity], text[:])
 	C.access(unsafe.Pointer(&buf[0]), accessCB)
 	return string(buf[:bytes.IndexByte(buf, 0)])
+}
+
+/*
+ 指定された名前のハンドルを取得します。
+*/
+func GetUI(name string) uintptr {
+	n := C.CString(name)
+	defer C.free(unsafe.Pointer(n))
+	return uintptr(C.handle(n, handleCB))
 }
 
 /*
