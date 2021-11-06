@@ -12,7 +12,7 @@ zLog is a simple yet powerful logging software for ham radio contests, which has
 
 ## Documents
 
-- [Read me](https://nextzlog.github.io/zylo/manual).
+- [Read me](https://zylo.pafelog.net/manual).
 
 ## Samples
 
@@ -92,7 +92,7 @@ url = "https://example.com/releases/sample.dat"
 url = "https://example.com/releases/sample.dll"
 ```
 
-- Crawler generates [market.json](https://nextzlog.github.io/zylo/market.json) every Saturday at 0:00 from the TOML files to notify zLog of the update.
+- Crawler generates [market.json](https://zylo.pafelog.net/market.json) every Saturday at 0:00 from the TOML files to notify zLog of the update.
 
 ## Contribution
 
