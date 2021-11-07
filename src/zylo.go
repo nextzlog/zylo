@@ -11,6 +11,7 @@ typedef void (*InsertCB)(void*);
 typedef void (*DeleteCB)(void*);
 typedef void (*UpdateCB)(void*);
 typedef void (*DialogCB)(char*);
+typedef void (*NotifyCB)(char*);
 typedef void (*AccessCB)(void*);
 typedef long (*HandleCB)(char*);
 typedef long (*ButtonCB)(char*);
@@ -31,6 +32,10 @@ inline void update(void *qso, UpdateCB cb) {
 }
 
 inline void dialog(char *str, DialogCB cb) {
+	cb(str);
+}
+
+inline void notify(char *str, NotifyCB cb) {
 	cb(str);
 }
 
@@ -63,8 +68,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"golang.org/x/text/encoding/japanese"
-	"gopkg.in/go-toast/toast.v1"
 	"gopkg.in/ini.v1"
 	"io"
 	"math"
@@ -90,14 +93,15 @@ var zone = time.Local
 var buttons = make(map[int]func(int))
 var editors = make(map[int]func(int))
 
-var insertCB C.InsertCB;
-var deleteCB C.DeleteCB;
-var updateCB C.UpdateCB;
-var dialogCB C.DialogCB;
-var accessCB C.AccessCB;
-var handleCB C.HandleCB;
-var buttonCB C.ButtonCB;
-var editorCB C.EditorCB;
+var insertCB C.InsertCB
+var deleteCB C.DeleteCB
+var updateCB C.UpdateCB
+var dialogCB C.DialogCB
+var notifyCB C.NotifyCB
+var accessCB C.AccessCB
+var handleCB C.HandleCB
+var buttonCB C.ButtonCB
+var editorCB C.EditorCB
 
 func main() {}
 
@@ -119,6 +123,11 @@ func zylo_allow_update(callback C.UpdateCB) {
 //export zylo_allow_dialog
 func zylo_allow_dialog(callback C.DialogCB) {
 	dialogCB = callback
+}
+
+//export zylo_allow_notify
+func zylo_allow_notify(callback C.NotifyCB) {
+	notifyCB = callback
 }
 
 //export zylo_allow_access
@@ -167,6 +176,12 @@ func zylo_launch_event() {
 func zylo_finish_event() {
 	defer zylo_recover_capture_panic()
 	OnFinishEvent()
+}
+
+//export zylo_window_event
+func zylo_window_event(msg uintptr) {
+	defer zylo_recover_capture_panic()
+	OnWindowEvent(msg)
 }
 
 //export zylo_import_event
@@ -548,33 +563,21 @@ func SetINI(section, key, value string) {
 }
 
 /*
- 指定された文字列をSJISに変換します。
-*/
-func UnicodeToShiftJIS(utf string) (string, error) {
-	return japanese.ShiftJIS.NewEncoder().String(utf)
-}
-
-/*
- 指定された文字列を通知欄に表示します。
-*/
-func DisplayToast(msg string, args ...interface{}) {
-	msg = fmt.Sprintf(msg, args...)
-	msg, _ = UnicodeToShiftJIS(msg)
-	toast := toast.Notification{
-		AppID:   "zLog",
-		Title:   "ZyLO",
-		Message: msg,
-	}
-	toast.Push()
-}
-
-/*
  指定された文字列を対話的に表示します。
 */
 func DisplayModal(msg string, args ...interface{}) {
 	text := C.CString(fmt.Sprintf(msg, args...))
 	defer C.free(unsafe.Pointer(text))
 	C.dialog(text, dialogCB)
+}
+
+/*
+ 指定された文字列を通知欄に表示します。
+*/
+func DisplayToast(msg string, args ...interface{}) {
+	text := C.CString(fmt.Sprintf(msg, args...))
+	defer C.free(unsafe.Pointer(text))
+	C.notify(text, notifyCB)
 }
 
 /*
@@ -616,6 +619,11 @@ var OnLaunchEvent = func() {}
  zLogの終了時に呼び出されます。
 */
 var OnFinishEvent = func() {}
+
+/*
+ zLogのメッセージを処理します。
+*/
+var OnWindowEvent = func(msg uintptr) {}
 
 /*
  交信記録をzLogでインポート可能な書式に変換します。
