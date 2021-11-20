@@ -57,7 +57,7 @@ fn leaf(item: &mut Value) -> Return<String> {
 	let mal = "malformed TOML file";
 	let val = item.as_table_mut().ok_or(mal)?;
 	let url = val["url"].as_str().ok_or(mal)?;
-	let bin = get(&url.to_string())?.bytes()?;
+	let bin = get(url)?.error_for_status()?.bytes()?;
 	let sum = format!("{v:x}", v = md5::compute(bin));
 	val.insert("sum".to_string(), Value::String(sum));
 	Ok(item.to_string())

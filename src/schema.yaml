@@ -19,6 +19,12 @@ patternProperties:
               type: string
               pattern: '^(?!pkg\.)'
             minContains: 1
+          exp:
+            type: string
+            enum:
+              - stable
+              - unstable
+            default: unstable
         required:
           - tag
           - msg

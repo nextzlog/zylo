@@ -182,6 +182,7 @@ tag = "title"
 msg = "description"
 web = "website URL"
 use = ["cfg.sample", "dat.sample", "dll.sample"] # 依存先
+exp = "unstable"
 ```
 
 - 毎週末にクローラが巡回し、`market.toml`の内容を検査して、DLLをzLogの全ての利用者に公開します。
