@@ -10,12 +10,6 @@ msg = "Notifies the user of the latest zLog release from GitHub."
 web = "https://github.com/nextzlog/zylo/tree/master/utils/latest"
 use = ["dll.latest"]
 
-[pkg.toasty]
-tag = "ZyLO extension demo"
-msg = "Demonstration that displays toasts in response to typing."
-web = "https://github.com/nextzlog/zylo/tree/master/utils/toasty"
-use = ["dll.toasty", "cfg.toasty"]
-
 [pkg.hstest]
 tag = "high-school contest"
 msg = "Installs scoring rules for high school ham-radio contest."
@@ -40,9 +34,6 @@ msg = "Installs scoring rules and monitors for realtime contest."
 web = "https://github.com/nextzlog/zylo/tree/master/rules/rttest"
 use = ["dll.rttest", "cfg.rttest"]
 
-[cfg.toasty]
-url = "https://raw.githubusercontent.com/nextzlog/zylo/master/utils/toasty/toasty.cfg"
-
 [cfg.hstest]
 url = "https://raw.githubusercontent.com/nextzlog/zylo/master/rules/hstest/hstest.cfg"
 
@@ -60,9 +51,6 @@ url = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll"
 
 [dll.latest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/latest.dll"
-
-[dll.toasty]
-url = "https://github.com/nextzlog/zylo/releases/download/nightly/toasty.dll"
 
 [dll.hstest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll"
