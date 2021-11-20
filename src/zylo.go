@@ -20,47 +20,47 @@ typedef void (*FormatCB)(char*);
 typedef void (*CitiesCB)(char*);
 
 inline void insert(void *qso, InsertCB cb) {
-	cb(qso);
+	if(cb) cb(qso);
 }
 
 inline void delete(void *qso, DeleteCB cb) {
-	cb(qso);
+	if(cb) cb(qso);
 }
 
 inline void update(void *qso, UpdateCB cb) {
-	cb(qso);
+	if(cb) cb(qso);
 }
 
 inline void dialog(char *str, DialogCB cb) {
-	cb(str);
+	if(cb) cb(str);
 }
 
 inline void notify(char *str, NotifyCB cb) {
-	cb(str);
+	if(cb) cb(str);
 }
 
 inline void access(void *str, AccessCB cb) {
-	cb(str);
+	if(cb) cb(str);
 }
 
 inline long handle(char *str, HandleCB cb) {
-	return cb(str);
+	if(cb) return cb(str);
 }
 
 inline long button(char *str, ButtonCB cb) {
-	return cb(str);
+	if(cb) return cb(str);
 }
 
 inline long editor(char *str, EditorCB cb) {
-	return cb(str);
+	if(cb) return cb(str);
 }
 
 inline void format(char *str, FormatCB cb) {
-	cb(str);
+	if(cb) cb(str);
 }
 
 inline void cities(char *str, CitiesCB cb) {
-	cb(str);
+	if(cb) cb(str);
 }
 */
 import "C"
@@ -102,6 +102,27 @@ var accessCB C.AccessCB
 var handleCB C.HandleCB
 var buttonCB C.ButtonCB
 var editorCB C.EditorCB
+
+func zylo_count_lost_cb() (cnt int) {
+	cnt += zylo_btoi(insertCB == nil)
+	cnt += zylo_btoi(deleteCB == nil)
+	cnt += zylo_btoi(updateCB == nil)
+	cnt += zylo_btoi(dialogCB == nil)
+	cnt += zylo_btoi(notifyCB == nil)
+	cnt += zylo_btoi(accessCB == nil)
+	cnt += zylo_btoi(handleCB == nil)
+	cnt += zylo_btoi(buttonCB == nil)
+	cnt += zylo_btoi(editorCB == nil)
+	return
+}
+
+func zylo_btoi(v bool) int {
+	if v {
+		return 1
+	} else {
+		return 0
+	}
+}
 
 func main() {}
 
@@ -167,15 +188,21 @@ func zylo_query_cities(callback C.CitiesCB) {
 }
 
 //export zylo_launch_event
-func zylo_launch_event() {
+func zylo_launch_event() bool {
 	defer zylo_recover_capture_panic()
-	OnLaunchEvent()
+	if zylo_count_lost_cb() == 0 {
+		OnLaunchEvent()
+		return true
+	} else {
+		return false
+	}
 }
 
 //export zylo_finish_event
-func zylo_finish_event() {
+func zylo_finish_event() bool {
 	defer zylo_recover_capture_panic()
 	OnFinishEvent()
+	return false
 }
 
 //export zylo_window_event
