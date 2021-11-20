@@ -124,6 +124,36 @@ exit
 dll rttest.dll
 ```
 
+## 高度な拡張機能の例
+
+- 拡張機能は、WinAPIのGo実装を利用することで、zLogに独自の部品を追加し、イベントを処理できます。
+
+```go
+package main
+
+import (
+	"fmt"
+	"unsafe"
+	"github.com/gonutz/w32"
+)
+
+func init() {
+	OnLaunchEvent = onLaunchEvent
+	OnWindowEvent = onWindowEvent
+}
+
+func onLaunchEvent() {
+	h := w32.HMENU(GetUI("MainForm.MainMenu"))
+	w32.AppendMenu(h, w32.MF_STRING, 810, "GO!")
+	w32.DrawMenuBar(w32.HWND(GetUI("MainForm")))
+}
+
+func onWindowEvent(msg uintptr) {
+	m := (*w32.MSG)(unsafe.Pointer(msg))
+	fmt.Printf("Window Message %v\n", m)
+}
+```
+
 ## 拡張機能の頒布方法
 
 - 適当な管理者に依頼して、その管理者が公開中の`market.toml`に、DLLの名称と配布場所を記載します。
