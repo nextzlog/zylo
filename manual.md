@@ -1,6 +1,8 @@
 zLog+ ZyLO for Windows
 ====
 
+[無線部開発班](https://pafelog.net)
+
 ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開発できます。
 例えば、
 
@@ -8,23 +10,31 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 - 従来対応できなかった複雑な規約への対応
 - 他のソフトウェアやハードウェアとの連携
 
-利用者はzLogのプラグイン管理機能を通じて多彩な拡張機能にアクセスできます。
 無限の可能性を切り開きましょう。
 
 ## 具体例
 
-- `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/format))
-- `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/latest))
-- `hstest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/hstest))
-- `tmtest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/tmtest))
-- `yltest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/yltest))
-- `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
+|拡張機能                                                               |内容                              |
+|-----------------------------------------------------------------------|----------------------------------|
+|[format.dll](https://github.com/nextzlog/zylo/tree/master/utils/format)|zLogに様々なログ形式を追加します。|
+|[latest.dll](https://github.com/nextzlog/zylo/tree/master/utils/latest)|zLogの最新のリリースを通知します。|
+|[hstest.dll](https://github.com/nextzlog/zylo/tree/master/rules/hstest)|全国高等学校コンテストの規約です。|
+|[rttest.dll](https://github.com/nextzlog/zylo/tree/master/rules/rttest)|リアルタイムコンテストの規約です。|
+|[tmtest.dll](https://github.com/nextzlog/zylo/tree/master/rules/tmtest)|東海マラソンコンテストの規約です。|
 
-## プラグイン管理機能
+## 拡張機能の管理画面
 
-- zLogのエンドユーザは、zLogのプラグイン管理機能を通じて、拡張機能を簡単にインストールできます。
+- zLogのエンドユーザは、zLogに内蔵された設定画面を通じて、拡張機能を簡単にインストールできます。
 
-> メニューバー &rarr; Settings &rarr; Plugin Manager &rarr; ZyLO Plugin Managerの画面が開く
+1. 設定メニューからプラグイン管理メニューを選び、管理画面を開く。
+2. 画面上部のリストから好きな拡張機能を選ぶと、詳細が表示される。
+3. 以下に示すボタンを押して、拡張機能を有効化・無効化・更新する。
+
+|ボタン |動作                                        |
+|-------|--------------------------------------------|
+|Install|拡張機能を有効化する。押すと同時に起動する。|
+|Disable|拡張機能を無効化する。再起動後に反映される。|
+|Upgrade|拡張機能を最新にする。再起動後に反映される。|
 
 ## 拡張機能の開発環境
 
@@ -174,7 +184,7 @@ url = "https://example.com/releases/sample.cfg"
 url = "https://example.com/releases/sample.dat"
 ```
 
-- 最後に、**パッケージ**の詳細を記述します。この内容が、zLogのプラグイン管理画面に表示されます。
+- 最後に、**パッケージ**の詳細を記述します。この内容が、zLogの拡張機能の管理画面に表示されます。
 
 ```toml
 [pkg.sample]

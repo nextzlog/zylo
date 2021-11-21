@@ -14,15 +14,6 @@ zLog is a simple yet powerful logging software for ham radio contests, which has
 
 - [Read me](https://zylo.pafelog.net/manual).
 
-## Samples
-
-- `format.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/format))
-- `latest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/utils/latest))
-- `hstest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/hstest))
-- `tmtest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/tmtest))
-- `yltest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/yltest))
-- `rttest.dll` ([Project](https://github.com/nextzlog/zylo/tree/master/rules/rttest))
-
 ## Build DLL
 
 - First, clone the sample project [hstest](https://github.com/nextzlog/zylo/tree/master/rules/hstest) as follows.
