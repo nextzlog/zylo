@@ -329,7 +329,7 @@ type QSO struct {
 	void  byte
 	sRST  int16
 	rRST  int16
-	ID    int32
+	id    int32
 	Mode  byte
 	Band  byte
 	Pow1  byte
@@ -384,6 +384,13 @@ const (
 )
 
 /*
+ 交信番号を返します。
+*/
+func (qso *QSO) GetID() int32 {
+	return qso.id / 100
+}
+
+/*
  交信時刻を返します。
 */
 func (qso *QSO) GetTime() time.Time {
@@ -404,106 +411,106 @@ func (qso *QSO) GetCallSign() string {
  呼出符号を返します。
 */
 func (qso *QSO) GetCall() string {
-	return stringFromDtoC(qso.call[:])
+	return zylo_decode_string(qso.call[:])
 }
 
 /*
  送信した番号を返します。
 */
 func (qso *QSO) GetSent() string {
-	return stringFromDtoC(qso.sent[:])
+	return zylo_decode_string(qso.sent[:])
 }
 
 /*
  受信した番号を返します。
 */
 func (qso *QSO) GetRcvd() string {
-	return stringFromDtoC(qso.rcvd[:])
+	return zylo_decode_string(qso.rcvd[:])
 }
 
 /*
  運用者名を返します。
 */
 func (qso *QSO) GetName() string {
-	return stringFromDtoC(qso.name[:])
+	return zylo_decode_string(qso.name[:])
 }
 
 /*
  備考を返します。
 */
 func (qso *QSO) GetNote() string {
-	return stringFromDtoC(qso.note[:])
+	return zylo_decode_string(qso.note[:])
 }
 
 /*
  第1マルチプライヤを返します。
 */
 func (qso *QSO) GetMul1() string {
-	return stringFromDtoC(qso.mul1[:])
+	return zylo_decode_string(qso.mul1[:])
 }
 
 /*
  第2マルチプライヤを返します。
 */
 func (qso *QSO) GetMul2() string {
-	return stringFromDtoC(qso.mul2[:])
+	return zylo_decode_string(qso.mul2[:])
 }
 
 /*
  第2マルチプライヤを返します。
 */
 func (qso *QSO) SetCall(value string) {
-	copy(qso.call[:], stringFromCtoD(value))
+	copy(qso.call[:], zylo_encode_string(value))
 }
 
 /*
  送信した番号を設定します。
 */
 func (qso *QSO) SetSent(value string) {
-	copy(qso.sent[:], stringFromCtoD(value))
+	copy(qso.sent[:], zylo_encode_string(value))
 }
 
 /*
  受信した番号を設定します。
 */
 func (qso *QSO) SetRcvd(value string) {
-	copy(qso.rcvd[:], stringFromCtoD(value))
+	copy(qso.rcvd[:], zylo_encode_string(value))
 }
 
 /*
  運用者名を設定します。
 */
 func (qso *QSO) SetName(value string) {
-	copy(qso.name[:], stringFromCtoD(value))
+	copy(qso.name[:], zylo_encode_string(value))
 }
 
 /*
  備考を設定します。
 */
 func (qso *QSO) SetNote(value string) {
-	copy(qso.note[:], stringFromCtoD(value))
+	copy(qso.note[:], zylo_encode_string(value))
 }
 
 /*
  第1マルチプライヤを設定します。
 */
 func (qso *QSO) SetMul1(value string) {
-	copy(qso.mul1[:], stringFromCtoD(value))
+	copy(qso.mul1[:], zylo_encode_string(value))
 }
 
 /*
  第2マルチプライヤを設定します。
 */
 func (qso *QSO) SetMul2(value string) {
-	copy(qso.mul2[:], stringFromCtoD(value))
+	copy(qso.mul2[:], zylo_encode_string(value))
 }
 
-func stringFromDtoC(f []byte) string {
+func zylo_decode_string(f []byte) string {
 	v := string(f[1 : int(f[0])+1])
 	return strings.TrimSpace(v)
 }
 
-func stringFromCtoD(v string) []byte {
+func zylo_encode_string(v string) []byte {
 	return append([]byte{byte(len(v))}, v...)
 }
 
@@ -552,21 +559,21 @@ func LoadZLO(bin []byte) (logs []QSO) {
 }
 
 /*
- 指定された交信記録を追加します。
+ 指定された交信記録をzLog側に追加します。
 */
 func (qso *QSO) Insert() {
 	C.insert(unsafe.Pointer(qso), insertCB)
 }
 
 /*
- 指定された交信記録を削除します。
+ 指定された交信記録をzLog側で削除します。
 */
 func (qso *QSO) Delete() {
 	C.delete(unsafe.Pointer(qso), deleteCB)
 }
 
 /*
- 指定された交信記録を更新します。
+ 指定されたzLog側の交信記録を更新します。
 */
 func (qso *QSO) Update() {
 	C.update(unsafe.Pointer(qso), updateCB)
@@ -698,8 +705,7 @@ var OnDeleteEvent = func(qso *QSO) {}
  編集中の交信記録に対し、必要なら何度でも呼び出されます。
 */
 var OnVerifyEvent = func(qso *QSO) {
-	rcvd := qso.GetRcvd()
-	qso.SetMul1(rcvd)
+	qso.SetMul1(qso.GetRcvd())
 	if qso.Dupe {
 		qso.Score = 0
 	} else {
