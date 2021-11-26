@@ -384,14 +384,14 @@ const (
 )
 
 /*
- 交信番号を返します。
+ 交信を識別する番号を返します。
 */
 func (qso *QSO) GetID() int32 {
 	return qso.id / 100
 }
 
 /*
- 交信時刻を返します。
+ 交信が行われた時刻を返します。
 */
 func (qso *QSO) GetTime() time.Time {
 	t := math.Abs(qso.time)
@@ -408,21 +408,21 @@ func (qso *QSO) GetCallSign() string {
 }
 
 /*
- 呼出符号を返します。
+ 交信相手の呼出符号を返します。
 */
 func (qso *QSO) GetCall() string {
 	return zylo_decode_string(qso.call[:])
 }
 
 /*
- 送信した番号を返します。
+ 送信したコンテストナンバーを返します。
 */
 func (qso *QSO) GetSent() string {
 	return zylo_decode_string(qso.sent[:])
 }
 
 /*
- 受信した番号を返します。
+ 受信したコンテストナンバーを返します。
 */
 func (qso *QSO) GetRcvd() string {
 	return zylo_decode_string(qso.rcvd[:])
@@ -464,14 +464,14 @@ func (qso *QSO) SetCall(value string) {
 }
 
 /*
- 送信した番号を設定します。
+ 送信したコンテストナンバーを設定します。
 */
 func (qso *QSO) SetSent(value string) {
 	copy(qso.sent[:], zylo_encode_string(value))
 }
 
 /*
- 受信した番号を設定します。
+ 受信したコンテストナンバーを設定します。
 */
 func (qso *QSO) SetRcvd(value string) {
 	copy(qso.rcvd[:], zylo_encode_string(value))
@@ -580,7 +580,7 @@ func (qso *QSO) Update() {
 }
 
 /*
- 指定された設定の内容を取得します。
+ 指定された設定を取得します。
 */
 func GetINI(section, key string) string {
 	init, _ := ini.LooseLoad(SettingsFileName)
@@ -588,7 +588,7 @@ func GetINI(section, key string) string {
 }
 
 /*
- 指定された設定の内容を変更します。
+ 指定された設定を保存します。
 */
 func SetINI(section, key, value string) {
 	init, _ := ini.LooseLoad(SettingsFileName)
@@ -597,7 +597,7 @@ func SetINI(section, key, value string) {
 }
 
 /*
- 指定された文字列を対話的に表示します。
+ 指定された文字列をダイアログで表示します。
 */
 func DisplayModal(msg string, args ...interface{}) {
 	text := C.CString(fmt.Sprintf(msg, args...))
@@ -606,7 +606,7 @@ func DisplayModal(msg string, args ...interface{}) {
 }
 
 /*
- 指定された文字列を通知欄に表示します。
+ 指定された文字列を通知バナーに表示します。
 */
 func DisplayToast(msg string, args ...interface{}) {
 	text := C.CString(fmt.Sprintf(msg, args...))
@@ -616,6 +616,31 @@ func DisplayToast(msg string, args ...interface{}) {
 
 /*
  指定されたクエリで問合わせを行います。
+ クエリには以下の各変数を利用できます。
+
+ $B,
+ $X,
+ $R,
+ $F,
+ $Z,
+ $I,
+ $Q,
+ $V,
+ $O,
+ $S,
+ $P,
+ $A,
+ $N,
+ $L,
+ $C,
+ $E,
+ $M,
+
+ {V}: バージョン番号,
+ {F}: 編集ファイル名,
+ {C}: 自局の呼出符号,
+ {B}: 運用中のバンド,
+ {M}: 運用中のモード.
 */
 func Query(text string) string {
 	buf := make([]byte, ResponseCapacity+1)
@@ -625,7 +650,11 @@ func Query(text string) string {
 }
 
 /*
- 指定された名前のハンドルを取得します。
+ 指定されたウィンドウハンドルを取得します。
+ 例:
+
+  GetUI("MainForm.FileOpenItem")
+  GetUI("MenuForm.CancelButton")
 */
 func GetUI(name string) uintptr {
 	n := C.CString(name)
@@ -634,40 +663,39 @@ func GetUI(name string) uintptr {
 }
 
 /*
- 対応済みの書式の名称と拡張子のリストを設定し、
- インポート及びエクスポート機能を有効化します。
+ I/O拡張機能が利用する専用の変数です。
 */
 var FileExtFilter string
 
 /*
- 市区町村や国や地域の番号のリストを指定します。
+ DATファイルを埋め込むための変数です。
 */
 var CityMultiList string
 
 /*
- zLogの起動時に呼び出されます。
+ 拡張機能の起動時に呼び出されます。
 */
 var OnLaunchEvent = func() {}
 
 /*
- zLogの終了時に呼び出されます。
+ 拡張機能の終了時に呼び出されます。
 */
 var OnFinishEvent = func() {}
 
 /*
- zLogのメッセージを処理します。
+ ウィンドウメッセージを受信します。
 */
 var OnWindowEvent = func(msg uintptr) {}
 
 /*
- 交信記録をzLogでインポート可能な書式に変換します。
+ 交信記録をZLOファイルに変換する要求を処理します。
 */
 var OnImportEvent = func(source, target string) error {
 	return nil
 }
 
 /*
- zLogがエクスポートした交信記録の書式を変換します。
+ ZLOファイルを他の書式に変換する要求を処理します。
 */
 var OnExportEvent = func(source, format string) error {
 	return nil
@@ -703,6 +731,7 @@ var OnDeleteEvent = func(qso *QSO) {}
 /*
  交信の得点やマルチプライヤを検査する時に呼び出されます。
  編集中の交信記録に対し、必要なら何度でも呼び出されます。
+ 無効な交信の場合は、マルチプライヤを空の文字列にします。
 */
 var OnVerifyEvent = func(qso *QSO) {
 	qso.SetMul1(qso.GetRcvd())
@@ -714,7 +743,7 @@ var OnVerifyEvent = func(qso *QSO) {
 }
 
 /*
- 総得点を計算します。
+ 総合得点を計算します。
  引数は交信の合計得点と第1マルチプライヤの異なり数です。
 */
 var OnPointsEvent = func(score, mults int) int {

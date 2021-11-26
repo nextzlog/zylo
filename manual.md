@@ -22,7 +22,9 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 |[rttest.dll](https://github.com/nextzlog/zylo/tree/master/rules/rttest)|リアルタイムコンテストの規約です。|
 |[tmtest.dll](https://github.com/nextzlog/zylo/tree/master/rules/tmtest)|東海マラソンコンテストの規約です。|
 
-## 拡張機能の管理画面
+## 拡張機能の利用方法
+
+### 利用者向けの情報
 
 - zLogのエンドユーザは、zLogに内蔵された設定画面を通じて、拡張機能を簡単にインストールできます。
 
@@ -36,9 +38,18 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 |Disable|拡張機能を無効化する。再起動後に反映される。|
 |Upgrade|拡張機能を最新にする。再起動後に反映される。|
 
+### 開発者向けの情報
+
+- 拡張機能をテストするには、`zlog.ini`に拡張機能のパスをカンマ区切りで記載し、zLogを起動します。
+
+```ini
+[zylo]
+DLLs=hstest.dll,yltest.dll,rttest.dll
+```
+
 ## 拡張機能の開発環境
 
-- 最初に、以下のパッケージ管理システムをインストールして、コマンドを実行できることを確認します。
+- まず、拡張機能の開発に利用する環境に合わせて、以下のパッケージ管理システムを準備しておきます。
 
 |OS      |package manager                |
 |--------|-------------------------------|
@@ -46,7 +57,15 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 |macOS   |[brew](https://brew.sh)        |
 |Ubuntu  |[apt](https://debian.org)      |
 
-- その後、[zbuild](https://github.com/nextzlog/zylo/releases/tag/zbuild)を実行し、準備完了です。
+- 開発環境に適合する[zbuild](https://github.com/nextzlog/zylo/releases/tag/zbuild)を準備します。
+
+|OS      |zbuild            |
+|--------|------------------|
+|Windows |zbuild-windows.exe|
+|macOS   |zbuild-macos      |
+|Ubuntu  |zbuild-linux      |
+
+- 最後に、以下のコマンドを実行すると、Go言語の開発環境が自動的にインストールされ、準備完了です。
 
 ```bat
 > zbuild-windows.exe setup
@@ -110,31 +129,66 @@ func onPointsEvent(score, mults int) int {
 }
 ```
 
-- その場で`zbuild`を実行すると、DLLが生成されます。
+- そのフォルダで`compile`コマンドを実行すると、フォルダと同じ名前で、拡張機能のDLLが完成します。
 
 ```bat
 > zbuild-windows.exe compile
 ```
 
-## 拡張機能の起動方法
-
-- 開発時にDLLをzLogと連携させるには、DLLをzLogの場所に置き、`zlog.ini`に以下の項目を追記します。
-
-```ini
-[zylo]
-DLLs=hstest.dll,yltest.dll,rttest.dll
-```
-
 ## 得点計算の移譲方法
 
-- CFGファイルに以下の項目を追記することで、そのコンテストの得点計算をDLLに委ねることができます。
+- CFGファイルの末尾に、以下の項目を追記することで、そのコンテストの得点計算をDLLに委譲できます。
 
 ```
-exit
-dll rttest.dll
+exit # required statement
+dll rttest.dll # basename
 ```
+
+- 具体的には、以下の関数が、CFGファイルで指定されたDLLに対してのみ、呼び出されるようになります。
+
+|関数         |機能                          |
+|-------------|------------------------------|
+|OnAssignEvent|得点計算の委譲時に通知される。|
+|OnVerifyEvent|交信の得点と有効性を確定する。|
+|OnPointsEvent|交信記録の総合得点を計算する。|
 
 ## 高度な拡張機能の例
+
+### ウィンドウハンドルの取得
+
+- 拡張機能でWinAPIを使う場合は、`GetUI`関数で、zLogのGUI部品のウィンドウハンドルを取得できます。
+- 部品は、[main.dfm](https://github.com/jr8ppg/zLog/blob/master/zlog/main.dfm)等で確認できます。
+
+```go
+handle := GetUI("MainForm.FileNewItem")
+```
+
+### ボタンやタイピングの監視
+
+- 拡張機能は、zLogのボタン及びメニュー項目のクリックや、記入欄のキーボードの入力を監視できます。
+
+```go
+package main
+
+func init() {
+	OnLaunchEvent = onLaunchEvent
+}
+
+func onLaunchEvent() {
+	HandleButton("MainForm.CWPlayButton", onButton)
+	HandleEditor("MainForm.CallsignEdit", onEditor)
+}
+
+func onButton(num int) {
+	DisplayToast("click CWPlayButton")
+}
+
+func onEditor(key int) {
+	DisplayToast(Query("QSO with $B"))
+}
+```
+
+### 独自のメニュー項目の追加
 
 - 拡張機能は、WinAPIのGo実装を利用することで、zLogに独自の部品を追加し、イベントを処理できます。
 
@@ -166,7 +220,9 @@ func onWindowEvent(msg uintptr) {
 
 ## 拡張機能の頒布方法
 
-- 適当な管理者に依頼して、その管理者が公開中の`market.toml`に、DLLの名称と配布場所を記載します。
+### パッケージの作成
+
+- 最初に、適当なTOMLファイルを作成し、その冒頭に、DLLの名称と最新版の配布場所のURLを記載します。
 
 ```toml
 # dll.DLL名
@@ -174,7 +230,7 @@ func onWindowEvent(msg uintptr) {
 url = "https://example.com/releases/sample.dll"
 ```
 
-- また、DLLに付随してCFGファイルやDATファイル等を添付できます。DLLと同様に配布場所を記載します。
+- また、DLLに付随してCFGファイルやDATファイル等を記載できます。DLLと同様に必要事項を記載します。
 
 ```toml
 [cfg.sample]
@@ -184,18 +240,21 @@ url = "https://example.com/releases/sample.cfg"
 url = "https://example.com/releases/sample.dat"
 ```
 
-- 最後に、**パッケージ**の詳細を記述します。この内容が、zLogの拡張機能の管理画面に表示されます。
+- 最後に、拡張機能の詳細な情報を記述します。この内容が、zLogの拡張機能の管理画面に表示されます。
 
 ```toml
 [pkg.sample]
 tag = "title"
 msg = "description"
 web = "website URL"
-use = ["cfg.sample", "dat.sample", "dll.sample"] # 依存先
-exp = "unstable"
+use = ["cfg.sample", "dat.sample", "dll.sample"] # dependency
+exp = "unstable" # or "stable"
 ```
 
-- 毎週末にクローラが巡回し、`market.toml`の内容を検査して、DLLをzLogの全ての利用者に公開します。
+### パッケージの公開
+
+- まず、適当な[管理者](https://github.com/nextzlog/zylo/blob/master/src/market.list)を選びます。
+- その管理者に依頼して、前掲のTOMLファイルの内容をマーケットに公開して、反映されるまで待ちます。
 
 # ZyLO API
 
