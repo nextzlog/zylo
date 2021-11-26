@@ -83,7 +83,7 @@ url = "https://example.com/releases/sample.dat"
 url = "https://example.com/releases/sample.dll"
 ```
 
-- Crawler generates [market.json](https://zylo.pafelog.net/market.json) every Saturday at 0:00 from the TOML files to notify zLog of the update.
+- Crawler generates [market.json](https://zylo.pafelog.net/market.json) every day at 0:00 UTC from the TOML files to notify zLog of the update.
 
 ## Contribution
 

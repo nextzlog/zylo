@@ -3,10 +3,9 @@ on:
   push:
     branches:
     - 'master'
-  schedule:
-  - cron: '0 0 * * 6'
 jobs:
   BuildZyLO:
+    if: github.event_name == 'push'
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
@@ -73,21 +72,7 @@ jobs:
     needs: BuildDemo
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/download-artifact@v2
+    - uses: peter-evans/repository-dispatch@v1
       with:
-        name: zbuild-linux
-    - run: mkdir docs
-    - run: chmod a+x zbuild
-    - run: ./zbuild setup
-    - run: ./zbuild market > docs/market.json
-    - run: echo `go env GOPATH`/bin >> $GITHUB_PATH
-    - run: go get github.com/robertkrimen/godocdown/godocdown
-    - run: godocdown -o docs/manual.md -template manual.md src
-    - run: cp README.md _config.yml docs
-    - uses: peaceiris/actions-gh-pages@v3
-      with:
-        cname: zylo.pafelog.net
-        enable_jekyll: true
-        github_token: ${{secrets.GITHUB_TOKEN}}
-        publish_dir: docs
+        token: ${{secrets.REPO_ACCESS_TOKEN}}
+        event-type: store

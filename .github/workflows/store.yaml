@@ -1,0 +1,31 @@
+name: 'store'
+on:
+  schedule:
+  - cron: '0 0 * * *'
+  repository_dispatch:
+    types:
+    - store
+jobs:
+  UpdateWeb:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dsaltares/fetch-gh-release-asset@master
+      with:
+        file: "zbuild-linux"
+        token: ${{secrets.GITHUB_TOKEN}}
+        version: "tags/zbuild"
+    - run: mkdir docs
+    - run: sudo chmod a+x zbuild-linux
+    - run: ./zbuild-linux setup
+    - run: ./zbuild-linux market > docs/market.json
+    - run: echo `go env GOPATH`/bin >> $GITHUB_PATH
+    - run: go get github.com/robertkrimen/godocdown/godocdown
+    - run: godocdown -o docs/manual.md -template manual.md src
+    - run: cp README.md _config.yml docs
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        cname: zylo.pafelog.net
+        enable_jekyll: true
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        publish_dir: docs
