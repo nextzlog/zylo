@@ -14,13 +14,13 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 
 ## 具体例
 
-|拡張機能                                                               |内容                              |
-|-----------------------------------------------------------------------|----------------------------------|
-|[format.dll](https://github.com/nextzlog/zylo/tree/master/utils/format)|zLogに様々なログ形式を追加します。|
-|[latest.dll](https://github.com/nextzlog/zylo/tree/master/utils/latest)|zLogの最新のリリースを通知します。|
-|[hstest.dll](https://github.com/nextzlog/zylo/tree/master/rules/hstest)|全国高等学校コンテストの規約です。|
-|[rttest.dll](https://github.com/nextzlog/zylo/tree/master/rules/rttest)|リアルタイムコンテストの規約です。|
-|[tmtest.dll](https://github.com/nextzlog/zylo/tree/master/rules/tmtest)|東海マラソンコンテストの規約です。|
+|拡張機能                                                                       |内容                              |
+|-------------------------------------------------------------------------------|----------------------------------|
+|[format.dll](https://github.com/nextzlog/zylo/tree/master/plugins/utils/format)|zLogに様々なログ形式を追加します。|
+|[latest.dll](https://github.com/nextzlog/zylo/tree/master/plugins/utils/latest)|zLogの最新のリリースを通知します。|
+|[hstest.dll](https://github.com/nextzlog/zylo/tree/master/plugins/rules/hstest)|全国高等学校コンテストの規約です。|
+|[rttest.dll](https://github.com/nextzlog/zylo/tree/master/plugins/rules/rttest)|リアルタイムコンテストの規約です。|
+|[tmtest.dll](https://github.com/nextzlog/zylo/tree/master/plugins/rules/tmtest)|東海マラソンコンテストの規約です。|
 
 ## 拡張機能の利用方法
 

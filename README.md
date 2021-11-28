@@ -16,11 +16,11 @@ zLog is a simple yet powerful logging software for ham radio contests, which has
 
 ## Build DLL
 
-- First, clone the sample project [hstest](https://github.com/nextzlog/zylo/tree/master/rules/hstest) as follows.
+- First, clone the sample project [hstest](https://github.com/nextzlog/zylo/tree/master/plugins/rules/hstest) as follows.
 
 ```sh
 $ git clone https://github.com/nextzlog/zylo
-$ cd zylo/rules/hstest
+$ cd zylo/plugins/rules/hstest
 ```
 
 - Next, create `hstest.dll` by the [`zbuild`](https://github.com/nextzlog/zylo/releases/tag/zbuild) command as follows, and you will find `hstest.dll` in the directory.

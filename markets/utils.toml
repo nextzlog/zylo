@@ -1,0 +1,22 @@
+[exe.qxsl]
+url = "https://github.com/nextzlog/qxsl/releases/download/qxsl-native/qxsl.exe"
+
+[pkg.format]
+tag = "zLog additional I/O"
+msg = "Installs several I/O formats, including ADI, ADX and LG8."
+web = "https://github.com/nextzlog/zylo/tree/master/plugins/utils/format"
+use = ["dll.format", "exe.qxsl"]
+exp = "stable"
+
+[dll.format]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll"
+
+[pkg.latest]
+tag = "zLog update checker"
+msg = "Notifies the user of the latest zLog release from GitHub."
+web = "https://github.com/nextzlog/zylo/tree/master/plugins/utils/latest"
+use = ["dll.latest"]
+exp = "stable"
+
+[dll.latest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/latest.dll"

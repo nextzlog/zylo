@@ -43,12 +43,12 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: rules/hstest
-        - name: rules/rttest
-        - name: rules/tmtest
-        - name: rules/yltest
-        - name: utils/format
-        - name: utils/latest
+        - name: plugins/rules/hstest
+        - name: plugins/rules/rttest
+        - name: plugins/rules/tmtest
+        - name: plugins/rules/yltest
+        - name: plugins/utils/format
+        - name: plugins/utils/latest
     steps:
     - uses: actions/checkout@v2
     - uses: actions-rs/toolchain@v1
@@ -64,7 +64,7 @@ jobs:
     - uses: svenstaro/upload-release-action@v2
       with:
         tag: nightly
-        file: '*/*/*.dll'
+        file: ${{matrix.name}}/*.dll
         file_glob: true
         overwrite: true
         repo_token: ${{secrets.GITHUB_TOKEN}}

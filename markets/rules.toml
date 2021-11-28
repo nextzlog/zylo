@@ -1,0 +1,51 @@
+[pkg.hstest]
+tag = "high-school contest"
+msg = "Installs scoring rules for high school ham-radio contest."
+web = "https://github.com/nextzlog/zylo/tree/master/plugins/rules/hstest"
+use = ["dll.hstest", "cfg.hstest"]
+exp = "stable"
+
+[cfg.hstest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/hstest/hstest.cfg"
+
+[dll.hstest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll"
+
+[pkg.tmtest]
+tag = "tokai marathon contest"
+msg = "Installs scoring rules for tokai region marathon contest."
+web = "https://github.com/nextzlog/zylo/tree/master/plugins/rules/tmtest"
+use = ["dll.tmtest", "cfg.tmtest"]
+exp = "stable"
+
+[cfg.tmtest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/tmtest/tmtest.cfg"
+
+[dll.tmtest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll"
+
+[pkg.yltest]
+tag = "JLRS (YL) contest"
+msg = "Installs scoring rules for JLRS annual ham-radio contest."
+web = "https://github.com/nextzlog/zylo/tree/master/plugins/rules/yltest"
+use = ["dll.yltest", "cfg.yltest"]
+exp = "stable"
+
+[cfg.yltest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/yltest/yltest.cfg"
+
+[dll.yltest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll"
+
+[pkg.rttest]
+tag = "real-time contest"
+msg = "Installs scoring rules and monitors for realtime contest."
+web = "https://github.com/nextzlog/zylo/tree/master/plugins/rules/rttest"
+use = ["dll.rttest", "cfg.rttest"]
+exp = "stable"
+
+[cfg.rttest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/rttest/rttest.cfg"
+
+[dll.rttest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/rttest.dll"
