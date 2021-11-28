@@ -13,7 +13,11 @@ var cityMultiList string
 
 func init() {
 	CityMultiList = cityMultiList
-	OnVerifyEvent = onVerifyEvent
+	OnAcceptEvent = onAcceptEvent
+	AllowBandRange(K1900, M1200)
+	AllowMode(CW, SSB, FM, AM)
+	AllowCall(`^\w{3,}`)
+	AllowRcvd(`^\d{4,}$`)
 }
 
 const (
@@ -70,11 +74,9 @@ func score(rcvd, sent int) int {
 	}
 }
 
-func onVerifyEvent(qso *QSO) {
-	if len(qso.GetCall()) > 3 {
-		qso.SetMul1(qso.GetCall()[:3])
-		qso.SetMul2(qso.GetRcvd())
-	}
+func onAcceptEvent(qso *QSO) {
+	qso.SetMul1(qso.GetCall()[:3])
+	qso.SetMul2(qso.GetRcvd())
 	rcvd, e1 := strconv.Atoi(qso.GetRcvd())
 	sent, e2 := strconv.Atoi(qso.GetSent())
 	qso.Score = byte(score(rcvd, sent))

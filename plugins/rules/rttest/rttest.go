@@ -58,6 +58,9 @@ func init() {
 	OnDeleteEvent = onDeleteEvent
 	h.HandleFunc("/", wait)
 	server = &h.Server{Addr: ":8873"}
+	AllowBandRange(K3500, M50)
+	AllowMode(CW, SSB, FM, AM)
+	AllowRcvd(`^\d{2,}^`)
 }
 
 func wait(w h.ResponseWriter, r *h.Request) {

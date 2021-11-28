@@ -3,11 +3,7 @@
 */
 package main
 
-import (
-	_ "embed"
-	"os"
-	"strings"
-)
+import _ "embed"
 
 var hsmults int
 
@@ -19,16 +15,15 @@ func init() {
 	OnAssignEvent = onAssignEvent
 	OnInsertEvent = onInsertEvent
 	OnDeleteEvent = onDeleteEvent
-	OnVerifyEvent = onVerifyEvent
+	OnAcceptEvent = onAcceptEvent
 	OnPointsEvent = onPointsEvent
+	AllowBand(M7, M21, M50, M144, M430)
+	AllowMode(CW, SSB, FM, AM)
+	AllowRcvd(`^(\d{2,})(HS|C)$`)
 }
 
 func onAssignEvent(contest, configs string) {
 	hsmults = 0
-	bin, _ := os.ReadFile(Query("{F}"))
-	for _, qso := range LoadZLO(bin) {
-		onInsertEvent(&qso)
-	}
 }
 
 func onInsertEvent(qso *QSO) {
@@ -43,21 +38,11 @@ func onDeleteEvent(qso *QSO) {
 	}
 }
 
-func splitAndSetMuls(qso *QSO, code string) {
-	rcvd := qso.GetRcvd()
-	head := strings.TrimSuffix(rcvd, code)
-	if strings.HasSuffix(rcvd, code) {
-		qso.SetMul1(head)
-		qso.SetMul2(code)
-	}
-}
-
-func onVerifyEvent(qso *QSO) {
-	splitAndSetMuls(qso, "C")
-	splitAndSetMuls(qso, "HS")
-	if qso.Dupe {
-		qso.Score = 0
-	} else if qso.Mode == CW {
+func onAcceptEvent(qso *QSO) {
+	rcvd := qso.GetRcvdGroups()
+	qso.SetMul1(rcvd[1])
+	qso.SetMul2(rcvd[2])
+	if qso.Mode == CW {
 		qso.Score = 3
 	} else {
 		qso.Score = 1

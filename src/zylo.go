@@ -71,6 +71,8 @@ import (
 	"gopkg.in/ini.v1"
 	"io"
 	"math"
+	"os"
+	"regexp"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -242,6 +244,10 @@ func zylo_attach_event(test, path *C.char) {
 	t := C.GoString(test)
 	c := C.GoString(path)
 	OnAttachEvent(t, c)
+	bin, _ := os.ReadFile(Query("{F}"))
+	for _, qso := range LoadZLO(bin) {
+		OnInsertEvent(&qso)
+	}
 }
 
 //export zylo_assign_event
@@ -353,34 +359,34 @@ type QSO struct {
  QSO構造体の通信方式の列挙子です。
 */
 const (
-	CW    = 0
-	SSB   = 1
-	FM    = 2
-	AM    = 3
-	RTTY  = 4
-	OTHER = 5
+	CW = iota
+	SSB
+	FM
+	AM
+	RTTY
+	OTHER
 )
 
 /*
  QSO構造体の周波数帯の列挙子です。
 */
 const (
-	M1_9  = 0
-	M3_5  = 1
-	M7    = 2
-	M10   = 3
-	M14   = 4
-	M18   = 5
-	M21   = 6
-	M24   = 7
-	M28   = 8
-	M50   = 9
-	M144  = 10
-	M430  = 11
-	M1200 = 12
-	M2400 = 13
-	M5600 = 14
-	G10UP = 15
+	K1900 = iota
+	K3500
+	M7
+	M10
+	M14
+	M18
+	M21
+	M24
+	M28
+	M50
+	M144
+	M430
+	M1200
+	M2400
+	M5600
+	G10UP
 )
 
 /*
@@ -443,21 +449,21 @@ func (qso *QSO) GetNote() string {
 }
 
 /*
- 第1マルチプライヤを返します。
+ 主マルチプライヤを返します。
 */
 func (qso *QSO) GetMul1() string {
 	return zylo_decode_string(qso.mul1[:])
 }
 
 /*
- 第2マルチプライヤを返します。
+ マルチプライヤを返します。
 */
 func (qso *QSO) GetMul2() string {
 	return zylo_decode_string(qso.mul2[:])
 }
 
 /*
- 第2マルチプライヤを返します。
+ 副マルチプライヤを返します。
 */
 func (qso *QSO) SetCall(value string) {
 	copy(qso.call[:], zylo_encode_string(value))
@@ -492,14 +498,14 @@ func (qso *QSO) SetNote(value string) {
 }
 
 /*
- 第1マルチプライヤを設定します。
+ 主マルチプライヤを設定します。
 */
 func (qso *QSO) SetMul1(value string) {
 	copy(qso.mul1[:], zylo_encode_string(value))
 }
 
 /*
- 第2マルチプライヤを設定します。
+ 副マルチプライヤを設定します。
 */
 func (qso *QSO) SetMul2(value string) {
 	copy(qso.mul2[:], zylo_encode_string(value))
@@ -512,6 +518,62 @@ func zylo_decode_string(f []byte) string {
 
 func zylo_encode_string(v string) []byte {
 	return append([]byte{byte(len(v))}, v...)
+}
+
+/*
+ 重複交信を検査します。
+ 有効な交信の場合は真を返します。
+*/
+func (qso *QSO) VerifyDupe() bool {
+	return !qso.Dupe || zylo_dupes
+}
+
+/*
+ 周波数帯を検査します。
+ 有効な交信の場合は真を返します。
+*/
+func (qso *QSO) VerifyBand() bool {
+	return zylo_bands[qso.Band]
+}
+
+/*
+ 通信方式を検査します。
+ 有効な交信の場合は真を返します。
+*/
+func (qso *QSO) VerifyMode() bool {
+	return zylo_modes[qso.Mode]
+}
+
+/*
+ 交信相手の呼出符号を検査します。
+ 有効な交信の場合は真を返します。
+*/
+func (qso *QSO) VerifyCall() bool {
+	return zylo_calls.MatchString(qso.GetCall())
+}
+
+/*
+ コンテストナンバーを検査します。
+ 有効な交信の場合は真を返します。
+*/
+func (qso *QSO) VerifyRcvd() bool {
+	return zylo_rcvds.MatchString(qso.GetRcvd())
+}
+
+/*
+ コンテストナンバーを正規表現でグループ化します。
+*/
+func (qso *QSO) GetRcvdGroups() []string {
+	return zylo_rcvds.FindStringSubmatch(qso.GetRcvd())
+}
+
+/*
+ QSOを無効な交信とします。
+*/
+func (qso *QSO) Invalid() {
+	qso.Score = 0
+	qso.SetMul1("")
+	qso.SetMul2("")
 }
 
 /*
@@ -662,13 +724,76 @@ func GetUI(name string) uintptr {
 	return uintptr(C.handle(n, handleCB))
 }
 
+var zylo_dupes = false
+var zylo_bands = make(map[byte]bool)
+var zylo_modes = make(map[byte]bool)
+var zylo_calls = regexp.MustCompile(`^.+$`)
+var zylo_rcvds = regexp.MustCompile(`^.+$`)
+
+/*
+ 重複交信を許容します。
+*/
+func AllowDupe() {
+	zylo_dupes = true
+}
+
+/*
+ 指定された周波数帯を許容します。
+*/
+func AllowBand(bands ...byte) {
+	for _, band := range bands {
+		zylo_bands[band] = true
+	}
+}
+
+/*
+ 指定された通信方式を許容します。
+*/
+func AllowMode(modes ...byte) {
+	for _, mode := range modes {
+		zylo_modes[mode] = true
+	}
+}
+
+/*
+ 指定された周波数帯を許容します。
+*/
+func AllowBandRange(lo, hi byte) {
+	for b := lo; b <= hi; b++ {
+		AllowBand(b)
+	}
+}
+
+/*
+ 指定された通信方式を許容します。
+*/
+func AllowModeRange(lo, hi byte) {
+	for m := lo; m <= hi; m++ {
+		AllowMode(m)
+	}
+}
+
+/*
+ 交信相手の呼出符号の正規表現を設定します。
+*/
+func AllowCall(pattern string) {
+	zylo_calls = regexp.MustCompile(pattern)
+}
+
+/*
+ コンテストナンバーの正規表現を設定します。
+*/
+func AllowRcvd(pattern string) {
+	zylo_rcvds = regexp.MustCompile(pattern)
+}
+
 /*
  I/O拡張機能が利用する専用の変数です。
 */
 var FileExtFilter string
 
 /*
- DATファイルを埋め込むための変数です。
+ DATファイルを内蔵するための変数です。
 */
 var CityMultiList string
 
@@ -734,20 +859,33 @@ var OnDeleteEvent = func(qso *QSO) {}
  無効な交信の場合は、マルチプライヤを空の文字列にします。
 */
 var OnVerifyEvent = func(qso *QSO) {
-	qso.SetMul1(qso.GetRcvd())
-	if qso.Dupe {
-		qso.Score = 0
-	} else {
-		qso.Score = 1
+	switch {
+	case !qso.VerifyDupe():
+		qso.Invalid()
+	case !qso.VerifyBand():
+		qso.Invalid()
+	case !qso.VerifyMode():
+		qso.Invalid()
+	case !qso.VerifyRcvd():
+		qso.Invalid()
+	default:
+		OnAcceptEvent(qso)
 	}
 }
 
 /*
- 総合得点を計算します。
- 引数は交信の合計得点と第1マルチプライヤの異なり数です。
+ 有効と判定した交信に得点やマルチプライヤを設定します。
 */
-var OnPointsEvent = func(score, mults int) int {
-	return score * mults
+var OnAcceptEvent = func(qso *QSO) {
+	qso.SetMul1(qso.GetRcvd())
+}
+
+/*
+ 総合得点を計算します。
+ 引数は交信の合計得点と主マルチプライヤの異なり数です。
+*/
+var OnPointsEvent = func(score, mul1s int) int {
+	return score * mul1s
 }
 
 /*

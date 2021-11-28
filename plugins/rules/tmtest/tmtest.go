@@ -3,33 +3,23 @@
 */
 package main
 
-import (
-	_ "embed"
-	"os"
-	"regexp"
-)
+import _ "embed"
 
 var days = make(map[int]int)
-var code = regexp.MustCompile(`^\d{3,}$`)
-var call = regexp.MustCompile(`^\w{3,}`)
 
 //go:embed tmtest.dat
 var cityMultiList string
 
 func init() {
 	CityMultiList = cityMultiList
-	OnAssignEvent = onAssignEvent
 	OnInsertEvent = onInsertEvent
 	OnDeleteEvent = onDeleteEvent
-	OnVerifyEvent = onVerifyEvent
+	OnAcceptEvent = onAcceptEvent
 	OnPointsEvent = onPointsEvent
-}
-
-func onAssignEvent(contest, configs string) {
-	bin, _ := os.ReadFile(Query("{F}"))
-	for _, qso := range LoadZLO(bin) {
-		onInsertEvent(&qso)
-	}
+	AllowBandRange(M50, G10UP)
+	AllowMode(CW, SSB, FM, AM)
+	AllowCall(`^\w{3,}`)
+	AllowRcvd(`^\d{3,}$`)
 }
 
 func onInsertEvent(qso *QSO) {
@@ -71,20 +61,9 @@ func score(qso *QSO) byte {
 	}
 }
 
-func valid(qso *QSO) bool {
-	b1 := code.MatchString(qso.GetRcvd())
-	b2 := call.MatchString(qso.GetCall())
-	return b1 && b2 && score(qso) > 0
-}
-
-func onVerifyEvent(qso *QSO) {
-	if !qso.Dupe && valid(qso) {
-		qso.Score = score(qso)
-		qso.SetMul1(mult(qso))
-	} else {
-		qso.Score = 0
-		qso.SetMul1("")
-	}
+func onAcceptEvent(qso *QSO) {
+	qso.Score = score(qso)
+	qso.SetMul1(mult(qso))
 }
 
 func onPointsEvent(score, mults int) int {
