@@ -1,6 +1,19 @@
+[pkg.aktest]
+tag = "旭川コンテスト"
+msg = "旭川コンテストの得点計算用の拡張機能です."
+web = "https://github.com/nextzlog/zylo/tree/master/plugins/rules/aktest"
+use = ["dll.aktest", "cfg.aktest"]
+exp = "stable"
+
+[cfg.aktest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/aktest/aktest.cfg"
+
+[dll.aktest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/aktest.dll"
+
 [pkg.hstest]
-tag = "high-school contest"
-msg = "Installs scoring rules for high school ham-radio contest."
+tag = "高校コンテスト"
+msg = "高校コンテストの得点計算用の拡張機能です."
 web = "https://github.com/nextzlog/zylo/tree/master/plugins/rules/hstest"
 use = ["dll.hstest", "cfg.hstest"]
 exp = "stable"
@@ -12,8 +25,8 @@ url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/hste
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll"
 
 [pkg.tmtest]
-tag = "tokai marathon contest"
-msg = "Installs scoring rules for tokai region marathon contest."
+tag = "東海マラソンコンテスト"
+msg = "東海マラソンコンテストの得点計算用の拡張機能です."
 web = "https://github.com/nextzlog/zylo/tree/master/plugins/rules/tmtest"
 use = ["dll.tmtest", "cfg.tmtest"]
 exp = "stable"
@@ -25,8 +38,8 @@ url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/tmte
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll"
 
 [pkg.yltest]
-tag = "JLRS (YL) contest"
-msg = "Installs scoring rules for JLRS annual ham-radio contest."
+tag = "YLコンテスト"
+msg = "JLRS主催のYLコンテストの得点計算用の拡張機能です."
 web = "https://github.com/nextzlog/zylo/tree/master/plugins/rules/yltest"
 use = ["dll.yltest", "cfg.yltest"]
 exp = "stable"
@@ -38,8 +51,8 @@ url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/ylte
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll"
 
 [pkg.rttest]
-tag = "real-time contest"
-msg = "Installs scoring rules and monitors for realtime contest."
+tag = "リアルタイムコンテスト"
+msg = "リアルタイムコンテストのネットワーク接続機能を提供します."
 web = "https://github.com/nextzlog/zylo/tree/master/plugins/rules/rttest"
 use = ["dll.rttest", "cfg.rttest"]
 exp = "stable"

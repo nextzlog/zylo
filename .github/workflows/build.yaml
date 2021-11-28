@@ -43,6 +43,7 @@ jobs:
     strategy:
       matrix:
         include:
+        - name: plugins/rules/aktest
         - name: plugins/rules/hstest
         - name: plugins/rules/rttest
         - name: plugins/rules/tmtest
