@@ -5,7 +5,6 @@ on:
     - 'master'
 jobs:
   BuildZyLO:
-    if: github.event_name == 'push'
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
@@ -26,14 +25,11 @@ jobs:
         profile: minimal
         toolchain: stable
     - run: cargo build --release
-    - uses: actions/upload-artifact@v2
-      with:
-        name: ${{matrix.name}}
-        path: ${{matrix.path}}
+      working-directory: zbuild
     - uses: svenstaro/upload-release-action@v2
       with:
         tag: zbuild
-        file: ${{matrix.path}}
+        file: zbuild/${{matrix.path}}
         asset_name: ${{matrix.name}}
         repo_token: ${{secrets.GITHUB_TOKEN}}
         overwrite: true
@@ -51,24 +47,10 @@ jobs:
         - name: plugins/utils/format
         - name: plugins/utils/latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
+    - uses: nextzlog/zylo@master
       with:
-        profile: minimal
-        toolchain: stable
-    - uses: actions/download-artifact@v2
-      with:
-        name: zbuild-linux
-    - run: chmod a+x zbuild
-    - run: ./zbuild setup
-    - run: ./zbuild compile ${{matrix.name}}
-    - uses: svenstaro/upload-release-action@v2
-      with:
-        tag: nightly
-        file: ${{matrix.name}}/*.dll
-        file_glob: true
-        overwrite: true
-        repo_token: ${{secrets.GITHUB_TOKEN}}
+        token: ${{secrets.GITHUB_TOKEN}}
+        directory: ${{matrix.name}}
   Documents:
     needs: BuildDemo
     runs-on: ubuntu-latest

@@ -1,7 +1,5 @@
-zLog+ ZyLO for Windows
+Tutorial
 ====
-
-[無線部開発班](https://pafelog.net)
 
 ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開発できます。
 例えば、
@@ -14,13 +12,7 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 
 ## 具体例
 
-|拡張機能                                                                       |内容                              |
-|-------------------------------------------------------------------------------|----------------------------------|
-|[format.dll](https://github.com/nextzlog/zylo/tree/master/plugins/utils/format)|zLogに様々なログ形式を追加します。|
-|[latest.dll](https://github.com/nextzlog/zylo/tree/master/plugins/utils/latest)|zLogの最新のリリースを通知します。|
-|[hstest.dll](https://github.com/nextzlog/zylo/tree/master/plugins/rules/hstest)|全国高等学校コンテストの規約です。|
-|[rttest.dll](https://github.com/nextzlog/zylo/tree/master/plugins/rules/rttest)|リアルタイムコンテストの規約です。|
-|[tmtest.dll](https://github.com/nextzlog/zylo/tree/master/plugins/rules/tmtest)|東海マラソンコンテストの規約です。|
+- [公開された拡張機能のリスト](https://zylo.pafelog.net/market.html)
 
 ## 拡張機能の利用方法
 
@@ -253,9 +245,32 @@ exp = "unstable" # or "stable"
 
 ### パッケージの公開
 
-- まず、適当な[管理者](https://github.com/nextzlog/zylo/blob/master/src/market.list)を選びます。
-- その管理者に依頼して、前掲のTOMLファイルの内容をマーケットに公開して、反映されるまで待ちます。
+- 適当な管理者を選び、前掲のTOMLファイルの公開を依頼して、マーケットプレイスへの反映を待ちます。
 
-# ZyLO API
+### 自動ビルドの設定
 
-{{.EmitUsage}}
+- 拡張機能をGitHubで開発している場合は、便利なActionを使って、拡張機能のビルドを自動化できます。
+- 以下のワークフローは、`main`ブランチが更新されると、DLLをビルドして`nightly`タグで公開します。
+
+```yaml
+name: 'build'
+on:
+  push:
+    branches:
+    - 'main'
+jobs:
+  BuildDLL:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: nextzlog/zylo@master
+      with:
+        token: ${{secrets.GITHUB_TOKEN}}
+        directory: /path/to/golang/files
+
+    # optional: request market update
+    - uses: peter-evans/repository-dispatch@v1
+      with:
+        token: YOUR_PRIVATE_ACCESS_TOKEN
+        repository: nextzlog/zylo
+        event-type: store
+```

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<title>Marketplace - ZyLO</title>
+
+	<meta name="description" content="Explore zLog plugins.">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/flatly/bootstrap.min.css" media="screen">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(function() {
+			$.getJSON('https://zylo.pafelog.net/market.json', function(plugins) {
+				function item(key) {
+					return plugins[key.split('.')[0]][key.split('.')[1]];
+				}
+				function link(pkg) {
+					const base = pkg.url.split('/').reverse()[0];
+					return `<a href="${pkg.url}" class="card-link">${base}</a>`;
+				}
+				for(const key in plugins.pkg) {
+					const pkg = plugins.pkg[key];
+					$(`div#${pkg.exp??'unstable'}`).append(`
+						<div class="card my-1 my-md-3">
+							<div class="card-body">
+								<h5 class="card-title">
+									<a href="${pkg.web}" class="card-link">${pkg.tag}</a>
+								</h5>
+								<h6 class="card-subtitle mb-2">${key}</h6>
+								<p class="card-text">${pkg.msg}</p>
+								${pkg.use.map(item).map(link).join('')}
+							</div>
+						</div>
+					`);
+				}
+			});
+		});
+	</script>
+</head>
+
+<body>
+	<div class="container-fluid p-md-5">
+		<div class="text-center">
+			<h1><a href="index.html">ZyLO</a></h1>
+		</div>
+		<div class="py-md-5">
+			<h3>stable plugins</h3>
+			<div id="stable"></div>
+		</div>
+		<div class="py-md-5">
+			<h3>unstable (experimental) plugins</h3>
+			<div id="unstable"></div>
+		</div>
+	</div>
+</body>
+</html>
