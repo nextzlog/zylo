@@ -561,10 +561,25 @@ func (qso *QSO) VerifyRcvd() bool {
 }
 
 /*
+ コンテストナンバーを検査します。
+ 有効な交信の場合は真を返します。
+*/
+func (qso *QSO) VerifySent() bool {
+	return zylo_sents.MatchString(qso.GetSent())
+}
+
+/*
  コンテストナンバーを正規表現でグループ化します。
 */
 func (qso *QSO) GetRcvdGroups() []string {
 	return zylo_rcvds.FindStringSubmatch(qso.GetRcvd())
+}
+
+/*
+ コンテストナンバーを正規表現でグループ化します。
+*/
+func (qso *QSO) GetSentGroups() []string {
+	return zylo_sents.FindStringSubmatch(qso.GetSent())
 }
 
 /*
@@ -729,6 +744,7 @@ var zylo_bands = make(map[byte]bool)
 var zylo_modes = make(map[byte]bool)
 var zylo_calls = regexp.MustCompile(`^.+$`)
 var zylo_rcvds = regexp.MustCompile(`^.+$`)
+var zylo_sents = regexp.MustCompile(`^.+$`)
 
 /*
  重複交信を許容します。
@@ -785,6 +801,13 @@ func AllowCall(pattern string) {
 */
 func AllowRcvd(pattern string) {
 	zylo_rcvds = regexp.MustCompile(pattern)
+}
+
+/*
+ コンテストナンバーの正規表現を設定します。
+*/
+func AllowSent(pattern string) {
+	zylo_sents = regexp.MustCompile(pattern)
 }
 
 /*
@@ -867,6 +890,8 @@ var OnVerifyEvent = func(qso *QSO) {
 	case !qso.VerifyMode():
 		qso.Invalid()
 	case !qso.VerifyRcvd():
+		qso.Invalid()
+	case !qso.VerifySent():
 		qso.Invalid()
 	default:
 		OnAcceptEvent(qso)

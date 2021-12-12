@@ -18,6 +18,7 @@ func init() {
 	AllowMode(CW, SSB, FM, AM)
 	AllowCall(`^\w{3,}`)
 	AllowRcvd(`^\d{4,}$`)
+	AllowSent(`^\d{4,}$`)
 }
 
 const (
@@ -77,14 +78,10 @@ func score(rcvd, sent int) int {
 func onAcceptEvent(qso *QSO) {
 	qso.SetMul1(qso.GetCall()[:3])
 	qso.SetMul2(qso.GetRcvd())
-	rcvd, e1 := strconv.Atoi(qso.GetRcvd())
-	sent, e2 := strconv.Atoi(qso.GetSent())
+	rcvd, _ := strconv.Atoi(qso.GetRcvd())
+	sent, _ := strconv.Atoi(qso.GetSent())
 	qso.Score = byte(score(rcvd, sent))
-	if e1 != nil || e2 != nil {
-		qso.SetMul1("")
-	} else if qso.Dupe {
-		qso.Score = 0
-	} else if qso.Score == 0 {
+	if qso.Score == 0 {
 		qso.SetNote("OM-to-OM QSO")
 	}
 }

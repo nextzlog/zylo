@@ -10,10 +10,15 @@ ZyLO
 [ZyLO](https://zylo.pafelog.net) is a plugin and marketplace mechanism integrated into [zLog](http://zlog.org).
 zLog is a simple yet powerful logging software for ham radio contests, which has been loved by many users for 30 years.
 
+## Downloads
+
+- [zbuild](https://github.com/nextzlog/zylo/releases/zbuild)
+- [zLog2.8+](https://github.com/jr8ppg/zLog/releases/latest)
+
 ## Documents
 
-- [How to develop plugins](https://zylo.pafelog.net/manual).
-- [Available plugins](https://zylo.pafelog.net/market.html).
+- [Tutorial](https://zylo.pafelog.net/manual)
+- [Marketplace](https://zylo.pafelog.net/market)
 
 ## Contribution
 
