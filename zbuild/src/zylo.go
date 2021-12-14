@@ -882,19 +882,16 @@ var OnDeleteEvent = func(qso *QSO) {}
  無効な交信の場合は、マルチプライヤを空の文字列にします。
 */
 var OnVerifyEvent = func(qso *QSO) {
-	switch {
-	case !qso.VerifyDupe():
-		qso.Invalid()
-	case !qso.VerifyBand():
-		qso.Invalid()
-	case !qso.VerifyMode():
-		qso.Invalid()
-	case !qso.VerifyRcvd():
-		qso.Invalid()
-	case !qso.VerifySent():
-		qso.Invalid()
-	default:
+	ok := true
+	ok = ok && qso.VerifyDupe()
+	ok = ok && qso.VerifyBand()
+	ok = ok && qso.VerifyMode()
+	ok = ok && qso.VerifyRcvd()
+	ok = ok && qso.VerifySent()
+	if ok {
 		OnAcceptEvent(qso)
+	} else {
+		qso.Invalid()
 	}
 }
 
