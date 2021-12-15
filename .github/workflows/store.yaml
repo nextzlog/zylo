@@ -19,10 +19,10 @@ jobs:
     - run: ./zbuild-Linux setup
     - run: ./zbuild-Linux market > web/market.json
     - run: echo `go env GOPATH`/bin >> $GITHUB_PATH
-    - run: echo '# ZyLO API' >> temp.md
     - run: echo '{{.EmitUsage}}' >> temp.md
     - run: go get github.com/robertkrimen/godocdown/godocdown
     - run: godocdown -o godoc.md -template temp.md zbuild/src
+    - run: sed -i -e "s/Usage/API/g" -e "s/^##/#/g" godoc.md
     - run: cat MANUAL.md godoc.md > web/MANUAL.md
     - uses: peaceiris/actions-gh-pages@v3
       with:
