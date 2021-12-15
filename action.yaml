@@ -2,13 +2,17 @@ name: 'build-zlog-plugin'
 author: 'The University of Tokyo Amateur Radio Club'
 description: 'GitHub action that builds a ZyLO DLL and publishes it as a nightly build'
 branding:
-  icon: 'radio'
-  color: 'blue'
+  icon: radio
+  color: blue
 inputs:
+  ref:
+    description: 'branch'
+    required: false
+    default: ''
   tag:
     description: 'release tag'
     required: false
-    default: 'nightly'
+    default: nightly
   token:
     description: 'GITHUB_TOKEN'
     required: true
@@ -17,22 +21,24 @@ inputs:
     required: false
     default: '.'
 runs:
-  using: 'composite'
+  using: composite
   steps:
   - uses: actions/checkout@v2
+    with:
+      ref: ${{inputs.ref}}
   - uses: dsaltares/fetch-gh-release-asset@master
     with:
-      repo: 'nextzlog/zylo'
-      file: 'zbuild-linux'
-      version: 'tags/zbuild'
+      repo: nextzlog/zylo
+      file: zbuild-${{runner.os}}
+      version: tags/zbuild
       token: ${{inputs.token}}
-  - run: sudo chmod a+x zbuild-linux
+  - run: sudo chmod a+x zbuild-${{runner.os}}
     shell: bash
   - run: echo `pwd` >> $GITHUB_PATH
     shell: bash
-  - run: zbuild-linux setup
+  - run: zbuild-${{runner.os}} setup
     shell: bash
-  - run: zbuild-linux compile
+  - run: zbuild-${{runner.os}} compile
     shell: bash
     working-directory: ${{inputs.directory}}
   - uses: svenstaro/upload-release-action@v2

@@ -12,12 +12,12 @@ jobs:
     - uses: actions/checkout@v2
     - uses: dsaltares/fetch-gh-release-asset@master
       with:
-        file: 'zbuild-linux'
+        file: 'zbuild-Linux'
         token: ${{secrets.GITHUB_TOKEN}}
         version: 'tags/zbuild'
-    - run: sudo chmod a+x zbuild-linux
-    - run: ./zbuild-linux setup
-    - run: ./zbuild-linux market > web/market.json
+    - run: sudo chmod a+x zbuild-Linux
+    - run: ./zbuild-Linux setup
+    - run: ./zbuild-Linux market > web/market.json
     - run: echo `go env GOPATH`/bin >> $GITHUB_PATH
     - run: echo '# ZyLO API' >> temp.md
     - run: echo '{{.EmitUsage}}' >> temp.md

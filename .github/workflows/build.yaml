@@ -10,13 +10,13 @@ jobs:
       matrix:
         include:
         - os: macos-latest
-          name: zbuild-macos
+          name: zbuild-macOS
           path: target/release/zbuild
         - os: ubuntu-latest
-          name: zbuild-linux
+          name: zbuild-Linux
           path: target/release/zbuild
         - os: windows-latest
-          name: zbuild-windows.exe
+          name: zbuild-Windows.exe
           path: target/release/zbuild.exe
     steps:
     - uses: actions/checkout@v2
