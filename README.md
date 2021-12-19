@@ -18,6 +18,7 @@ zLog is a simple yet powerful logging software for ham radio contests, which has
 
 ## Documents
 
+- [Slides](https://pafelog.net/zylo.pdf)
 - [Tutorial](https://zylo.pafelog.net/manual)
 - [Marketplace](https://zylo.pafelog.net/market)
 
