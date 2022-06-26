@@ -20,7 +20,7 @@ jobs:
     - run: ./zbuild-Linux market > web/market.json
     - run: echo `go env GOPATH`/bin >> $GITHUB_PATH
     - run: echo '{{.EmitUsage}}' >> temp.md
-    - run: go get github.com/robertkrimen/godocdown/godocdown
+    - run: go install github.com/robertkrimen/godocdown/godocdown@latest
     - run: godocdown -o godoc.md -template temp.md zbuild/src
     - run: sed -i -e "s/Usage/API/g" -e "s/^##/#/g" godoc.md
     - run: cat MANUAL.md godoc.md > web/MANUAL.md
