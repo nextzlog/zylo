@@ -214,23 +214,19 @@ func zylo_window_event(msg uintptr) {
 }
 
 //export zylo_import_event
-func zylo_import_event(source, target *C.char) {
+func zylo_import_event(source, target *C.char) bool {
 	defer zylo_recover_capture_panic()
 	src := C.GoString(source)
 	tgt := C.GoString(target)
-	if OnImportEvent(src, tgt) != nil {
-		DisplayModal("failed to load %s", src)
-	}
+	return OnImportEvent(src, tgt) == nil
 }
 
 //export zylo_export_event
-func zylo_export_event(target, format *C.char) {
+func zylo_export_event(target, format *C.char) bool {
 	defer zylo_recover_capture_panic()
 	tgt := C.GoString(target)
 	fmt := C.GoString(format)
-	if OnExportEvent(tgt, fmt) != nil {
-		DisplayModal("failed to save %s", tgt)
-	}
+	return OnExportEvent(tgt, fmt) == nil
 }
 
 //export zylo_offset_event
