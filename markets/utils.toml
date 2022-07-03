@@ -1,5 +1,5 @@
 [exe.qxsl]
-url = "https://github.com/nextzlog/qxsl/releases/download/qxsl-native/qxsl.exe"
+url = "https://github.com/nextzlog/qxsl/releases/download/nightly/qxsl.exe"
 
 [pkg.format]
 tag = "zLog additional I/O"

@@ -20,9 +20,9 @@ func init() {
 }
 
 func onImportEvent(source, target string) error {
-	return exec.Command(QXSL, "format", source, target, "zbin").Run()
+	return exec.Command(QXSL, source, target, "zbin").Run()
 }
 
 func onExportEvent(source, format string) error {
-	return exec.Command(QXSL, "format", source, source, format).Run()
+	return exec.Command(QXSL, source, source, format).Run()
 }
