@@ -20,7 +20,25 @@ zLog is a simple yet powerful logging software for ham radio contests, which has
 
 - [Slides](https://pafelog.net/zylo.pdf)
 - [Tutorial](https://zylo.pafelog.net/manual)
-- [Marketplace](https://zylo.pafelog.net/market)
+
+## [Marketplace](https://zylo.pafelog.net/market)
+
+### Utility plugins
+
+|Name|Description|
+|----|-----------|
+|zLog additional I/O|Installs several I/O formats, including [ADI, ADX](http://adif.org) and [LG8](http://e.gmobb.jp/ctestwin/Download.html).|
+|zLog update checker|Notifies the user of the latest zLog release from GitHub.|
+
+### Contest plugins
+
+|Name|Rules|
+|----|-----|
+|旭川コンテスト|https://asahikawa-contest.jimdofree.com|
+|高校コンテスト|http://hstest.mg-sci.com|
+|リアルタイムコンテスト|http://ja1zlo.u-tokyo.org/rt|
+|東海マラソンコンテスト|http://isotope.sist.chukyo-u.ac.jp/tkitest|
+|JLRSパーティコンテスト|https://www.jarl.com/jlrs|
 
 ## Contribution
 

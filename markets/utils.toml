@@ -4,7 +4,7 @@ url = "https://github.com/nextzlog/qxsl/releases/download/nightly/qxsl.exe"
 [pkg.format]
 tag = "zLog additional I/O"
 msg = "様々なログファイルのインポートとエクスポートに対応します."
-web = "https://github.com/nextzlog/zylo/tree/master/plugins/utils/format"
+web = "https://github.com/nextzlog/zylo"
 use = ["dll.format", "exe.qxsl"]
 exp = "stable"
 
@@ -14,7 +14,7 @@ url = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll"
 [pkg.latest]
 tag = "zLog update checker"
 msg = "zLogの最新のリリースを自動的に検索し、利用者に通知します."
-web = "https://github.com/nextzlog/zylo/tree/master/plugins/utils/latest"
+web = "https://github.com/nextzlog/zylo"
 use = ["dll.latest"]
 exp = "stable"
 
