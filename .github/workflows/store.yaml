@@ -1,7 +1,7 @@
 name: 'store'
 on:
   schedule:
-  - cron: '0 0 * * 6'
+  - cron: '0 0 * * *'
   repository_dispatch:
     types:
     - store
@@ -29,3 +29,12 @@ jobs:
         cname: zylo.pafelog.net
         github_token: ${{secrets.GITHUB_TOKEN}}
         publish_dir: web
+  CleanRuns:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: igorjs/gh-actions-clean-workflow@v1
+      with:
+        token: ${{secrets.GITHUB_TOKEN}}
+        owner: nextzlog
+        repo: zylo
+        days_old: 30
