@@ -1,1 +1,1 @@
-Sub ADIF (ADI)|*.adi|Sub ADIF (ADX)|*.adx|CTESTWIN (LG8)|*.lg8|CTESTWIN (text)|*.txt|JARL LOG (R2.0)|*.txt|QXML|*.xml;*.qxml
+Sub ADIF (ADI)|*.adi|Sub ADIF (ADX)|*.adx|CTESTWIN (LG8)|*.lg8|CTESTWIN (text)|*.txt|Turbo HAMLOG (HDB)|*.hdb|JARL LOG (R2.0)|*.txt|QXML|*.xml;*.qxml
