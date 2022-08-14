@@ -1,57 +1,20 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-	<meta charset="UTF-8">
-	<title>Marketplace - ZyLO</title>
+---
+title: Market
+subtitle: zLog Plugins
+layout: default
+---
 
-	<meta name="description" content="Explore zLog plugins.">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+<p>以下のプラグインは、zLog令和64bit版のメニューからインストールできます。</p>
 
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/flatly/bootstrap.min.css" media="screen">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-	<script type="text/javascript">
-		$(function() {
-			$.getJSON('https://zylo.pafelog.net/market.json', function(plugins) {
-				function item(key) {
-					return plugins[key.split('.')[0]][key.split('.')[1]];
-				}
-				function link(pkg) {
-					const base = pkg.url.split('/').reverse()[0];
-					return `<a href="${pkg.url}" class="card-link">${base}</a>`;
-				}
-				for(const key in plugins.pkg) {
-					const pkg = plugins.pkg[key];
-					$(`div#${pkg.exp??'unstable'}`).append(`
-						<div class="card my-1 my-md-3">
-							<div class="card-body">
-								<h5 class="card-title">
-									<a href="${pkg.web}" class="card-link">${pkg.tag}</a>
-								</h5>
-								<h6 class="card-subtitle mb-2">${key}</h6>
-								<p class="card-text">${pkg.msg}</p>
-								${pkg.use.map(item).map(link).join('')}
-							</div>
-						</div>
-					`);
-				}
-			});
-		});
-	</script>
-</head>
-
-<body>
-	<div class="container-fluid p-md-5">
-		<div class="text-center">
-			<h1><a href="index.html">ZyLO</a></h1>
-		</div>
-		<div class="py-md-5">
-			<h3>stable plugins</h3>
-			<div id="stable"></div>
-		</div>
-		<div class="py-md-5">
-			<h3>unstable (experimental) plugins</h3>
-			<div id="unstable"></div>
+{% for item in site.data.market.pkg %}
+	{% assign pkg = item[1] %}
+	<div class='card my-1 my-md-3'>
+		<div class='card-body'>
+			<span class='badge bg-success'>{{pkg.exp}}</span>
+			<span class='badge bg-primary'>{{item[0]}}</span>
+			<h3 class='card-title'>{{pkg.tag}}</h3>
+			<p class='card-text'>{{pkg.msg}}</p>
+			<a class='card-link' href='{{pkg.web}}'>{{pkg.web}}</a>
 		</div>
 	</div>
-</body>
-</html>
+{% endfor %}

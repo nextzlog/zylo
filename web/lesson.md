@@ -1,14 +1,13 @@
-Tutorial
-====
+---
+title: Lesson
+subtitle: Make a zLog Plugin
+---
+
+{% raw %}
 
 ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開発できます。
-例えば、
 
-- 独自のユーザインタフェースや機能の追加
-- 従来対応できなかった複雑な規約への対応
-- 他のソフトウェアやハードウェアとの連携
-
-無限の可能性を切り開きましょう。
+<img src='https://pafelog.net/images/zylo.23.svg' class='img-thumbnail img-fluid' width='100%'>
 
 ## 具体例
 
@@ -16,21 +15,17 @@ ZyLOを利用すれば[zLog](https://zlog.org)の拡張機能をGo言語で開�
 
 ## 拡張機能の利用方法
 
-### 利用者向けの情報
-
 - zLogのエンドユーザは、zLogに内蔵された設定画面を通じて、拡張機能を簡単にインストールできます。
 
 1. 設定メニューからプラグイン管理メニューを選び、管理画面を開く。
 2. 画面上部のリストから好きな拡張機能を選ぶと、詳細が表示される。
-3. 以下に示すボタンを押して、拡張機能を有効化・無効化・更新する。
+3. 画面下部のボタンを押して、拡張機能を有効化・無効化・更新する。
 
 |ボタン |動作                                        |
 |-------|--------------------------------------------|
 |Install|拡張機能を有効化する。押すと同時に起動する。|
 |Disable|拡張機能を無効化する。再起動後に反映される。|
 |Upgrade|拡張機能を最新にする。再起動後に反映される。|
-
-### 開発者向けの情報
 
 - 拡張機能をテストするには、`zlog.ini`に拡張機能のパスをカンマ区切りで記載し、zLogを起動します。
 
@@ -146,16 +141,12 @@ dll rttest.dll # basename
 
 ## 高度な拡張機能の例
 
-### ウィンドウハンドルの取得
-
 - 拡張機能でWinAPIを使う場合は、`GetUI`関数で、zLogのGUI部品のウィンドウハンドルを取得できます。
 - 部品は、[main.dfm](https://github.com/jr8ppg/zLog/blob/master/zlog/main.dfm)等で確認できます。
 
 ```go
 handle := GetUI("MainForm.FileNewItem")
 ```
-
-### ボタンやタイピングの監視
 
 - 拡張機能は、zLogのボタン及びメニュー項目のクリックや、記入欄のキーボードの入力を監視できます。
 
@@ -179,8 +170,6 @@ func onEditor(key int) {
 	DisplayToast(Query("QSO with $B"))
 }
 ```
-
-### 独自のメニュー項目の追加
 
 - 拡張機能は、WinAPIのGo実装を利用することで、zLogに独自の部品を追加し、イベントを処理できます。
 
@@ -212,8 +201,6 @@ func onWindowEvent(msg uintptr) {
 
 ## 拡張機能の頒布方法
 
-### パッケージの作成
-
 - 最初に、適当なTOMLファイルを作成し、その冒頭に、DLLの名称と最新版の配布場所のURLを記載します。
 
 ```toml
@@ -243,11 +230,9 @@ use = ["cfg.sample", "dat.sample", "dll.sample"] # dependency
 exp = "unstable" # or "stable"
 ```
 
-### パッケージの公開
-
 - 適当な管理者を選び、前掲のTOMLファイルの公開を依頼して、マーケットプレイスへの反映を待ちます。
 
-### 自動ビルドの設定
+## 自動ビルドの設定
 
 - 拡張機能をGitHubで開発している場合は、便利なActionを使って、拡張機能のビルドを自動化できます。
 - 以下のワークフローは、`main`ブランチが更新されると、DLLをビルドして`nightly`タグで公開します。
@@ -266,11 +251,6 @@ jobs:
       with:
         token: ${{secrets.GITHUB_TOKEN}}
         directory: /path/to/golang/files
-
-    # optional: request market update
-    - uses: peter-evans/repository-dispatch@v1
-      with:
-        token: YOUR_PRIVATE_ACCESS_TOKEN
-        repository: nextzlog/zylo
-        event-type: store
 ```
+
+{% endraw %}
