@@ -5,36 +5,30 @@ on:
   repository_dispatch:
     types:
     - store
+env:
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 jobs:
   UpdateWeb:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        file: 'zbuild-Linux'
-        token: ${{secrets.GITHUB_TOKEN}}
-        version: 'tags/zbuild'
-    - run: sudo chmod a+x zbuild-Linux
-    - run: ./zbuild-Linux setup
-    - run: ./zbuild-Linux market > web/market.json
-    - run: echo `go env GOPATH`/bin >> $GITHUB_PATH
-    - run: echo '{{.EmitUsage}}' >> temp.md
-    - run: go install github.com/robertkrimen/godocdown/godocdown@latest
-    - run: godocdown -o godoc.md -template temp.md zbuild/src
-    - run: sed -i -e "s/Usage/API/g" -e "s/^##/#/g" godoc.md
-    - run: cat MANUAL.md godoc.md > web/MANUAL.md
+    - run: |
+        gh release download -p ${{env.ZBUILD}}
+        sudo chmod a+x ${{env.ZBUILD}}
+        ./${{env.ZBUILD}} setup
+        ./${{env.ZBUILD}} market > web/market.json
+        echo `go env GOPATH`/bin >> $GITHUB_PATH
+      env:
+        ZBUILD: zbuild-${{runner.os}}
+    - run: |
+        echo '{{.EmitUsage}}' >> temp.md
+        go install github.com/robertkrimen/godocdown/godocdown@latest
+        godocdown -o godoc.md -template temp.md zbuild/src
+        sed -i -e "s/Usage/API/g" -e "s/^##/#/g" godoc.md
+        cat MANUAL.md godoc.md > web/manual.md
     - uses: peaceiris/actions-gh-pages@v3
       with:
+        enable_jekyll: true
         cname: zylo.pafelog.net
         github_token: ${{secrets.GITHUB_TOKEN}}
         publish_dir: web
-  CleanRuns:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: igorjs/gh-actions-clean-workflow@v1
-      with:
-        token: ${{secrets.GITHUB_TOKEN}}
-        owner: nextzlog
-        repo: zylo
-        days_old: 30

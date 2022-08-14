@@ -3,6 +3,8 @@ on:
   push:
     branches:
     - 'master'
+env:
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 jobs:
   BuildZyLO:
     runs-on: ${{matrix.os}}
@@ -24,15 +26,11 @@ jobs:
       with:
         profile: minimal
         toolchain: stable
-    - run: cargo build --release
+    - run: |
+        cargo build --release
+        mv ${{matrix.path}} ${{matrix.name}}
+        gh release upload zbuild ${{matrix.name}} --clobber
       working-directory: zbuild
-    - uses: svenstaro/upload-release-action@v2
-      with:
-        tag: zbuild
-        file: zbuild/${{matrix.path}}
-        asset_name: ${{matrix.name}}
-        repo_token: ${{secrets.GITHUB_TOKEN}}
-        overwrite: true
   BuildDemo:
     needs: BuildZyLO
     runs-on: ubuntu-latest

@@ -10,14 +10,14 @@ inputs:
     required: false
     default: ''
   tag:
-    description: 'release tag'
+    description: 'release name'
     required: false
     default: nightly
   token:
     description: 'GITHUB_TOKEN'
     required: true
   directory:
-    description: 'source-file directory'
+    description: 'project path'
     required: false
     default: '.'
 runs:
@@ -26,25 +26,14 @@ runs:
   - uses: actions/checkout@v2
     with:
       ref: ${{inputs.ref}}
-  - uses: dsaltares/fetch-gh-release-asset@master
-    with:
-      repo: nextzlog/zylo
-      file: zbuild-${{runner.os}}
-      version: tags/zbuild
-      token: ${{inputs.token}}
-  - run: sudo chmod a+x zbuild-${{runner.os}}
+  - run: |
+      gh release download -R nextzlog/zylo -p ${{env.ZBUILD}}
+      sudo chmod a+x ${{env.ZBUILD}}
+      ./${{env.ZBUILD}} setup
+      ./${{env.ZBUILD}} compile
+      gh release upload ${{inputs.tag}} *.dll --clobber
     shell: bash
-  - run: echo `pwd` >> $GITHUB_PATH
-    shell: bash
-  - run: zbuild-${{runner.os}} setup
-    shell: bash
-  - run: zbuild-${{runner.os}} compile
-    shell: bash
+    env:
+      ZBUILD: zbuild-${{runner.os}}
+      GITHUB_TOKEN: ${{inputs.token}}
     working-directory: ${{inputs.directory}}
-  - uses: svenstaro/upload-release-action@v2
-    with:
-      tag: ${{inputs.tag}}
-      file: ${{inputs.directory}}/*.dll
-      file_glob: true
-      overwrite: true
-      repo_token: ${{inputs.token}}
