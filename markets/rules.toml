@@ -1,6 +1,6 @@
 [pkg.aktest]
 tag = "旭川コンテスト"
-msg = "旭川コンテストの得点計算用の拡張機能です."
+msg = "旭川コンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
 web = "https://github.com/nextzlog/zylo"
 use = ["dll.aktest", "cfg.aktest"]
 exp = "stable"
@@ -13,7 +13,7 @@ url = "https://github.com/nextzlog/zylo/releases/download/nightly/aktest.dll"
 
 [pkg.hstest]
 tag = "高校コンテスト"
-msg = "高校コンテストの得点計算用の拡張機能です."
+msg = "高校コンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
 web = "https://github.com/nextzlog/zylo"
 use = ["dll.hstest", "cfg.hstest"]
 exp = "stable"
@@ -26,7 +26,7 @@ url = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll"
 
 [pkg.tmtest]
 tag = "東海マラソンコンテスト"
-msg = "東海マラソンコンテストの得点計算用の拡張機能です."
+msg = "東海マラソンコンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
 web = "https://github.com/nextzlog/zylo"
 use = ["dll.tmtest", "cfg.tmtest"]
 exp = "stable"
@@ -39,7 +39,7 @@ url = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll"
 
 [pkg.yltest]
 tag = "YLコンテスト"
-msg = "JLRS主催のYLコンテストの得点計算用の拡張機能です."
+msg = "JLRS主催のYLコンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
 web = "https://github.com/nextzlog/zylo"
 use = ["dll.yltest", "cfg.yltest"]
 exp = "stable"
@@ -52,7 +52,7 @@ url = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll"
 
 [pkg.rttest]
 tag = "リアルタイムコンテスト"
-msg = "リアルタイムコンテストのネットワーク接続機能を提供します."
+msg = "リアルタイムコンテストのCFGファイルと, クラウド送受信を行うプラグインです."
 web = "https://github.com/nextzlog/zylo"
 use = ["dll.rttest", "cfg.rttest"]
 exp = "stable"
