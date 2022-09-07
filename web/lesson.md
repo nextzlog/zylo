@@ -199,6 +199,48 @@ func onWindowEvent(msg uintptr) {
 }
 ```
 
+## プロパティ操作の例
+
+- `RunDelphi`関数は、zLogのGUI部品のプロパティやメソッドをDelphiの式で参照もしくは実行できます。
+
+```go
+package main
+
+func init() {
+	OnLaunchEvent = onLaunchEvent
+}
+
+func onLaunchEvent() {
+	RunDelphi(`PluginMenu.Add(op.Put(MainMenu.CreateMenuItem(), "Name", "MyMenu"))`)
+	RunDelphi(`op.Put(MainMenu.FindComponent("MyMenu"), "Caption", "Special Menu")`)
+}
+```
+
+### 演算子
+
+|演算子|意味  |返り値の型|
+|------|------|----------|
+| +    |加算  |Extended  |
+| -    |減算  |Extended  |
+| *    |乗算  |Extended  |
+| /    |除算  |Extended  |
+| =    |等値  |Boolean   |
+| <>   |不等  |Boolean   |
+| <    |未満  |Boolean   |
+| >    |超過  |Boolean   |
+| <=   |以下  |Boolean   |
+| >=   |以上  |Boolean   |
+| and  |論理積|Boolean   |
+| or   |論理和|Boolean   |
+| not  |否定  |Boolean   |
+
+### 組み込み関数
+
+|関数|意味            |
+|----|----------------|
+|Int |実数を整数に変換|
+|Put |プロパティを設定|
+
 ## 拡張機能の頒布方法
 
 - 最初に、適当なTOMLファイルを作成し、その冒頭に、DLLの名称と最新版の配布場所のURLを記載します。
@@ -234,8 +276,7 @@ exp = "unstable" # or "stable"
 
 ## 自動ビルドの設定
 
-- 拡張機能をGitHubで開発している場合は、便利なActionを使って、拡張機能のビルドを自動化できます。
-- 以下のワークフローは、`main`ブランチが更新されると、DLLをビルドして`nightly`タグで公開します。
+- 拡張機能をGitHubで開発している場合は、以下に示すワークフローにより、リリースを自動化できます。
 
 ```yaml
 name: 'build'

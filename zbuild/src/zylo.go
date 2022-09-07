@@ -16,6 +16,7 @@ typedef void (*AccessCB)(void*);
 typedef long (*HandleCB)(char*);
 typedef long (*ButtonCB)(char*);
 typedef long (*EditorCB)(char*);
+typedef long (*ScriptCB)(char*);
 typedef void (*FormatCB)(char*);
 typedef void (*CitiesCB)(char*);
 
@@ -52,6 +53,10 @@ inline long button(char *str, ButtonCB cb) {
 }
 
 inline long editor(char *str, EditorCB cb) {
+	if(cb) return cb(str);
+}
+
+inline long script(char *str, ScriptCB cb) {
 	if(cb) return cb(str);
 }
 
@@ -104,6 +109,7 @@ var accessCB C.AccessCB
 var handleCB C.HandleCB
 var buttonCB C.ButtonCB
 var editorCB C.EditorCB
+var scriptCB C.ScriptCB
 
 func zylo_count_lost_cb() (cnt int) {
 	cnt += zylo_btoi(insertCB == nil)
@@ -115,6 +121,7 @@ func zylo_count_lost_cb() (cnt int) {
 	cnt += zylo_btoi(handleCB == nil)
 	cnt += zylo_btoi(buttonCB == nil)
 	cnt += zylo_btoi(editorCB == nil)
+	cnt += zylo_btoi(scriptCB == nil)
 	return
 }
 
@@ -171,6 +178,11 @@ func zylo_allow_button(callback C.ButtonCB) {
 //export zylo_allow_editor
 func zylo_allow_editor(callback C.EditorCB) {
 	editorCB = callback
+}
+
+//export zylo_allow_script
+func zylo_allow_script(callback C.ScriptCB) {
+	scriptCB = callback
 }
 
 //export zylo_query_format
@@ -729,10 +741,19 @@ func Query(text string) string {
   GetUI("MainForm.FileOpenItem")
   GetUI("MenuForm.CancelButton")
 */
-func GetUI(name string) uintptr {
-	n := C.CString(name)
-	defer C.free(unsafe.Pointer(n))
-	return uintptr(C.handle(n, handleCB))
+func GetUI(expression string) uintptr {
+	e := C.CString(expression)
+	defer C.free(unsafe.Pointer(e))
+	return uintptr(C.handle(e, handleCB))
+}
+
+/*
+ 指定されたスクリプトを実行します。
+*/
+func RunDelphi(exp string, args ...interface{}) int {
+	e := C.CString(fmt.Sprintf(exp, args...))
+	defer C.free(unsafe.Pointer(e))
+	return int(C.script(e, scriptCB))
 }
 
 var zylo_dupes = false
