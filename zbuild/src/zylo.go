@@ -700,32 +700,7 @@ func DisplayToast(msg string, args ...interface{}) {
 }
 
 /*
- 指定されたクエリで問合わせを行います。
- クエリには以下の各変数を利用できます。
-
- $B,
- $X,
- $R,
- $F,
- $Z,
- $I,
- $Q,
- $V,
- $O,
- $S,
- $P,
- $A,
- $N,
- $L,
- $C,
- $E,
- $M,
-
- {V}: バージョン番号,
- {F}: 編集ファイル名,
- {C}: 自局の呼出符号,
- {B}: 運用中のバンド,
- {M}: 運用中のモード.
+ 指定されたクエリを問い合わせます。
 */
 func Query(text string) string {
 	buf := make([]byte, ResponseCapacity+1)
