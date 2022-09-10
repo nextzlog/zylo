@@ -14,9 +14,6 @@ items:
 - name: Manual
   href: /manual
   icon: fas fa-book
-- name: Wiki
-  href: /wiki
-  icon: fas fa-books
 - name: Builds
   href: /builds
   icon: fas fa-download
@@ -37,8 +34,3 @@ jumps:
 - name: zLog
   href: /builds
   icon: fas fa-download
-defaults:
-- scope:
-    path: wiki/Home.md
-  values:
-    permalink: /wiki/
