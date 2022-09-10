@@ -3,6 +3,9 @@ on:
   push:
     branches:
     - 'master'
+  gollum:
+  schedule:
+  - cron: '0 0 * * *'
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 jobs:
@@ -31,6 +34,7 @@ jobs:
         mv ${{matrix.path}} ${{matrix.name}}
         gh release upload zbuild ${{matrix.name}} --clobber
       working-directory: zbuild
+      if: github.event_name == 'push'
   BuildDemo:
     needs: BuildZyLO
     runs-on: ubuntu-latest
@@ -49,11 +53,60 @@ jobs:
       with:
         token: ${{secrets.GITHUB_TOKEN}}
         directory: ${{matrix.name}}
-  Documents:
+      if: github.event_name == 'push'
+  FetchWiki:
     needs: BuildDemo
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - repo: jr8ppg/zlog
+          name: form
+          file: zlog/main.dfm
+        - repo: jr8ppg/zlog.wiki
+          name: zlog
+          file: Home.md
+        - repo: nextzlog/zylo.wiki
+          name: zylo
+          file: Home.md
     steps:
-    - uses: peter-evans/repository-dispatch@v1
+    - uses: actions/checkout@v2
       with:
-        token: ${{secrets.REPO_ACCESS_TOKEN}}
-        event-type: store
+        repository: ${{matrix.repo}}
+    - uses: actions/upload-artifact@v3
+      with:
+        name: ${{matrix.name}}
+        path: ${{matrix.file}}
+  Documents:
+    needs: FetchWiki
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: nextzlog/zylo@master
+      with:
+        nobuild: true
+        token: ${{secrets.GITHUB_TOKEN}}
+    - uses: actions/download-artifact@v3
+      with:
+        path: web/_includes
+    - run: |
+        mkdir _data
+        zbuild market | tee market.json _data/market.json
+        gh api ${RELEASES} --paginate > _data/builds.json
+      env:
+        RELEASES: repos/jr8ppg/zlog/releases
+      working-directory: web
+      if: github.event_name != 'gollum'
+    - run: grep object main.dfm > form.dfm
+      working-directory: web/_includes/form
+    - name: publish docs
+      run: |
+        go install github.com/robertkrimen/godocdown/godocdown@latest
+        godocdown -o web/manual.md -template web/manual.md zbuild/src
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        enable_jekyll: true
+        cname: zylo.pafelog.net
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        publish_dir: web
+        keep_files: true

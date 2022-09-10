@@ -6,7 +6,6 @@ ZyLO
 ![image](https://img.shields.io/badge/Delphi-10.4-red.svg)
 ![image](https://img.shields.io/badge/license-MIT-darkblue.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
-![badge](https://github.com/nextzlog/zylo/actions/workflows/store.yaml/badge.svg)
 
 [ZyLO](https://zylo.pafelog.net) is a plugin and marketplace mechanism integrated into [zLog](http://zlog.org).
 zLog is a simple yet powerful logging software for ham radio contests, which has been loved by many users for 30 years.
