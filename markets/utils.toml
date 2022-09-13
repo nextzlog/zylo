@@ -10,6 +10,7 @@ exp = "stable"
 
 [dll.format]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll.md5"
 
 [pkg.latest]
 tag = "zLog update checker"
@@ -20,3 +21,4 @@ exp = "stable"
 
 [dll.latest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/latest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/latest.dll.md5"

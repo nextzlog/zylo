@@ -253,12 +253,13 @@ fmt.Println(Query("$B,$X,$R,$F,$Z,$I,$Q,$V,$O,$S,$P,$A,$N,$L,$C,$E,$M"))
 
 ## 拡張機能の頒布方法
 
-- 最初に、適当なTOMLファイルを作成し、その冒頭に、DLLの名称と最新版の配布場所のURLを記載します。
+- 最初に、適当なTOMLファイルを作成し、DLLの名称に続け、リリースとチェックサムのURLを記載します。
 
 ```toml
 # dll.DLL名
 [dll.sample]
 url = "https://example.com/releases/sample.dll"
+sum = "https://example.com/releases/sample.dll.md5"
 ```
 
 - また、DLLに付随してCFGファイルやDATファイル等を記載できます。DLLと同様に必要事項を記載します。

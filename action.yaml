@@ -49,6 +49,7 @@ runs:
     run: |
       zbuild compile
       gh release upload ${{inputs.tag}} *.dll --clobber
+      gh release upload ${{inputs.tag}} *.md5 --clobber
     shell: bash
     if: ${{inputs.nobuild == 'false'}}
     env:

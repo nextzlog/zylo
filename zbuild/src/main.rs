@@ -38,6 +38,7 @@ fn make(pkg: &str) -> Return<()> {
 	let args = ["build", "-o", &name, "-buildmode=c-shared"];
 	ok(Cmd::new("go").args(&args).status()?.code().unwrap());
 	shell("upx", name);
+	md5sum(name)?;
 	Ok(())
 }
 
@@ -54,19 +55,19 @@ fn save(name: &str, data: &[u8]) {
 }
 
 fn leaf(item: &mut Value) -> Return<String> {
-	let mal = "malformed TOML file";
-	let val = item.as_table_mut().ok_or(mal)?;
-	let url = val["url"].as_str().ok_or(mal)?;
-	let bin = get(url)?.error_for_status()?.bytes()?;
-	let sum = format!("{v:x}", v = md5::compute(bin));
-	val.insert("sum".to_string(), Value::String(sum));
+	if item.get("sum").is_none() {
+		let val = item.as_table_mut().unwrap();
+		let url = val["url"].as_str().unwrap();
+		let bin = get(url)?.error_for_status()?.bytes()?;
+		let sum = format!("{:x}", md5::compute(bin));
+		val.insert("sum".into(), Value::String(sum));
+	}
 	Ok(item.to_string())
 }
 
 fn tree(list: &mut Value) -> Return<String> {
-	let mal = "malformed TOML file";
 	let items = list.as_table_mut();
-	for (_, it) in items.ok_or(mal)? {
+	for (_, it) in items.unwrap() {
 		if it.get("url").is_some() {
 			leaf(it)?;
 		} else if it.is_table() {
@@ -101,6 +102,13 @@ fn merge() -> Return<String> {
 fn shell(cmd: &str, arg: &str) {
 	let seq = arg.split_whitespace();
 	Cmd::new(cmd).args(seq).status();
+}
+
+fn md5sum(file: &str) -> Return<()> {
+	let md5 = format!("{}.md5", file);
+	let sum = md5::compute(fs::read(&file)?);
+	fs::write(md5, format!("{v:x}", v=sum))?;
+	Ok(())
 }
 
 #[argopt::subcmd]

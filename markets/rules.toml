@@ -10,6 +10,7 @@ url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/akte
 
 [dll.aktest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/aktest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/aktest.dll.md5"
 
 [pkg.hstest]
 tag = "高校コンテスト"
@@ -23,6 +24,7 @@ url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/hste
 
 [dll.hstest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll.md5"
 
 [pkg.tmtest]
 tag = "東海マラソンコンテスト"
@@ -36,6 +38,7 @@ url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/tmte
 
 [dll.tmtest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll.md5"
 
 [pkg.yltest]
 tag = "YLコンテスト"
@@ -49,6 +52,7 @@ url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/ylte
 
 [dll.yltest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll.md5"
 
 [pkg.rttest]
 tag = "リアルタイムコンテスト"
@@ -62,3 +66,4 @@ url = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/rtte
 
 [dll.rttest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/rttest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/rttest.dll.md5"

@@ -1,12 +1,11 @@
 .*
 *.h
 *.dll
-*.exe
+*.md5
 *.lock
 go.mod
 go.sum
-maunal.md
 zutils.go
-/target
+target/
 !.github
 !.gitignore
