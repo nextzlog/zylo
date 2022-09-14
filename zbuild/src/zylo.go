@@ -73,6 +73,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/hashicorp/go-version"
 	"gopkg.in/ini.v1"
 	"io"
 	"math"
@@ -110,28 +111,6 @@ var handleCB C.HandleCB
 var buttonCB C.ButtonCB
 var editorCB C.EditorCB
 var scriptCB C.ScriptCB
-
-func zylo_count_lost_cb() (cnt int) {
-	cnt += zylo_btoi(insertCB == nil)
-	cnt += zylo_btoi(deleteCB == nil)
-	cnt += zylo_btoi(updateCB == nil)
-	cnt += zylo_btoi(dialogCB == nil)
-	cnt += zylo_btoi(notifyCB == nil)
-	cnt += zylo_btoi(accessCB == nil)
-	cnt += zylo_btoi(handleCB == nil)
-	cnt += zylo_btoi(buttonCB == nil)
-	cnt += zylo_btoi(editorCB == nil)
-	cnt += zylo_btoi(scriptCB == nil)
-	return
-}
-
-func zylo_btoi(v bool) int {
-	if v {
-		return 1
-	} else {
-		return 0
-	}
-}
 
 func main() {}
 
@@ -204,7 +183,9 @@ func zylo_query_cities(callback C.CitiesCB) {
 //export zylo_launch_event
 func zylo_launch_event() bool {
 	defer zylo_recover_capture_panic()
-	if zylo_count_lost_cb() == 0 {
+	zv, _ := version.NewVersion(Query("{V}"))
+	mv, _ := version.NewVersion(`{{version}}`)
+	if !zv.LessThan(mv) {
 		OnLaunchEvent()
 		return true
 	} else {
@@ -722,14 +703,19 @@ func GetUI(expression string) uintptr {
 	return uintptr(C.handle(e, handleCB))
 }
 
+//{% if version is not older_than("2.8.3.0") %}
+
 /*
  指定されたスクリプトを実行します。
+ zLog 2.8.3.0以降に限定の機能です。
 */
 func RunDelphi(exp string, args ...interface{}) int {
 	e := C.CString(fmt.Sprintf(exp, args...))
 	defer C.free(unsafe.Pointer(e))
 	return int(C.script(e, scriptCB))
 }
+
+//{% endif %}
 
 var zylo_dupes = false
 var zylo_bands = make(map[byte]bool)

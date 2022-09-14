@@ -6,6 +6,7 @@
 
 use itertools::join;
 use jsonschema::JSONSchema;
+use minijinja::{context, Environment, State};
 use reqwest::blocking::get;
 use serde_json::Serializer;
 use serde_transcode::transcode;
@@ -17,6 +18,7 @@ use std::process::Command as Cmd;
 use std::{env, fs, io, path};
 use toml::Deserializer;
 use toml::Value;
+use version_compare::Version;
 
 type Return<E> = Result<E, Box<dyn Error>>;
 
@@ -111,12 +113,19 @@ fn md5sum(file: &str) -> Return<()> {
 	Ok(())
 }
 
+fn older(_st: &State, now: String, old: String) -> bool {
+	Version::from(&now).unwrap() < Version::from(&old).unwrap()
+}
+
 #[argopt::subcmd]
-fn compile(#[opt(default_value = ".")]dir: String) -> Return<()> {
-	env::set_current_dir(path::Path::new(&dir))?;
-	let err = "failed to determine project name";
-	save("zutils.go", include_bytes!("zylo.go"));
-	make(&name(&env::current_dir()?).ok_or(err)?)
+fn compile(#[opt(default_value = "2.8")]ver: String) -> Return<()> {
+	let mut env = Environment::new();
+	env.add_test("older_than", older);
+	let src = include_str!("zylo.go");
+	let ctx = context!(version => ver);
+	let lib = env.render_str(src, ctx);
+	save("zutils.go", lib?.as_bytes());
+	make(&name(&env::current_dir()?).unwrap())
 }
 
 #[argopt::subcmd]

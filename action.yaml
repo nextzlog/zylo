@@ -7,22 +7,20 @@ branding:
 inputs:
   ref:
     description: 'branch'
-    required: false
-    default: ''
   tag:
     description: 'release name'
-    required: false
     default: nightly
+  version:
+    description: 'zLog version'
+    default: '2.8'
   token:
     description: 'GITHUB_TOKEN'
     required: true
   directory:
     description: 'project path'
-    required: false
     default: '.'
   nobuild:
     description: 'install only'
-    required: false
     default: false
 runs:
   using: composite
@@ -31,6 +29,9 @@ runs:
     with:
       ref: ${{inputs.ref}}
     if: ${{inputs.nobuild == 'false'}}
+  - uses: actions/setup-go@v3
+    with:
+      go-version: 1.18
   - name: setup zbuild
     run: |
       mkdir -p .bin
@@ -47,11 +48,12 @@ runs:
     shell: bash
   - name: build plugin
     run: |
-      zbuild compile
-      gh release upload ${{inputs.tag}} *.dll --clobber
-      gh release upload ${{inputs.tag}} *.md5 --clobber
+      zbuild compile ${{inputs.version}}
+      gh release create ${{inputs.tag}} || true
+      gh release upload ${{inputs.tag}} *.{dll,md5} --clobber
     shell: bash
     if: ${{inputs.nobuild == 'false'}}
     env:
+      LATEST: zbuild -R nextzlog/zylo
       GITHUB_TOKEN: ${{inputs.token}}
     working-directory: ${{inputs.directory}}

@@ -109,7 +109,15 @@ func onPointsEvent(score, mults int) int {
 - そのフォルダで`compile`コマンドを実行すると、フォルダと同じ名前で、拡張機能のDLLが完成します。
 
 ```bat
+> zbuild-windows.exe compile --help
+USAGE:
+    zbuild compile [VER]
+
+ARGS:
+    <VER>    [default: 2.8]
+
 > zbuild-windows.exe compile
+> zbuild-windows.exe compile 2.8.3.0
 ```
 
 ## 得点計算の移譲方法
