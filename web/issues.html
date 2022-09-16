@@ -1,0 +1,31 @@
+---
+title: Issues
+subtitle: zLog Development Tasks
+layout: default
+---
+
+{% for issue in site.data.issues %}
+	{% assign labels = issue.labels | map: 'name' %}
+	{% if labels contains 'ZyLO' or issue.url contains 'jr8ppg' %}
+		<div class='card my-1 my-md-3'>
+			<div class='card-body'>
+				{% for label in issue.labels %}
+					<span class='badge bg-success'>{{label.name}}</span>
+				{% endfor %}
+				<span class='badge bg-primary'>
+					<i class='fas fa-comments'></i>
+					{{issue.comments}}
+				</span>
+				<h3 class='card-title'>
+					<a class='card-link' href='{{issue.html_url}}'>{{issue.title}}</a>
+				</h3>
+				<h5 class='card-subtitle'>{{issue.created_at}}</h5>
+				<p class='card-text'>{{issue.body | markdownify}}</p>
+				<a class='card-link' href='{{issue.user.html_url}}'>
+					<i class='fas fa-user'></i>
+					{{issue.user.login}}
+				</a>
+			</div>
+		</div>
+	{% endif %}
+{% endfor %}

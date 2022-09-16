@@ -77,8 +77,29 @@ jobs:
       with:
         name: ${{matrix.name}}
         path: ${{matrix.file}}
-  Documents:
+  FetchRepo:
     needs: FetchWiki
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - repo: repos/jr8ppg/zlog/releases
+          name: zlog
+          file: builds.json
+        - repo: repos/jr8ppg/zlog/issues
+          name: zlog
+          file: issues.json
+        - repo: repos/nextzlog/todo/issues
+          name: zylo
+          file: issues.json
+    steps:
+    - run: gh api ${{matrix.repo}} --paginate > ${{matrix.file}}
+    - uses: actions/upload-artifact@v3
+      with:
+        name: ${{matrix.name}}
+        path: ${{matrix.file}}
+  Documents:
+    needs: FetchRepo
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -90,11 +111,11 @@ jobs:
       with:
         path: web/_includes
     - run: |
-        mkdir _data
+        mkdir _data && mv _includes/zlog/builds.json _data
+        mkdir _data/zlog && mv _includes/zlog/issues.json _data/zlog
+        mkdir _data/zylo && mv _includes/zylo/issues.json _data/zylo
         zbuild market | tee market.json _data/market.json
-        gh api ${RELEASES} --paginate > _data/builds.json
-      env:
-        RELEASES: repos/jr8ppg/zlog/releases
+        jq -s add _data/*/issues.json > _data/issues.json
       working-directory: web
       if: github.event_name != 'gollum'
     - run: grep object main.dfm > form.dfm

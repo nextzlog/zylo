@@ -14,6 +14,9 @@ items:
 - name: Manual
   href: /manual
   icon: fas fa-book
+- name: Issues
+  href: /issues
+  icon: fas fa-comments
 - name: Builds
   href: /builds
   icon: fas fa-download
@@ -21,9 +24,6 @@ links:
 - name: GitHub
   href: https://github.com/nextzlog/zylo
   icon: fab fa-github
-- name: Issues
-  href: https://github.com/nextzlog/todo/issues
-  icon: fas fa-comments
 - name: zLog.org
   href: https://zlog.org
 - name: CFG/DAT
