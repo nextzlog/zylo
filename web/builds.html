@@ -9,16 +9,26 @@ layout: default
 		<div class='card my-1 my-md-3'>
 			<div class='card-body'>
 				<span class='badge bg-success'>{{rel.tag_name}}</span>
+				{% for asset in rel.assets %}
+					<span class='badge bg-primary'>
+						<i class='fas fa-download'></i>
+						{{asset.download_count}}
+					</span>
+				{% endfor %}
 				<h3 class='card-title'>
 					<a class='card-link' href='{{rel.html_url}}'>{{rel.name}}</a>
 				</h3>
 				<h5 class='card-subtitle'>{{rel.published_at}}</h5>
-				<p class='card-text'>{{rel.body | markdownify}}</p>
+				<p class='card-text'>
+					<details>
+						<summary>Details</summary>
+						{{rel.body | markdownify}}
+					</details>
+				</p>
 				{% for asset in rel.assets %}
 					<a class='btn btn-lg btn-outline-primary' href='{{asset.browser_download_url}}'>
 						<i class='fas fa-download'></i>
 						{{asset.name | split: '_' | slice: 2}}
-						<span class='badge bg-dark'>{{asset.download_count}}DLs</span>
 					</a>
 				{% endfor %}
 			</div>
