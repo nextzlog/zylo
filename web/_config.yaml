@@ -1,9 +1,9 @@
 remote_theme: nextzlog/pafe
 url: https://zylo.pafelog.net
-name: ZyLO for zLog
+name: ZyLO
 icon: /assets/head.png
-lead: ZyLO is a plugin and marketplace mechanism integrated into zLog. zLog is a simple yet powerful logging software for ham radio contests, which has been loved by many users for 30 years. Both ZyLO and zLog are distributed under the MIT License.
-desc: zLogでアマチュア無線を楽しもう. ZyLOでプラグインを使いこなそう.
+lead: &desc ZyLOはWindowsで動作するコンテスト用ロギングソフトzLog令和版のプラグインを開発するためのフレームワークです。
+desc: *desc
 items:
 - name: Market
   href: /market
