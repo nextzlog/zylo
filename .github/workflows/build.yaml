@@ -49,6 +49,8 @@ jobs:
         - name: plugins/rules/yltest
         - name: plugins/utils/format
         - name: plugins/utils/latest
+        - name: plugins/utils/maplot
+          zlog: 2.8.3.0
     steps:
     - uses: nextzlog/zylo@master
       with:

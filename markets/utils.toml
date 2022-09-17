@@ -22,3 +22,14 @@ exp = "stable"
 [dll.latest]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/latest.dll"
 sum = "https://github.com/nextzlog/zylo/releases/download/nightly/latest.dll.md5"
+
+[pkg.maplot]
+tag = "Maplot"
+msg = "zLogで記録したQSOから, 交信済みのJCC/Gコードを検出し, 地図に描画します."
+web = "https://github.com/nextzlog/zylo"
+use = ["dll.maplot"]
+exp = "stable"
+
+[dll.maplot]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/maplot.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/maplot.dll.md5"
