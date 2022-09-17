@@ -44,6 +44,7 @@ jobs:
         - name: plugins/rules/aktest
         - name: plugins/rules/hstest
         - name: plugins/rules/rttest
+          zlog: 2.8.3.0
         - name: plugins/rules/tmtest
         - name: plugins/rules/yltest
         - name: plugins/utils/format
@@ -52,6 +53,7 @@ jobs:
     - uses: nextzlog/zylo@master
       with:
         token: ${{secrets.GITHUB_TOKEN}}
+        version: ${{matrix.zlog}}
         directory: ${{matrix.name}}
       if: github.event_name == 'push'
   FetchWiki:

@@ -4,15 +4,20 @@
 package main
 
 import (
+	"bufio"
 	_ "embed"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/tadvi/winc"
 	"github.com/pkg/browser"
 	"github.com/recws-org/recws"
+	"math"
 	h "net/http"
 	"os"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -22,8 +27,18 @@ const (
 )
 
 const (
+	INSERT = 0
+	DELETE = 1
+)
+
+const (
 	SEC = "ATS"
 	KEY = "UID"
+)
+
+const (
+	RTTEST_NAME = "rttest"
+	RTTEST_MENU = "MainForm.MainMenu.RttestMenu"
 )
 
 var UID string
@@ -41,6 +56,27 @@ var (
 	server *h.Server
 )
 
+var (
+	form *winc.Form
+	tabs *winc.TabView
+)
+
+//go:embed rttest.pas
+var runDelphi string
+
+//go:embed rttest.tab
+var sects string
+var views = make(map[string]ScoreView)
+
+type ScoreItem struct {
+	ranking int
+	station Station
+}
+
+type ScoreView struct {
+	list *winc.ListView
+}
+
 type Station struct {
 	Call  string `json:"call"`
 	Score int    `json:"score"`
@@ -52,6 +88,8 @@ type Sections map[string]([]Station)
 func init() {
 	stopCh = make(chan bool)
 	CityMultiList = cityMultiList
+	OnLaunchEvent = onLaunchEvent
+	OnFinishEvent = onFinishEvent
 	OnAssignEvent = onAssignEvent
 	OnDetachEvent = onDetachEvent
 	OnInsertEvent = onInsertEvent
@@ -86,25 +124,36 @@ func connectWebSocketAPI() {
 	}
 }
 
+func onLaunchEvent() {
+	createWindow()
+	RunDelphi(runDelphi)
+	HandleButton(RTTEST_MENU, func(num int) {
+		form.Show()
+	})
+}
+
+func onFinishEvent() {
+	x, y := form.Pos()
+	w, h := form.Size()
+	SetINI(RTTEST_NAME, "x", strconv.Itoa(x))
+	SetINI(RTTEST_NAME, "y", strconv.Itoa(y))
+	SetINI(RTTEST_NAME, "w", strconv.Itoa(w))
+	SetINI(RTTEST_NAME, "h", strconv.Itoa(h))
+}
+
 func onAssignEvent(contest, configs string) {
-	ShowLeaderWindow()
+	form.Show()
 	connectWebSocketAPI()
 	go server.ListenAndServe()
 }
 
 func onDetachEvent(contest, configs string) {
-	CloseLeaderWindow()
 	if ws.IsConnected() {
 		close(stopCh)
 		ws.Close()
 	}
 	server.Close()
 }
-
-const (
-	INSERT = 0
-	DELETE = 1
-)
 
 func submit(cmd byte, data []byte) {
 	msg := append([]byte{cmd}, data...)
@@ -151,6 +200,90 @@ func OnRealTimeStreamEvent(sections Sections) {
 			total_j := stations[j].Total
 			return total_i > total_j
 		})
-		Display(section, stations)
+		display(section, stations)
 	}
+}
+
+func (item ScoreItem) Text() (text []string) {
+	text = append(text, strconv.Itoa(item.ranking))
+	text = append(text, item.station.Call)
+	text = append(text, strconv.Itoa(item.station.Score))
+	text = append(text, strconv.Itoa(item.station.Total))
+	return
+}
+
+func (item ScoreItem) ImageIndex() int {
+	return 0
+}
+
+func createWindow() {
+	form = winc.NewForm(nil)
+	tabs = winc.NewTabView(form)
+	form.SetText("Real-Time Contest")
+	x, _ := strconv.Atoi(GetINI(RTTEST_NAME, "x"))
+	y, _ := strconv.Atoi(GetINI(RTTEST_NAME, "y"))
+	w, _ := strconv.Atoi(GetINI(RTTEST_NAME, "w"))
+	h, _ := strconv.Atoi(GetINI(RTTEST_NAME, "h"))
+	exec, _ := os.Executable()
+	icon, _ := winc.ExtractIcon(exec, 0)
+	form.SetIcon(0, icon)
+	if w <= 0 || h <= 0 {
+		w = 300
+		h = 300
+	}
+	form.SetSize(w, h)
+	if x <= 0 || y <= 0 {
+		form.Center()
+	} else {
+		form.SetPos(x, y)
+	}
+	form.OnClose().Bind(closeWindow)
+	dock := winc.NewSimpleDock(form)
+	dock.Dock(tabs, winc.Top)
+	dock.Dock(tabs.Panels(), winc.Fill)
+	reader := strings.NewReader(sects)
+	buffer := bufio.NewScanner(reader)
+	for buffer.Scan() {
+		addSection(buffer.Text())
+	}
+	return
+}
+
+func closeWindow(arg *winc.Event) {
+	form.Hide()
+}
+
+func addSection(section string) (view ScoreView) {
+	panel := tabs.AddPanel(section)
+	view.list = winc.NewListView(panel)
+	view.list.EnableEditLabels(false)
+	view.list.AddColumn("rank", 120)
+	view.list.AddColumn("call", 120)
+	view.list.AddColumn("score", 120)
+	view.list.AddColumn("total", 120)
+	dock := winc.NewSimpleDock(panel)
+	dock.Dock(view.list, winc.Fill)
+	views[section] = view
+	tabs.SetCurrent(0)
+	return
+}
+
+func (view ScoreView) update(stations []Station) {
+	view.list.DeleteAllItems()
+	count := 0
+	worst := math.MaxInt64
+	for num, station := range stations {
+		if worst > station.Total {
+			worst = station.Total
+			count = num + 1
+		}
+		view.list.AddItem(ScoreItem{
+			ranking: count,
+			station: station,
+		})
+	}
+}
+
+func display(section string, stations []Station) {
+	views[section].update(stations)
 }
