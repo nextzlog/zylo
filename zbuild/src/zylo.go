@@ -74,12 +74,15 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/hashicorp/go-version"
+	"github.com/tadvi/winc"
+	"github.com/tadvi/winc/w32"
 	"gopkg.in/ini.v1"
 	"io"
 	"math"
 	"os"
 	"regexp"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"time"
 	"unsafe"
@@ -94,6 +97,11 @@ const ResponseCapacity = 256
  設定を保管するファイルの名前です。
 */
 const SettingsFileName = "zlog.ini"
+
+/*
+ この拡張機能を識別できる名前です。
+*/
+var PluginName = ""
 
 var zone = time.Local
 
@@ -902,4 +910,62 @@ func HandleButton(name string, handler func(int)) {
 */
 func HandleEditor(name string, handler func(int)) {
 	editors[zylo_add_editor_handler(name)] = handler
+}
+
+/*
+ この拡張機能の専用のクラス名を持つフォームを構築します。
+*/
+func newForm(parent winc.Controller) *winc.Form {
+	name := fmt.Sprintf("plugin_%s_form", PluginName)
+	winc.RegClassOnlyOnce(name)
+	form := new(winc.Form)
+	form.SetParent(parent)
+	ex := uint(w32.WS_EX_CONTROLPARENT)
+	st := uint(w32.WS_OVERLAPPEDWINDOW)
+	exe, _ := os.Executable()
+	ico, _ := winc.ExtractIcon(exe, 0)
+	form.SetHandle(winc.CreateWindow(name, parent, ex, st))
+	winc.RegMsgHandler(form)
+	form.SetIcon(0, ico)
+	form.SetIsForm(true)
+	form.SetText(PluginName)
+	form.SetFont(winc.DefaultFont)
+	x, _ := strconv.Atoi(GetINI(PluginName, "x"))
+	y, _ := strconv.Atoi(GetINI(PluginName, "y"))
+	w, _ := strconv.Atoi(GetINI(PluginName, "w"))
+	h, _ := strconv.Atoi(GetINI(PluginName, "h"))
+	form.OnClose().Bind(func(arg *winc.Event) {
+		SetINI(PluginName, "x", strconv.Itoa(x))
+		SetINI(PluginName, "y", strconv.Itoa(y))
+		SetINI(PluginName, "w", strconv.Itoa(w))
+		SetINI(PluginName, "h", strconv.Itoa(h))
+		form.Hide()
+	})
+	if w <= 0 || h <= 0 {
+		w = 300
+		h = 300
+	}
+	form.SetSize(w, h)
+	if x <= 0 || y <= 0 {
+		form.Center()
+	} else {
+		form.SetPos(x, y)
+	}
+	return form
+}
+
+/*
+ この拡張機能の専用のクラス名を持つパネルを構築します。
+*/
+func newPanel(parent winc.Controller) *winc.Panel {
+	name := fmt.Sprintf("plugin_%s_panel", PluginName)
+	winc.RegClassOnlyOnce(name)
+	pane := new(winc.Panel)
+	pane.SetParent(parent)
+	ex := uint(w32.WS_EX_CONTROLPARENT)
+	st := uint(w32.WS_CHILD | w32.WS_VISIBLE)
+	pane.SetHandle(winc.CreateWindow(name, parent, ex, st))
+	winc.RegMsgHandler(pane)
+	pane.SetFont(winc.DefaultFont)
+	return pane
 }

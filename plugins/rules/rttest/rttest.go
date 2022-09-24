@@ -36,10 +36,7 @@ const (
 	KEY = "UID"
 )
 
-const (
-	RTTEST_NAME = "rttest"
-	RTTEST_MENU = "MainForm.MainMenu.RttestMenu"
-)
+const RTTEST_MENU = "MainForm.MainMenu.RttestMenu"
 
 var UID string
 
@@ -86,10 +83,10 @@ type Station struct {
 type Sections map[string]([]Station)
 
 func init() {
+	PluginName = "rttest"
 	stopCh = make(chan bool)
 	CityMultiList = cityMultiList
 	OnLaunchEvent = onLaunchEvent
-	OnFinishEvent = onFinishEvent
 	OnAssignEvent = onAssignEvent
 	OnDetachEvent = onDetachEvent
 	OnInsertEvent = onInsertEvent
@@ -130,15 +127,6 @@ func onLaunchEvent() {
 	HandleButton(RTTEST_MENU, func(num int) {
 		form.Show()
 	})
-}
-
-func onFinishEvent() {
-	x, y := form.Pos()
-	w, h := form.Size()
-	SetINI(RTTEST_NAME, "x", strconv.Itoa(x))
-	SetINI(RTTEST_NAME, "y", strconv.Itoa(y))
-	SetINI(RTTEST_NAME, "w", strconv.Itoa(w))
-	SetINI(RTTEST_NAME, "h", strconv.Itoa(h))
 }
 
 func onAssignEvent(contest, configs string) {
@@ -217,27 +205,9 @@ func (item ScoreItem) ImageIndex() int {
 }
 
 func createWindow() {
-	form = winc.NewForm(nil)
+	form = newForm(nil)
 	tabs = winc.NewTabView(form)
 	form.SetText("Real-Time Contest")
-	x, _ := strconv.Atoi(GetINI(RTTEST_NAME, "x"))
-	y, _ := strconv.Atoi(GetINI(RTTEST_NAME, "y"))
-	w, _ := strconv.Atoi(GetINI(RTTEST_NAME, "w"))
-	h, _ := strconv.Atoi(GetINI(RTTEST_NAME, "h"))
-	exec, _ := os.Executable()
-	icon, _ := winc.ExtractIcon(exec, 0)
-	form.SetIcon(0, icon)
-	if w <= 0 || h <= 0 {
-		w = 300
-		h = 300
-	}
-	form.SetSize(w, h)
-	if x <= 0 || y <= 0 {
-		form.Center()
-	} else {
-		form.SetPos(x, y)
-	}
-	form.OnClose().Bind(closeWindow)
 	dock := winc.NewSimpleDock(form)
 	dock.Dock(tabs, winc.Top)
 	dock.Dock(tabs.Panels(), winc.Fill)
@@ -247,10 +217,6 @@ func createWindow() {
 		addSection(buffer.Text())
 	}
 	return
-}
-
-func closeWindow(arg *winc.Event) {
-	form.Hide()
 }
 
 func addSection(section string) (view ScoreView) {

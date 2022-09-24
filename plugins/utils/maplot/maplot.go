@@ -13,13 +13,11 @@ import (
 	"image/color"
 	"os"
 	"regexp"
-	"strconv"
 )
 
 const (
 	WINDOW_SIZE = 600
 	MARKER_SIZE = 16
-	MAPLOT_NAME = "maplot"
 	MAPLOT_MENU = "MainForm.MainMenu.MaplotMenu"
 )
 
@@ -64,8 +62,8 @@ var (
 )
 
 func init() {
+	PluginName = "maplot"
 	OnLaunchEvent = onLaunchEvent
-	OnFinishEvent = onFinishEvent
 	OnAttachEvent = onAttachEvent
 	OnInsertEvent = onInsertEvent
 }
@@ -81,12 +79,6 @@ func onLaunchEvent() {
 		form.Show()
 		update()
 	})
-}
-
-func onFinishEvent() {
-	x, y := form.Pos()
-	SetINI(MAPLOT_NAME, "x", strconv.Itoa(x))
-	SetINI(MAPLOT_NAME, "y", strconv.Itoa(y))
 }
 
 func onAttachEvent(contest, config string) {
@@ -126,30 +118,13 @@ func update() {
 }
 
 func createWindow() {
-	form = winc.NewForm(nil)
-	form.SetText("Maplot")
-	icon, err := winc.ExtractIcon("zlog.exe", 0)
-	if err == nil {
-		form.SetIcon(0, icon)
-	}
-	x, _ := strconv.Atoi(GetINI(MAPLOT_NAME, "x"))
-	y, _ := strconv.Atoi(GetINI(MAPLOT_NAME, "y"))
+	form = newForm(nil)
 	form.SetSize(WINDOW_SIZE, WINDOW_SIZE)
 	form.EnableSizable(false)
 	form.EnableMaxButton(false)
-	if x <= 0 || y <= 0 {
-		form.Center()
-	} else {
-		form.SetPos(x, y)
-	}
-	pane = winc.NewPanel(form)
+	pane = newPanel(form)
 	view = winc.NewImageView(pane)
-	form.OnClose().Bind(closeWindow)
 	dock := winc.NewSimpleDock(form)
 	dock.Dock(pane, winc.Fill)
 	return
-}
-
-func closeWindow(arg *winc.Event) {
-	form.Hide()
 }
