@@ -3,7 +3,6 @@ on:
   push:
     branches:
     - 'master'
-  gollum:
   schedule:
   - cron: '0 0 * * *'
 env:
@@ -58,80 +57,35 @@ jobs:
         version: ${{matrix.zlog}}
         directory: ${{matrix.name}}
       if: github.event_name == 'push'
-  FetchWiki:
+  BuildJSON:
     needs: BuildDemo
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-        - repo: jr8ppg/zlog
-          name: form
-          file: zlog/main.dfm
-        - repo: jr8ppg/zlog.wiki
-          name: zlog
-          file: Home.md
-        - repo: nextzlog/zylo.wiki
-          name: zylo
-          file: Home.md
     steps:
+    - uses: actions/checkout@v3
+      with:
+        path: zylo
     - uses: actions/checkout@v2
       with:
-        repository: ${{matrix.repo}}
-    - uses: actions/upload-artifact@v3
-      with:
-        name: ${{matrix.name}}
-        path: ${{matrix.file}}
-  FetchRepo:
-    needs: FetchWiki
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-        - repo: repos/jr8ppg/zlog/releases
-          name: zlog
-          file: builds.json
-        - repo: repos/jr8ppg/zlog/issues
-          name: zlog
-          file: issues.json
-        - repo: repos/nextzlog/todo/issues
-          name: zylo
-          file: issues.json
-    steps:
-    - run: gh api ${{matrix.repo}} --paginate > ${{matrix.file}}
-    - uses: actions/upload-artifact@v3
-      with:
-        name: ${{matrix.name}}
-        path: ${{matrix.file}}
-  Documents:
-    needs: FetchRepo
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
+        path: zlog
+        repository: jr8ppg/zlog
     - uses: nextzlog/zylo@master
       with:
         nobuild: true
         token: ${{secrets.GITHUB_TOKEN}}
-    - uses: actions/download-artifact@v3
-      with:
-        path: web/_includes
+    - run: cp zlog/zlog/main.dfm zylo
     - run: |
-        mkdir _data && mv _includes/zlog/builds.json _data
-        mkdir _data/zlog && mv _includes/zlog/issues.json _data/zlog
-        mkdir _data/zylo && mv _includes/zylo/issues.json _data/zylo
-        zbuild market | tee market.json _data/market.json
-        jq -s add _data/*/issues.json > _data/issues.json
-      working-directory: web
-      if: github.event_name != 'gollum'
-    - run: grep object main.dfm > form.dfm
-      working-directory: web/_includes/form
+        mkdir -p _includes
+        zbuild market > market.json
+        grep object ../main.dfm > _includes/form.dfm
+      working-directory: zylo/docs
     - name: publish docs
       run: |
         go install github.com/robertkrimen/godocdown/godocdown@latest
-        godocdown -o web/manual.md -template web/manual.md zbuild/src
+        godocdown -o docs/index.md -template docs/index.md zbuild/src
+      working-directory: zylo
     - uses: peaceiris/actions-gh-pages@v3
       with:
         enable_jekyll: true
+        publish_dir: zylo/docs
         cname: zylo.pafelog.net
         github_token: ${{secrets.GITHUB_TOKEN}}
-        publish_dir: web
-        keep_files: true

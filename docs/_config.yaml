@@ -4,33 +4,11 @@ name: ZyLO
 icon: /assets/head.png
 lead: &desc ZyLOはWindowsで動作するコンテスト用ロギングソフトzLog令和版のプラグインを開発するためのフレームワークです。
 desc: *desc
-items:
-- name: Market
-  href: /market
-  icon: fas fa-shopping-cart
-- name: Lesson
-  href: /lesson
-  icon: fas fa-edit
-- name: Manual
-  href: /manual
-  icon: fas fa-book
-- name: Issues
-  href: /issues
-  icon: fas fa-comments
-- name: Builds
-  href: /builds
-  icon: fas fa-download
 links:
 - name: GitHub
   href: https://github.com/nextzlog/zylo
   icon: fab fa-github
 - name: zLog.org
   href: https://zlog.org
-- name: CFG/DAT
-  href: http://ja6ycu.in.coocan.jp/ZLOG
 - name: 無線部開発班
   href: https://pafelog.net
-jumps:
-- name: zLog
-  href: /builds
-  icon: fas fa-download
