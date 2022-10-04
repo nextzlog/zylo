@@ -7,7 +7,7 @@ ZyLO
 ![image](https://img.shields.io/badge/license-MIT-darkblue.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
 
-[ZyLO](https://zylo.pafelog.net) is an official plugin marketplace and SDK integrated into [zLog 令和 edition](https://github.com/jr8ppg/zLog).
+[ZyLO](https://zylo.pafelog.net) is an official plugin marketplace and SDK integrated into [zLog 令和 edition](https://use.zlog.org).
 
 ## Introduction
 
@@ -26,9 +26,7 @@ zLog is a powerful amateur radio logging software for contests and has been love
 ## Documents
 
 - [Slides](https://pafelog.net/zylo.pdf)
-- [Market](https://zylo.pafelog.net/market)
-- [Lesson](https://zylo.pafelog.net/lesson)
-- [Manual](https://zylo.pafelog.net/manual)
+- [Manual](https://zylo.pafelog.net)
 
 ## Contribution
 
