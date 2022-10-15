@@ -6,19 +6,20 @@ package main
 import (
 	_ "embed"
 	"strconv"
+	"zylo/reiwa"
 )
 
 //go:embed yltest.dat
 var cityMultiList string
 
 func init() {
-	CityMultiList = cityMultiList
-	OnAcceptEvent = onAcceptEvent
-	AllowBandRange(K1900, M1200)
-	AllowMode(CW, SSB, FM, AM)
-	AllowCall(`^\w{3,}`)
-	AllowRcvd(`^\d{4,}$`)
-	AllowSent(`^\d{4,}$`)
+	reiwa.CityMultiList = cityMultiList
+	reiwa.OnAcceptEvent = onAcceptEvent
+	reiwa.AllowBandRange(reiwa.K1900, reiwa.M1200)
+	reiwa.AllowModeRange(reiwa.CW, reiwa.AM)
+	reiwa.AllowCall(`^\w{3,}`)
+	reiwa.AllowRcvd(`^\d{4,}$`)
+	reiwa.AllowSent(`^\d{4,}$`)
 }
 
 const (
@@ -75,7 +76,7 @@ func score(rcvd, sent int) int {
 	}
 }
 
-func onAcceptEvent(qso *QSO) {
+func onAcceptEvent(qso *reiwa.QSO) {
 	qso.SetMul1(qso.GetCall()[:3])
 	qso.SetMul2(qso.GetRcvd())
 	rcvd, _ := strconv.Atoi(qso.GetRcvd())

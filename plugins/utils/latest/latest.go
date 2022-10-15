@@ -6,6 +6,7 @@ package main
 import (
 	"github.com/tcnksm/go-latest"
 	"regexp"
+	"zylo/reiwa"
 )
 
 const (
@@ -14,7 +15,7 @@ const (
 )
 
 func init() {
-	OnLaunchEvent = onLaunchEvent
+	reiwa.OnLaunchEvent = onLaunchEvent
 }
 
 var tag = latest.GithubTag{
@@ -33,8 +34,8 @@ func onLaunchEvent() {
 }
 
 func fetchReleases() {
-	res, _ := latest.Check(&tag, Query("{V}"))
+	res, _ := latest.Check(&tag, reiwa.Query("{V}"))
 	if res != nil && res.Outdated {
-		DisplayToast("%s is now available", res.Current)
+		reiwa.DisplayToast("%s is now available", res.Current)
 	}
 }

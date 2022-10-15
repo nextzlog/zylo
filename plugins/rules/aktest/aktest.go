@@ -6,17 +6,18 @@ package main
 import (
 	_ "embed"
 	"strings"
+	"zylo/reiwa"
 )
 
 //go:embed aktest.dat
 var cityMultiList string
 
 func init() {
-	CityMultiList = cityMultiList
-	OnAcceptEvent = onAcceptEvent
-	AllowBandRange(K3500, M430)
-	AllowMode(CW, SSB, FM, AM)
-	AllowRcvd(`^(\d{4,})(M?)$`)
+	reiwa.CityMultiList = cityMultiList
+	reiwa.OnAcceptEvent = onAcceptEvent
+	reiwa.AllowBandRange(reiwa.K3500, reiwa.M430)
+	reiwa.AllowModeRange(reiwa.CW, reiwa.AM)
+	reiwa.AllowRcvd(`^(\d{4,})(M?)$`)
 }
 
 func isMember(mul, mem string) bool {
@@ -44,7 +45,7 @@ func score(mul, mem string) byte {
 	}
 }
 
-func onAcceptEvent(qso *QSO) {
+func onAcceptEvent(qso *reiwa.QSO) {
 	rcvd := qso.GetRcvdGroups()
 	mul, mem := rcvd[1], rcvd[2]
 	qso.Score = score(mul, mem)

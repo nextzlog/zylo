@@ -3,7 +3,7 @@
  * License: The MIT License since 2021 October 28 (see LICENSE)
  * Author: Journal of Hamradio Informatics (http://pafelog.net)
 *******************************************************************************/
-package main
+package reiwa
 
 /*
 #include <stdlib.h>
@@ -74,15 +74,12 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/hashicorp/go-version"
-	"github.com/tadvi/winc"
-	"github.com/tadvi/winc/w32"
 	"gopkg.in/ini.v1"
 	"io"
 	"math"
 	"os"
 	"regexp"
 	"runtime/debug"
-	"strconv"
 	"strings"
 	"time"
 	"unsafe"
@@ -103,6 +100,11 @@ const SettingsFileName = "zlog.ini"
 */
 var PluginName = ""
 
+/*
+ この拡張機能が動くバージョンです。
+*/
+var MinVersion = "2.8.3.0"
+
 var zone = time.Local
 
 // event handlers
@@ -119,8 +121,6 @@ var handleCB C.HandleCB
 var buttonCB C.ButtonCB
 var editorCB C.EditorCB
 var scriptCB C.ScriptCB
-
-func main() {}
 
 //export zylo_allow_insert
 func zylo_allow_insert(callback C.InsertCB) {
@@ -192,7 +192,7 @@ func zylo_query_cities(callback C.CitiesCB) {
 func zylo_launch_event() bool {
 	defer zylo_recover_capture_panic()
 	zv, _ := version.NewVersion(Query("{V}"))
-	mv, _ := version.NewVersion(`{{version}}`)
+	mv, _ := version.NewVersion(MinVersion)
 	if !zv.LessThan(mv) {
 		OnLaunchEvent()
 		return true
@@ -711,8 +711,6 @@ func GetUI(expression string) uintptr {
 	return uintptr(C.handle(e, handleCB))
 }
 
-//{% if version is not older_than("2.8.3.0") %}
-
 /*
  指定されたスクリプトを実行します。
  zLog 2.8.3.0以降に限定の機能です。
@@ -722,8 +720,6 @@ func RunDelphi(exp string, args ...interface{}) int {
 	defer C.free(unsafe.Pointer(e))
 	return int(C.script(e, scriptCB))
 }
-
-//{% endif %}
 
 var zylo_dupes = false
 var zylo_bands = make(map[byte]bool)
@@ -910,62 +906,4 @@ func HandleButton(name string, handler func(int)) {
 */
 func HandleEditor(name string, handler func(int)) {
 	editors[zylo_add_editor_handler(name)] = handler
-}
-
-/*
- この拡張機能の専用のクラス名を持つフォームを構築します。
-*/
-func newForm(parent winc.Controller) *winc.Form {
-	name := fmt.Sprintf("plugin_%s_form", PluginName)
-	winc.RegClassOnlyOnce(name)
-	form := new(winc.Form)
-	form.SetParent(parent)
-	ex := uint(w32.WS_EX_CONTROLPARENT)
-	st := uint(w32.WS_OVERLAPPEDWINDOW)
-	exe, _ := os.Executable()
-	ico, _ := winc.ExtractIcon(exe, 0)
-	form.SetHandle(winc.CreateWindow(name, parent, ex, st))
-	winc.RegMsgHandler(form)
-	form.SetIcon(0, ico)
-	form.SetIsForm(true)
-	form.SetText(PluginName)
-	form.SetFont(winc.DefaultFont)
-	x, _ := strconv.Atoi(GetINI(PluginName, "x"))
-	y, _ := strconv.Atoi(GetINI(PluginName, "y"))
-	w, _ := strconv.Atoi(GetINI(PluginName, "w"))
-	h, _ := strconv.Atoi(GetINI(PluginName, "h"))
-	form.OnClose().Bind(func(arg *winc.Event) {
-		SetINI(PluginName, "x", strconv.Itoa(x))
-		SetINI(PluginName, "y", strconv.Itoa(y))
-		SetINI(PluginName, "w", strconv.Itoa(w))
-		SetINI(PluginName, "h", strconv.Itoa(h))
-		form.Hide()
-	})
-	if w <= 0 || h <= 0 {
-		w = 300
-		h = 300
-	}
-	form.SetSize(w, h)
-	if x <= 0 || y <= 0 {
-		form.Center()
-	} else {
-		form.SetPos(x, y)
-	}
-	return form
-}
-
-/*
- この拡張機能の専用のクラス名を持つパネルを構築します。
-*/
-func newPanel(parent winc.Controller) *winc.Panel {
-	name := fmt.Sprintf("plugin_%s_panel", PluginName)
-	winc.RegClassOnlyOnce(name)
-	pane := new(winc.Panel)
-	pane.SetParent(parent)
-	ex := uint(w32.WS_EX_CONTROLPARENT)
-	st := uint(w32.WS_CHILD | w32.WS_VISIBLE)
-	pane.SetHandle(winc.CreateWindow(name, parent, ex, st))
-	winc.RegMsgHandler(pane)
-	pane.SetFont(winc.DefaultFont)
-	return pane
 }

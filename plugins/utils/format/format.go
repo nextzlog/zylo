@@ -6,6 +6,7 @@ package main
 import (
 	_ "embed"
 	"os/exec"
+	"zylo/reiwa"
 )
 
 const QXSL = "qxsl.exe"
@@ -14,9 +15,9 @@ const QXSL = "qxsl.exe"
 var fileExtFilter string
 
 func init() {
-	OnImportEvent = onImportEvent
-	OnExportEvent = onExportEvent
-	FileExtFilter = fileExtFilter
+	reiwa.OnImportEvent = onImportEvent
+	reiwa.OnExportEvent = onExportEvent
+	reiwa.FileExtFilter = fileExtFilter
 }
 
 func onImportEvent(source, target string) error {

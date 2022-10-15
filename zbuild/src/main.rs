@@ -29,9 +29,10 @@ fn ok(code: i32) {
 }
 
 fn init(pkg: &str) -> Return<String> {
-	Cmd::new("go").args(["mod", "init", pkg]).status()?;
-	Cmd::new("go").args(["get", "-u", "all"]).status()?;
-	Cmd::new("go").args(["mod", "tidy"]).status()?;
+	shell("go", &format!("mod init {}", pkg));
+	shell("go", &include_str!("go.mod.opts"));
+	shell("go", "get -u all");
+	shell("go", "mod tidy");
 	Ok(format!("{}.dll", pkg))
 }
 
@@ -121,7 +122,7 @@ fn older(_st: &State, now: String, old: String) -> bool {
 fn compile(#[opt(default_value = "2.8")]ver: String) -> Return<()> {
 	let mut env = Environment::new();
 	env.add_test("older_than", older);
-	let src = include_str!("zylo.go");
+	let src = include_str!("zutils.go");
 	let ctx = context!(version => ver);
 	let lib = env.render_str(src, ctx);
 	save("zutils.go", lib?.as_bytes());

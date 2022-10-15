@@ -13,6 +13,7 @@ import (
 	"image/color"
 	"os"
 	"regexp"
+	"zylo/reiwa"
 )
 
 const (
@@ -62,10 +63,10 @@ var (
 )
 
 func init() {
-	PluginName = "maplot"
-	OnLaunchEvent = onLaunchEvent
-	OnAttachEvent = onAttachEvent
-	OnInsertEvent = onInsertEvent
+	reiwa.PluginName = "maplot"
+	reiwa.OnLaunchEvent = onLaunchEvent
+	reiwa.OnAttachEvent = onAttachEvent
+	reiwa.OnInsertEvent = onInsertEvent
 }
 
 func onLaunchEvent() {
@@ -74,18 +75,18 @@ func onLaunchEvent() {
 	ctx.SetSize(form.ClientWidth(), form.ClientHeight())
 	yaml.UnmarshalStrict([]byte(cityYaml), &cityMap)
 	yaml.UnmarshalStrict([]byte(codeYaml), &codeMap)
-	RunDelphi(runDelphi)
-	HandleButton(MAPLOT_MENU, func(num int) {
+	reiwa.RunDelphi(runDelphi)
+	reiwa.HandleButton(MAPLOT_MENU, func(num int) {
 		form.Show()
 		update()
 	})
 }
 
 func onAttachEvent(contest, config string) {
-	file = Query("{F}.png")
+	file = reiwa.Query("{F}.png")
 }
 
-func onInsertEvent(qso *QSO) {
+func onInsertEvent(qso *reiwa.QSO) {
 	rcvd := number.FindString(qso.GetRcvd())
 	if code, ok := codeMap[rcvd]; ok {
 		enable(code, marker)

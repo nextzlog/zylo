@@ -9,9 +9,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"github.com/tadvi/winc"
 	"github.com/pkg/browser"
 	"github.com/recws-org/recws"
+	"github.com/tadvi/winc"
 	"math"
 	h "net/http"
 	"os"
@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"zylo/reiwa"
 )
 
 const (
@@ -83,48 +84,48 @@ type Station struct {
 type Sections map[string]([]Station)
 
 func init() {
-	PluginName = "rttest"
+	reiwa.PluginName = "rttest"
 	stopCh = make(chan bool)
-	CityMultiList = cityMultiList
-	OnLaunchEvent = onLaunchEvent
-	OnAssignEvent = onAssignEvent
-	OnDetachEvent = onDetachEvent
-	OnInsertEvent = onInsertEvent
-	OnDeleteEvent = onDeleteEvent
+	reiwa.CityMultiList = cityMultiList
+	reiwa.OnLaunchEvent = onLaunchEvent
+	reiwa.OnAssignEvent = onAssignEvent
+	reiwa.OnDetachEvent = onDetachEvent
+	reiwa.OnInsertEvent = onInsertEvent
+	reiwa.OnDeleteEvent = onDeleteEvent
 	h.HandleFunc("/", wait)
 	server = &h.Server{Addr: ":8873"}
-	AllowBandRange(K3500, M50)
-	AllowMode(CW, SSB, FM, AM)
-	AllowRcvd(`^\d{2,}^`)
+	reiwa.AllowBandRange(reiwa.K3500, reiwa.M50)
+	reiwa.AllowModeRange(reiwa.CW, reiwa.AM)
+	reiwa.AllowRcvd(`^\d{2,}^`)
 }
 
 func wait(w h.ResponseWriter, r *h.Request) {
 	r.ParseForm()
 	UID = r.FormValue("id")
 	if UID != "" {
-		SetINI(SEC, KEY, UID)
+		reiwa.SetINI(SEC, KEY, UID)
 		connectWebSocketAPI()
 	}
 }
 
 func connectWebSocketAPI() {
-	UID = GetINI(SEC, KEY)
+	UID = reiwa.GetINI(SEC, KEY)
 	ws.Dial(fmt.Sprintf(WSS, UID), nil)
 	if ws.GetDialError() != nil {
-		DisplayModal("authenticate via ATS-4")
+		reiwa.DisplayModal("authenticate via ATS-4")
 		browser.OpenURL(ATS)
 	} else {
 		go RealTimeStreamHandlerInfiniteLoop()
-		DisplayModal("successfully connected")
-		binary, _ := os.ReadFile(Query("{F}"))
+		reiwa.DisplayModal("successfully connected")
+		binary, _ := os.ReadFile(reiwa.Query("{F}"))
 		submit(INSERT, binary)
 	}
 }
 
 func onLaunchEvent() {
 	createWindow()
-	RunDelphi(runDelphi)
-	HandleButton(RTTEST_MENU, func(num int) {
+	reiwa.RunDelphi(runDelphi)
+	reiwa.HandleButton(RTTEST_MENU, func(num int) {
 		form.Show()
 	})
 }
@@ -147,21 +148,21 @@ func submit(cmd byte, data []byte) {
 	msg := append([]byte{cmd}, data...)
 	err := ws.WriteMessage(BINARY, msg)
 	if err != nil {
-		DisplayModal(err.Error())
+		reiwa.DisplayModal(err.Error())
 	}
 }
 
-func onInsertEvent(qso *QSO) {
+func onInsertEvent(qso *reiwa.QSO) {
 	if ws.IsConnected() {
-		submit(INSERT, DumpZLO(*qso))
-		DisplayToast("insert %s", qso.GetCall())
+		submit(INSERT, reiwa.DumpZLO(*qso))
+		reiwa.DisplayToast("insert %s", qso.GetCall())
 	}
 }
 
-func onDeleteEvent(qso *QSO) {
+func onDeleteEvent(qso *reiwa.QSO) {
 	if ws.IsConnected() {
-		submit(DELETE, DumpZLO(*qso))
-		DisplayToast("delete %s", qso.GetCall())
+		submit(DELETE, reiwa.DumpZLO(*qso))
+		reiwa.DisplayToast("delete %s", qso.GetCall())
 	}
 }
 
