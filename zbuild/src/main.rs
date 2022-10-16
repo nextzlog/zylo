@@ -41,7 +41,9 @@ fn make(pkg: &str) -> Return<()> {
 	let args = ["build", "-o", &name, "-buildmode=c-shared"];
 	ok(Cmd::new("go").args(&args).status()?.code().unwrap());
 	shell("upx", name);
-	md5sum(name)?;
+	let md5 = format!("{}.md5", name);
+	let sum = md5::compute(fs::read(&name)?);
+	fs::write(md5, format!("{v:x}", v=sum))?;
 	Ok(())
 }
 
@@ -57,7 +59,7 @@ fn save(name: &str, data: &[u8]) {
 	}
 }
 
-fn leaf(item: &mut Value) -> Return<String> {
+fn checksum(item: &mut Value) -> Return<()> {
 	if item.get("sum").is_none() {
 		let val = item.as_table_mut().unwrap();
 		let url = val["url"].as_str().unwrap();
@@ -65,16 +67,29 @@ fn leaf(item: &mut Value) -> Return<String> {
 		let sum = format!("{:x}", md5::compute(bin));
 		val.insert("sum".into(), Value::String(sum));
 	}
-	Ok(item.to_string())
+	Ok(())
+}
+
+fn document(item: &mut Value) -> Return<()> {
+	if item.get("doc").is_some() {
+		let val = item.as_table_mut().unwrap();
+		let url = val["doc"].as_str().unwrap();
+		let txt = get(url)?.error_for_status()?.text()?;
+		val.insert("doc".into(), Value::String(txt));
+	}
+	Ok(())
 }
 
 fn tree(list: &mut Value) -> Return<String> {
 	let items = list.as_table_mut();
 	for (_, it) in items.unwrap() {
-		if it.get("url").is_some() {
-			leaf(it)?;
-		} else if it.is_table() {
+		if it.is_table() {
 			tree(it)?;
+		}
+		if it.get("url").is_some() {
+			checksum(it)?;
+		} else {
+			document(it)?;
 		}
 	}
 	Ok(list.to_string())
@@ -105,13 +120,6 @@ fn merge() -> Return<String> {
 fn shell(cmd: &str, arg: &str) {
 	let seq = arg.split_whitespace();
 	Cmd::new(cmd).args(seq).status();
-}
-
-fn md5sum(file: &str) -> Return<()> {
-	let md5 = format!("{}.md5", file);
-	let sum = md5::compute(fs::read(&file)?);
-	fs::write(md5, format!("{v:x}", v=sum))?;
-	Ok(())
 }
 
 fn older(_st: &State, now: String, old: String) -> bool {

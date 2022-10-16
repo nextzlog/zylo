@@ -13,6 +13,9 @@ patternProperties:
           web:
             type: string
             format: uri
+          doc:
+            type: string
+            format: uri
           use:
             type: array
             items:

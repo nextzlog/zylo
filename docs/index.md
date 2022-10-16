@@ -286,7 +286,8 @@ url = "https://example.com/releases/sample.dat"
 [pkg.sample]
 tag = "title"
 msg = "description"
-web = "website URL"
+web = "https://example.com/sample/index.html"
+doc = "https://example.com/sample/details.md"
 use = ["cfg.sample", "dat.sample", "dll.sample"] # dependency
 exp = "unstable" # or "stable"
 ```
