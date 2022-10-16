@@ -2,6 +2,7 @@
 tag = "旭川コンテスト"
 msg = "旭川コンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
 web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/aktest/README.md"
 use = ["dll.aktest", "cfg.aktest"]
 exp = "stable"
 
@@ -16,6 +17,7 @@ sum = "https://github.com/nextzlog/zylo/releases/download/nightly/aktest.dll.md5
 tag = "高校コンテスト"
 msg = "高校コンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
 web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/hstest/README.md"
 use = ["dll.hstest", "cfg.hstest"]
 exp = "stable"
 
@@ -30,6 +32,7 @@ sum = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll.md5
 tag = "東海マラソンコンテスト"
 msg = "東海マラソンコンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
 web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/tmtest/README.md"
 use = ["dll.tmtest", "cfg.tmtest"]
 exp = "stable"
 
@@ -44,6 +47,7 @@ sum = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll.md5
 tag = "YLコンテスト"
 msg = "JLRS主催のYLコンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
 web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/yltest/README.md"
 use = ["dll.yltest", "cfg.yltest"]
 exp = "stable"
 
@@ -58,6 +62,7 @@ sum = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll.md5
 tag = "リアルタイムコンテスト"
 msg = "リアルタイムコンテストのCFGファイルと, クラウド送受信を行うプラグインです."
 web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/rules/rttest/README.md"
 use = ["dll.rttest", "cfg.rttest"]
 exp = "stable"
 
