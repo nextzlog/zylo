@@ -5,6 +5,7 @@ url = "https://github.com/nextzlog/qxsl/releases/download/nightly/qxsl.exe"
 tag = "zLog additional I/O"
 msg = "CTESTWINのLG8やHAMLOGのHDBを始め, 様々なファイルへの対応をzLogのインポート・エクスポート機能に追加します."
 web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/utils/format/README.md"
 use = ["dll.format", "exe.qxsl"]
 exp = "stable"
 
@@ -16,6 +17,7 @@ sum = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll.md5
 tag = "zLog update checker"
 msg = "zLogの最新のリリースを自動的に検出し, デスクトップの通知欄に表示します."
 web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/utils/latest/README.md"
 use = ["dll.latest"]
 exp = "stable"
 
@@ -27,6 +29,7 @@ sum = "https://github.com/nextzlog/zylo/releases/download/nightly/latest.dll.md5
 tag = "Maplot"
 msg = "zLogで記録したQSOから, 交信済みのJCC/Gコードを検出し, 地図に描画します."
 web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/utils/maplot/README.md"
 use = ["dll.maplot"]
 exp = "stable"
 
