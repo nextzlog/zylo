@@ -55,17 +55,19 @@ DLLs=hstest.dll,yltest.dll,rttest.dll
 ```go
 package main
 
+import "zylo/reiwa"
+
 func init() {
 	// when plugin loaded
-	OnLaunchEvent = onLaunchEvent
-	OnFinishEvent = onFinishEvent
-	OnAttachEvent = onAttachEvent
-	OnAssignEvent = onAssignEvent
-	OnDetachEvent = onDetachEvent
-	OnInsertEvent = onInsertEvent
-	OnDeleteEvent = onDeleteEvent
-	OnVerifyEvent = onVerifyEvent
-	OnPointsEvent = onPointsEvent
+	reiwa.OnLaunchEvent = onLaunchEvent
+	reiwa.OnFinishEvent = onFinishEvent
+	reiwa.OnAttachEvent = onAttachEvent
+	reiwa.OnAssignEvent = onAssignEvent
+	reiwa.OnDetachEvent = onDetachEvent
+	reiwa.OnInsertEvent = onInsertEvent
+	reiwa.OnDeleteEvent = onDeleteEvent
+	reiwa.OnVerifyEvent = onVerifyEvent
+	reiwa.OnPointsEvent = onPointsEvent
 }
 
 func onLaunchEvent() {
@@ -88,15 +90,15 @@ func onDetachEvent(contest, configs string) {
 	// when contest detached
 }
 
-func onInsertEvent(qso *QSO) {
+func onInsertEvent(qso *reiwa.QSO) {
 	// when insert this QSO
 }
 
-func onDeleteEvent(qso *QSO) {
+func onDeleteEvent(qso *reiwa.QSO) {
 	// when delete this QSO
 }
 
-func onVerifyEvent(qso *QSO) {
+func onVerifyEvent(qso *reiwa.QSO) {
 	// score and multiplier
 }
 
@@ -142,7 +144,7 @@ dll rttest.dll # basename
 - 拡張機能でWinAPIを使う場合は、`GetUI`関数で、zLogのGUI部品のウィンドウハンドルを取得できます。
 
 ```go
-handle := GetUI("MainForm.FileNewItem")
+handle := reiwa.GetUI("MainForm.FileNewItem")
 ```
 
 - 拡張機能は、zLogのボタン及びメニュー項目のクリックや、記入欄のキーボードの入力を監視できます。
@@ -150,21 +152,23 @@ handle := GetUI("MainForm.FileNewItem")
 ```go
 package main
 
+import "zylo/reiwa"
+
 func init() {
-	OnLaunchEvent = onLaunchEvent
+	reiwa.OnLaunchEvent = onLaunchEvent
 }
 
 func onLaunchEvent() {
-	HandleButton("MainForm.CWPlayButton", onButton)
-	HandleEditor("MainForm.CallsignEdit", onEditor)
+	reiwa.HandleButton("MainForm.CWPlayButton", onButton)
+	reiwa.HandleEditor("MainForm.CallsignEdit", onEditor)
 }
 
 func onButton(num int) {
-	DisplayToast("click CWPlayButton")
+	reiwa.DisplayToast("CWPlayButton was clicked")
 }
 
 func onEditor(key int) {
-	DisplayToast(Query("QSO with $B"))
+	reiwa.DisplayToast(reiwa.Query("QSO with $B"))
 }
 ```
 
@@ -177,17 +181,18 @@ import (
 	"fmt"
 	"unsafe"
 	"github.com/gonutz/w32"
+	"zylo/reiwa"
 )
 
 func init() {
-	OnLaunchEvent = onLaunchEvent
-	OnWindowEvent = onWindowEvent
+	reiwa.OnLaunchEvent = onLaunchEvent
+	reiwa.OnWindowEvent = onWindowEvent
 }
 
 func onLaunchEvent() {
-	h := w32.HMENU(GetUI("MainForm.MainMenu"))
-	w32.AppendMenu(h, w32.MF_STRING, 810, "GO!")
-	w32.DrawMenuBar(w32.HWND(GetUI("MainForm")))
+	h := w32.HMENU(reiwa.GetUI("MainForm.MainMenu"))
+	w32.AppendMenu(h, w32.MF_STRING, 810, "My Menu")
+	w32.DrawMenuBar(w32.HWND(reiwa.GetUI("MainForm")))
 }
 
 func onWindowEvent(msg uintptr) {
@@ -203,13 +208,15 @@ func onWindowEvent(msg uintptr) {
 ```go
 package main
 
+import "zylo/reiwa"
+
 func init() {
-	OnLaunchEvent = onLaunchEvent
+	reiwa.OnLaunchEvent = onLaunchEvent
 }
 
 func onLaunchEvent() {
-	RunDelphi(`PluginMenu.Add(op.Put(MainMenu.CreateMenuItem(), "Name", "MyMenu"))`)
-	RunDelphi(`op.Put(MainMenu.FindComponent("MyMenu"), "Caption", "Special Menu")`)
+	reiwa.RunDelphi(`PluginMenu.Add(op.Put(MainMenu.CreateMenuItem(), "Name", "MyMenu"))`)
+	reiwa.RunDelphi(`op.Put(MainMenu.FindComponent("MyMenu"), "Caption", "Special Menu")`)
 }
 ```
 
@@ -248,7 +255,7 @@ op.Put(object, property_name, property_value) // returns the object
 - zLogのマクロの内容を取得できます。CWキーボードのマクロに加え、表に掲載する変数が利用可能です。
 
 ```go
-fmt.Println(Query("$B,$X,$R,$F,$Z,$I,$Q,$V,$O,$S,$P,$A,$N,$L,$C,$E,$M"))
+fmt.Println(reiwa.Query("$B,$X,$R,$F,$Z,$I,$Q,$V,$O,$S,$P,$A,$N,$L,$C,$E,$M"))
 ```
 
 |変数|内容          |
@@ -312,7 +319,7 @@ jobs:
     steps:
     - uses: nextzlog/zylo@master
       with:
-        token: {{`${{secrets.GITHUB_TOKEN}}`}}
+        token: ${{secrets.GITHUB_TOKEN}}
         directory: /path/to/golang/files
 ```
 
@@ -328,7 +335,4 @@ jobs:
 
 ## 組み込み関数と変数
 
-{% capture body %}
-{{.EmitUsage}}
-{% endcapture %}
-{{`{{body | replace: "## Usage", "" | markdownify}}`}}
+
