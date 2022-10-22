@@ -3,7 +3,6 @@
 *.dll
 *.md5
 *.lock
-go.mod
 go.sum
 zutils.go
 target/

@@ -162,5 +162,6 @@ fn main() -> Return<()> {
 	env::set_var("GOOS", "windows");
 	env::set_var("GOARCH", "amd64");
 	env::set_var("CGO_ENABLED", "1");
+	env::set_var("GOPROXY", "direct");
 	env::set_var("CC", "x86_64-w64-mingw32-gcc");
 }
