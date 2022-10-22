@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 	"zylo/reiwa"
+	"zylo/win32"
 )
 
 const (
@@ -206,7 +207,7 @@ func (item ScoreItem) ImageIndex() int {
 }
 
 func createWindow() {
-	form = newForm(nil)
+	form = win32.NewForm(nil)
 	tabs = winc.NewTabView(form)
 	form.SetText("Real-Time Contest")
 	dock := winc.NewSimpleDock(form)

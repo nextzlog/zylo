@@ -83,6 +83,7 @@ jobs:
         go install github.com/robertkrimen/godocdown/godocdown@latest
         godocdown -o _morse.md -template docs/_morse.md commons/morse
         godocdown -o _reiwa.md -template docs/_reiwa.md commons/reiwa
+        godocdown -o _win32.md -template docs/_win32.md commons/win32
         cat _*.md >> docs/index.md
       working-directory: zylo
     - uses: peaceiris/actions-gh-pages@v3

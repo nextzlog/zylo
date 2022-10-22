@@ -14,6 +14,7 @@ import (
 	"os"
 	"regexp"
 	"zylo/reiwa"
+	"zylo/win32"
 )
 
 const (
@@ -119,11 +120,11 @@ func update() {
 }
 
 func createWindow() {
-	form = newForm(nil)
+	form = win32.NewForm(nil)
 	form.SetSize(WINDOW_SIZE, WINDOW_SIZE)
 	form.EnableSizable(false)
 	form.EnableMaxButton(false)
-	pane = newPanel(form)
+	pane = win32.NewPanel(form)
 	view = winc.NewImageView(pane)
 	dock := winc.NewSimpleDock(form)
 	dock.Dock(pane, winc.Fill)
