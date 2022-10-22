@@ -174,7 +174,7 @@ func zylo_allow_script(callback C.ScriptCB) {
 
 //export zylo_query_format
 func zylo_query_format(callback C.FormatCB) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	f := C.CString(FileExtFilter)
 	defer C.free(unsafe.Pointer(f))
 	C.format(f, callback)
@@ -182,7 +182,7 @@ func zylo_query_format(callback C.FormatCB) {
 
 //export zylo_query_cities
 func zylo_query_cities(callback C.CitiesCB) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	c := C.CString(CityMultiList)
 	defer C.free(unsafe.Pointer(c))
 	C.cities(c, callback)
@@ -190,7 +190,7 @@ func zylo_query_cities(callback C.CitiesCB) {
 
 //export zylo_launch_event
 func zylo_launch_event() bool {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	zv, _ := version.NewVersion(Query("{V}"))
 	mv, _ := version.NewVersion(MinVersion)
 	if !zv.LessThan(mv) {
@@ -203,20 +203,20 @@ func zylo_launch_event() bool {
 
 //export zylo_finish_event
 func zylo_finish_event() bool {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	OnFinishEvent()
 	return false
 }
 
 //export zylo_window_event
 func zylo_window_event(msg uintptr) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	OnWindowEvent(msg)
 }
 
 //export zylo_import_event
 func zylo_import_event(source, target *C.char) bool {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	src := C.GoString(source)
 	tgt := C.GoString(target)
 	return OnImportEvent(src, tgt) == nil
@@ -224,7 +224,7 @@ func zylo_import_event(source, target *C.char) bool {
 
 //export zylo_export_event
 func zylo_export_event(target, format *C.char) bool {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	tgt := C.GoString(target)
 	fmt := C.GoString(format)
 	return OnExportEvent(tgt, fmt) == nil
@@ -237,7 +237,7 @@ func zylo_offset_event(offset int) {
 
 //export zylo_attach_event
 func zylo_attach_event(test, path *C.char) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	t := C.GoString(test)
 	c := C.GoString(path)
 	OnAttachEvent(t, c)
@@ -249,7 +249,7 @@ func zylo_attach_event(test, path *C.char) {
 
 //export zylo_assign_event
 func zylo_assign_event(test, path *C.char) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	t := C.GoString(test)
 	c := C.GoString(path)
 	OnAssignEvent(t, c)
@@ -257,7 +257,7 @@ func zylo_assign_event(test, path *C.char) {
 
 //export zylo_detach_event
 func zylo_detach_event(test, path *C.char) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	t := C.GoString(test)
 	c := C.GoString(path)
 	OnDetachEvent(t, c)
@@ -265,31 +265,31 @@ func zylo_detach_event(test, path *C.char) {
 
 //export zylo_insert_event
 func zylo_insert_event(ptr uintptr) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	OnInsertEvent((*QSO)(unsafe.Pointer(ptr)))
 }
 
 //export zylo_delete_event
 func zylo_delete_event(ptr uintptr) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	OnDeleteEvent((*QSO)(unsafe.Pointer(ptr)))
 }
 
 //export zylo_verify_event
 func zylo_verify_event(ptr uintptr) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	OnVerifyEvent((*QSO)(unsafe.Pointer(ptr)))
 }
 
 //export zylo_points_event
 func zylo_points_event(pts, muls int) int {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	return OnPointsEvent(pts, muls)
 }
 
 //export zylo_button_event
 func zylo_button_event(comp, btn int) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	if h, ok := buttons[comp]; ok {
 		h(btn)
 	}
@@ -297,15 +297,9 @@ func zylo_button_event(comp, btn int) {
 
 //export zylo_editor_event
 func zylo_editor_event(comp, key int) {
-	defer zylo_recover_capture_panic()
+	defer DisplayPanic()
 	if h, ok := editors[comp]; ok {
 		h(key)
-	}
-}
-
-func zylo_recover_capture_panic() {
-	if err := recover(); err != nil {
-		DisplayModal(string(debug.Stack()))
 	}
 }
 
@@ -668,6 +662,18 @@ func SetINI(section, key, value string) {
 	init, _ := ini.LooseLoad(SettingsFileName)
 	init.Section(section).Key(key).SetValue(value)
 	init.SaveTo(SettingsFileName)
+}
+
+/*
+ パニックを捕捉してダイアログで表示します。
+ 例:
+
+  defer DisplayPanic()
+*/
+func DisplayPanic() {
+	if err := recover(); err != nil {
+		DisplayModal("%s: %s", err, debug.Stack())
+	}
 }
 
 /*
