@@ -11,6 +11,7 @@ import (
 	"github.com/thoas/go-funk"
 	"math"
 	"sort"
+	"strings"
 )
 
 const MIN_RELIABLE_DOT = 2
@@ -112,7 +113,7 @@ func (d *Decoder) steps(signal Samples) (result []*step) {
 		}
 		pre = cls
 	}
-	return
+	return append(result, &step{time: len(signal)})
 }
 
 func (d *Decoder) detect(signal Samples) (result string) {
@@ -177,6 +178,36 @@ func (d *Decoder) Read(signal Samples) (result []string) {
 			buff[t] = s[d.Bias+idx]
 		}
 		result = append(result, d.detect(buff))
+	}
+	return
+}
+
+/*
+ モールス信号の逐次的な解析器です。
+*/
+type Monitor struct {
+	MaxHold int
+	Decoder Decoder
+	samples Samples
+}
+
+/*
+ 音声からモールス信号の文字列を抽出します。
+ 無音を検知する度にバッファが消去されます。
+*/
+func (m *Monitor) Read(signal Samples) (result []string) {
+	if len(m.samples) < m.MaxHold || m.MaxHold == 0 {
+		m.samples = append(m.samples, signal...)
+	}
+	finish := true
+	result = m.Decoder.Read(m.samples)
+	for _, text := range result {
+		if !strings.HasSuffix(text, " ; ") {
+			finish = false
+		}
+	}
+	if finish {
+		m.samples = signal
 	}
 	return
 }
