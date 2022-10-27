@@ -33,9 +33,9 @@ func TestEnDe(t *testing.T) {
 		},
 	}
 	tone := encoder.Tone(TextToCode(TEXT))
-	for _, text := range decoder.Read(tone) {
-		if CodeToText(text) != TEXT {
-			t.Errorf("%s != %s", text, TEXT)
+	for _, msg := range decoder.Read(tone) {
+		if CodeToText(msg.Code) != TEXT {
+			t.Errorf("%s != %s", msg.Code, TEXT)
 		} else {
 			return
 		}

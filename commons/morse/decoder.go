@@ -90,6 +90,21 @@ func (s *step) mute(class int) string {
 }
 
 /*
+ モールス信号の文字列です。
+*/
+type Message struct {
+	Code string
+	Freq int
+}
+
+/*
+ 文章の区切りを検出した場合は真を返します。
+*/
+func (m *Message) Finish() (finish bool) {
+	return strings.HasSuffix(m.Code, " ; ")
+}
+
+/*
  モールス信号の解析器です。
 */
 type Decoder struct {
@@ -99,7 +114,7 @@ type Decoder struct {
 	STFT *stft.STFT
 }
 
-func (d *Decoder) steps(signal Samples) (result []*step) {
+func (d *Decoder) binary(signal Samples) (result []*step) {
 	gmm := means{X: signal}
 	gmm.optimize(d.Iter)
 	pre := 0
@@ -116,8 +131,8 @@ func (d *Decoder) steps(signal Samples) (result []*step) {
 	return append(result, &step{time: len(signal)})
 }
 
-func (d *Decoder) detect(signal Samples) (result string) {
-	steps := d.steps(signal)
+func (d *Decoder) detect(signal Samples) (result Message) {
+	steps := d.binary(signal)
 	tones := make(Samples, 0)
 	if len(steps) >= 1 {
 		for idx, s := range steps[1:] {
@@ -133,9 +148,9 @@ func (d *Decoder) detect(signal Samples) (result string) {
 		if funk.MinFloat64(gmm.m) > MIN_RELIABLE_DOT {
 			for _, s := range steps[1:] {
 				if s.down {
-					result += s.tone(gmm.class(s.span))
+					result.Code += s.tone(gmm.class(s.span))
 				} else {
-					result += s.mute(gmm.extra(s.span))
+					result.Code += s.mute(gmm.extra(s.span))
 				}
 			}
 		}
@@ -143,7 +158,7 @@ func (d *Decoder) detect(signal Samples) (result string) {
 	return
 }
 
-func (d *Decoder) peaks(spectrum Samples) (result []int) {
+func (d *Decoder) search(spectrum Samples) (result []int) {
 	total := funk.SumFloat64(spectrum)
 	value := 0.0
 	index := 0
@@ -164,7 +179,7 @@ func (d *Decoder) peaks(spectrum Samples) (result []int) {
  音声からモールス信号の文字列を抽出します。
  複数の周波数のモールス信号を分離できます。
 */
-func (d *Decoder) Read(signal Samples) (result []string) {
+func (d *Decoder) Read(signal Samples) (result []Message) {
 	spec, _ := gossp.SplitSpectrogram(d.STFT.STFT(signal))
 	dist := make(Samples, d.STFT.FrameLen/2)
 	for _, s := range spec {
@@ -173,11 +188,14 @@ func (d *Decoder) Read(signal Samples) (result []string) {
 		}
 	}
 	buff := make(Samples, len(spec))
-	for _, idx := range d.peaks(dist) {
+	for _, idx := range d.search(dist) {
 		for t, s := range spec {
 			buff[t] = s[d.Bias+idx]
 		}
-		result = append(result, d.detect(buff))
+		if m := d.detect(buff); m.Code != "" {
+			m.Freq = int(d.Bias + idx)
+			result = append(result, m)
+		}
 	}
 	return
 }
@@ -195,14 +213,14 @@ type Monitor struct {
  音声からモールス信号の文字列を抽出します。
  無音を検知する度にバッファが消去されます。
 */
-func (m *Monitor) Read(signal Samples) (result []string) {
+func (m *Monitor) Read(signal Samples) (result []Message) {
 	if len(m.samples) < m.MaxHold || m.MaxHold == 0 {
 		m.samples = append(m.samples, signal...)
 	}
 	finish := true
 	result = m.Decoder.Read(m.samples)
-	for _, text := range result {
-		if !strings.HasSuffix(text, " ; ") {
+	for _, msg := range result {
+		if !msg.Finish() {
 			finish = false
 		}
 	}
