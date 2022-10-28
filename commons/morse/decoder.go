@@ -110,11 +110,16 @@ func (m *Message) Finish() (finish bool) {
 type Decoder struct {
 	Iter int
 	Bias int
+	Gain float64
 	Thre float64
 	STFT *stft.STFT
 }
 
 func (d *Decoder) binary(signal Samples) (result []*step) {
+	max := funk.MaxFloat64(signal)
+	for idx, val := range signal {
+		signal[idx] = val * math.Min(d.Gain, max/val)
+	}
 	gmm := means{X: signal}
 	gmm.optimize(d.Iter)
 	pre := 0

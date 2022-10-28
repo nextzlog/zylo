@@ -25,6 +25,7 @@ func TestEnDe(t *testing.T) {
 	decoder := Decoder{
 		Iter: 50,
 		Bias: 2,
+		Gain: 2,
 		Thre: 0.03,
 		STFT: &stft.STFT{
 			FrameShift: RATE / 100,
