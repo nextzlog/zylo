@@ -105,6 +105,43 @@ func (m *Message) Finish() (finish bool) {
 }
 
 /*
+ この文字列の末尾に次の文字列を結合します。
+*/
+func (prev *Message) Join(next *Message) {
+	best := 1
+	save := 0
+	skip := 0
+	head := strings.Split(prev.Code, " ")
+	tail := strings.Split(next.Code, " ")
+	for idx := 0; idx < len(head); idx++ {
+		rel := len(head)-idx >= len(tail)
+		zip := funk.Zip(head[idx:], tail)
+		pos := 0
+		neg := 0
+		for idx, tuple := range zip {
+			p := tuple.Element1.(string)
+			n := tuple.Element2.(string)
+			if p == n {
+				pos += 1
+			} else if rel {
+				neg = idx + 1
+			} else {
+				neg = idx
+			}
+		}
+		if pos >= best {
+			best = pos
+			save = idx + neg
+			skip = neg
+		}
+	}
+	p := strings.Join(head[:save], " ")
+	n := strings.Join(tail[skip:], " ")
+	prev.Code = strings.TrimSpace(p + n)
+	next.Code = strings.TrimSpace(p + n)
+}
+
+/*
  モールス信号の解析器です。
 */
 type Decoder struct {
@@ -216,21 +253,12 @@ type Monitor struct {
 
 /*
  音声からモールス信号の文字列を抽出します。
- 無音を検知する度にバッファが消去されます。
 */
 func (m *Monitor) Read(signal Samples) (result []Message) {
-	if len(m.samples) < m.MaxHold || m.MaxHold == 0 {
-		m.samples = append(m.samples, signal...)
-	}
-	finish := true
+	m.samples = append(m.samples, signal...)
 	result = m.Decoder.Read(m.samples)
-	for _, msg := range result {
-		if !msg.Finish() {
-			finish = false
-		}
-	}
-	if finish {
-		m.samples = signal
+	if len(m.samples) > m.MaxHold {
+		m.samples = m.samples[len(signal):]
 	}
 	return
 }
