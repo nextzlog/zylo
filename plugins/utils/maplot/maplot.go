@@ -5,23 +5,14 @@ package main
 
 import (
 	_ "embed"
-	sm "github.com/flopp/go-staticmaps"
-	"github.com/fogleman/gg"
-	"github.com/golang/geo/s2"
 	"github.com/tadvi/winc"
 	"gopkg.in/yaml.v2"
-	"image/color"
-	"os"
 	"regexp"
 	"zylo/reiwa"
 	"zylo/win32"
 )
 
-const (
-	WINDOW_SIZE = 600
-	MARKER_SIZE = 16
-	MAPLOT_MENU = "MainForm.MainMenu.MaplotMenu"
-)
+const MAPLOT_MENU = "MainForm.MainMenu.MaplotMenu"
 
 var (
 	//go:embed code.yaml
@@ -35,98 +26,86 @@ var (
 type Code struct {
 	Name   string
 	Cities []string
-	marked bool
 }
 
 type City struct {
-	Lat float64
-	Lon float64
+	YX map[int]map[int]int
 }
 
 var (
 	codeMap map[string]Code
 	cityMap map[string]City
+	enabled []City
 )
 
 var (
-	number = regexp.MustCompile("[0-9]*")
-	marker = color.RGBA{0xff, 0, 0, 0xff}
+	rcvd = regexp.MustCompile("\\d*")
+	face = winc.RGB(0xff, 0x00, 0x00)
+	edge = winc.RGB(0x00, 0x00, 0x00)
 )
 
-var ctx *sm.Context
-
 var (
-	file string
-	temp *os.File
 	form *winc.Form
-	view *winc.ImageView
-	pane *winc.Panel
+	view *winc.Canvas
 )
 
 func init() {
 	reiwa.PluginName = "maplot"
 	reiwa.OnLaunchEvent = onLaunchEvent
-	reiwa.OnAttachEvent = onAttachEvent
 	reiwa.OnInsertEvent = onInsertEvent
 }
 
 func onLaunchEvent() {
 	createWindow()
-	ctx = sm.NewContext()
-	ctx.SetSize(form.ClientWidth(), form.ClientHeight())
 	yaml.UnmarshalStrict([]byte(cityYaml), &cityMap)
 	yaml.UnmarshalStrict([]byte(codeYaml), &codeMap)
 	reiwa.RunDelphi(runDelphi)
 	reiwa.HandleButton(MAPLOT_MENU, func(num int) {
 		form.Show()
-		update()
+		onUpdateEvent(nil)
 	})
 }
 
-func onAttachEvent(contest, config string) {
-	file = reiwa.Query("{F}.png")
-}
-
 func onInsertEvent(qso *reiwa.QSO) {
-	rcvd := number.FindString(qso.GetRcvd())
-	if code, ok := codeMap[rcvd]; ok {
-		enable(code, marker)
-	}
-	if form.Visible() {
-		update()
+	n := rcvd.FindString(qso.GetRcvd())
+	if code, ok := codeMap[n]; ok {
+		mark(code, face)
 	}
 }
 
-func enable(code Code, marker color.RGBA) {
+func onUpdateEvent(ev *winc.Event) {
+	fill(cityMap["JA"], edge)
+	for _, code := range enabled {
+		fill(code, face)
+	}
+}
+
+func mark(code Code, color winc.Color) {
 	for _, city := range code.Cities {
 		if pt, ok := cityMap[city]; ok {
-			p := s2.LatLngFromDegrees(pt.Lat, pt.Lon)
-			m := sm.NewMarker(p, marker, MARKER_SIZE)
-			if !code.marked {
-				ctx.AddMarker(m)
-				code.marked = true
-			}
+			enabled = append(enabled, pt)
+			fill(pt, face)
 		}
 	}
 }
 
-func update() {
-	if img, e := ctx.Render(); e == nil {
-		if gg.SavePNG(file, img) == nil {
-			view.DrawImageFile(file)
-			pane.Invalidate(true)
+func fill(city City, color winc.Color) {
+	br := winc.NewSolidColorBrush(color)
+	for y, runs := range city.YX {
+		for x, width := range runs {
+			line(y, x, width, br)
 		}
 	}
+	br.Dispose()
+}
+
+func line(y, x, w int, brush *winc.Brush) {
+	view.FillRect(winc.NewRect(x, y, x+w, y+1), brush)
 }
 
 func createWindow() {
 	form = win32.NewForm(nil)
-	form.SetSize(WINDOW_SIZE, WINDOW_SIZE)
-	form.EnableSizable(false)
-	form.EnableMaxButton(false)
-	pane = win32.NewPanel(form)
-	view = winc.NewImageView(pane)
-	dock := winc.NewSimpleDock(form)
-	dock.Dock(pane, winc.Fill)
+	view = winc.NewCanvasFromHwnd(form.Handle())
+	form.OnSize().Bind(onUpdateEvent)
 	return
 }
