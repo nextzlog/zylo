@@ -36,3 +36,15 @@ exp = "stable"
 [dll.maplot]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/maplot.dll"
 sum = "https://github.com/nextzlog/zylo/releases/download/nightly/maplot.dll.md5"
+
+[pkg.prefix]
+tag = "Prefix"
+msg = "zLogで記録したQSOから, 交信相手局の国や地域を特定し, 通知欄に表示します."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/utils/prefix/README.md"
+use = ["dll.prefix"]
+exp = "stable"
+
+[dll.prefix]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/prefix.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/prefix.dll.md5"

@@ -50,6 +50,7 @@ jobs:
         - name: plugins/utils/latest
         - name: plugins/utils/maplot
           zlog: 2.8.3.0
+        - name: plugins/utils/prefix
     steps:
     - uses: nextzlog/zylo@master
       with:
