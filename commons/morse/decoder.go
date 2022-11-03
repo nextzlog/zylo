@@ -6,6 +6,7 @@
 package morse
 
 import (
+	"encoding/binary"
 	"github.com/r9y9/gossp"
 	"github.com/r9y9/gossp/stft"
 	"github.com/thoas/go-funk"
@@ -252,6 +253,23 @@ type Monitor struct {
 }
 
 /*
+ 規定の設定が適用された解析器を構築します。
+*/
+func DefaultMonitor(SampleRateInHz int) (monitor Monitor) {
+	shift := int(math.Round(0.02 * float64(SampleRateInHz)))
+	return Monitor{
+		MaxHold: 10 * SampleRateInHz,
+		Decoder: Decoder{
+			Iter: 10,
+			Bias: 10,
+			Gain: 2,
+			Thre: 0.03,
+			STFT: stft.New(shift, 2048),
+		},
+	}
+}
+
+/*
  音声からモールス信号の文字列を抽出します。
 */
 func (m *Monitor) Read(signal Samples) (result []Message) {
@@ -259,6 +277,17 @@ func (m *Monitor) Read(signal Samples) (result []Message) {
 	result = m.Decoder.Read(m.samples)
 	if len(m.samples) > m.MaxHold {
 		m.samples = m.samples[len(signal):]
+	}
+	return
+}
+
+/*
+ 音声のバイト表現から音声信号を取得します。
+*/
+func Read32BitSignedInt(signal []byte) (result []float64) {
+	for _, buffer := range funk.Chunk(signal, 4).([][]byte) {
+		v := binary.LittleEndian.Uint32(buffer)
+		result = append(result, float64(int32(v)))
 	}
 	return
 }
