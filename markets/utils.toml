@@ -1,13 +1,25 @@
-[exe.qxsl]
-url = "https://github.com/nextzlog/qxsl/releases/download/nightly/qxsl.exe"
+[pkg.chotto]
+tag = "Chotto Wakaru CW"
+msg = "Windowsの音声入力から, モールス信号を解析し, その内容を画面に表示します."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/utils/chotto/README.md"
+use = ["dll.chotto"]
+exp = "stable"
+
+[dll.chotto]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/chotto.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/chotto.dll.md5"
 
 [pkg.format]
 tag = "zLog additional I/O"
 msg = "CTESTWINのLG8やHAMLOGのHDBを始め, 様々なファイルへの対応をzLogのインポート・エクスポート機能に追加します."
 web = "https://github.com/nextzlog/zylo"
 doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/plugins/utils/format/README.md"
-use = ["dll.format", "exe.qxsl"]
+use = ["dll.format", "exe.format"]
 exp = "stable"
+
+[exe.format]
+url = "https://github.com/nextzlog/qxsl/releases/download/nightly/qxsl.exe"
 
 [dll.format]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll"

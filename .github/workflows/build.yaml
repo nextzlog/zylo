@@ -46,6 +46,8 @@ jobs:
           zlog: 2.8.3.0
         - name: plugins/rules/tmtest
         - name: plugins/rules/yltest
+        - name: plugins/utils/chotto
+          zlog: 2.8.3.0
         - name: plugins/utils/format
         - name: plugins/utils/latest
         - name: plugins/utils/maplot
