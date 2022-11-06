@@ -20,7 +20,7 @@ func init() {
 	reiwa.OnAcceptEvent = onAcceptEvent
 	reiwa.OnPointsEvent = onPointsEvent
 	reiwa.AllowBandRange(reiwa.M50, reiwa.G10UP)
-	reiwa.AllowModeRange(reiwa.CW, reiwa.AM)
+	reiwa.AllowModeRange(reiwa.CW, reiwa.OTHER)
 	reiwa.AllowCall(`^\w{3,}`)
 	reiwa.AllowRcvd(`^\d{3,}$`)
 }
@@ -67,6 +67,14 @@ func score(qso *reiwa.QSO) byte {
 func onAcceptEvent(qso *reiwa.QSO) {
 	qso.Score = score(qso)
 	qso.SetMul1(mult(qso))
+	if qso.Mode >= reiwa.RTTY {
+		if qso.SRST == 599 {
+			qso.SRST = 59
+		}
+		if qso.RRST == 599 {
+			qso.RRST = 59
+		}
+	}
 }
 
 func onPointsEvent(score, mults int) int {

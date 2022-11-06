@@ -324,8 +324,8 @@ type QSO struct {
 	sent  [31]byte
 	rcvd  [31]byte
 	void  byte
-	sRST  int16
-	rRST  int16
+	SRST  int16
+	RRST  int16
 	id    int32
 	Mode  byte
 	Band  byte
@@ -604,7 +604,7 @@ func (qso *QSO) LoadWithoutHead(r io.Reader) {
 func DumpZLO(qso ...QSO) (bin []byte) {
 	_, diff := time.Now().In(zone).Zone()
 	log := append(make([]QSO, 1), qso...)
-	log[0].sRST = int16(-diff / 60)
+	log[0].SRST = int16(-diff / 60)
 	buf := new(bytes.Buffer)
 	for _, qso := range log {
 		qso.DumpWithoutHead(buf)
