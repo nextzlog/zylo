@@ -5,8 +5,10 @@ package main
 
 import (
 	_ "embed"
+	"encoding/binary"
 	"github.com/gen2brain/malgo"
 	"github.com/tadvi/winc"
+	"github.com/thoas/go-funk"
 	"strings"
 	"zylo/morse"
 	"zylo/reiwa"
@@ -69,7 +71,15 @@ func onDecodeEvent(signal []float64) {
 }
 
 func onSignalEvent(out, in []byte, frames uint32) {
-	go onDecodeEvent(morse.Read32BitSignedInt(in))
+	go onDecodeEvent(readSignedInt(in))
+}
+
+func readSignedInt(signal []byte) (result []float64) {
+	for _, b := range funk.Chunk(signal, 4).([][]byte) {
+		v := binary.LittleEndian.Uint32(b)
+		result = append(result, float64(int32(v)))
+	}
+	return
 }
 
 func DeviceConfig() (cfg malgo.DeviceConfig) {

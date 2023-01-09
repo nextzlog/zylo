@@ -6,89 +6,14 @@
 package morse
 
 import (
-	"encoding/binary"
 	"github.com/r9y9/gossp"
 	"github.com/r9y9/gossp/stft"
 	"github.com/thoas/go-funk"
 	"math"
-	"sort"
 	"strings"
 )
 
 const MIN_RELIABLE_DOT = 2
-
-type Samples []float64
-
-type means struct {
-	X Samples
-	m Samples
-}
-
-func (b *means) optimize(iterations int) {
-	b.m = append(b.m, funk.MinFloat64(b.X))
-	b.m = append(b.m, funk.MaxFloat64(b.X))
-	for i := 0; i < iterations; i++ {
-		newN := make(Samples, len(b.m))
-		newM := make(Samples, len(b.m))
-		for _, x := range b.X {
-			k := b.class(x)
-			newN[k] += 1
-			newM[k] += x
-		}
-		for k, m := range newM {
-			b.m[k] = m / newN[k]
-		}
-	}
-	sort.Sort(sort.Float64Slice(b.m))
-}
-
-func (b *means) class(x float64) (k int) {
-	lo := math.Abs(x - b.m[0])
-	hi := math.Abs(x - b.m[1])
-	if lo < hi {
-		return 0
-	} else {
-		return 1
-	}
-}
-
-func (b *means) extra(x float64) (k int) {
-	hi := math.Abs(x - b.m[1]*1)
-	ex := math.Abs(x - b.m[1]*3)
-	if hi < ex {
-		return b.class(x)
-	} else {
-		return 2
-	}
-}
-
-type step struct {
-	time int
-	down bool
-	span float64
-}
-
-func (s *step) tone(class int) string {
-	switch class {
-	case 0:
-		return "."
-	case 1:
-		return "_"
-	default:
-		return "_"
-	}
-}
-
-func (s *step) mute(class int) string {
-	switch class {
-	case 0:
-		return ""
-	case 1:
-		return " "
-	default:
-		return " ; "
-	}
-}
 
 /*
  モールス信号の文字列です。
@@ -153,7 +78,7 @@ type Decoder struct {
 	STFT *stft.STFT
 }
 
-func (d *Decoder) binary(signal Samples) (result []*step) {
+func (d *Decoder) binary(signal []float64) (result []*step) {
 	max := funk.MaxFloat64(signal)
 	for idx, val := range signal {
 		signal[idx] = val * math.Min(d.Gain, max/val)
@@ -174,9 +99,9 @@ func (d *Decoder) binary(signal Samples) (result []*step) {
 	return append(result, &step{time: len(signal)})
 }
 
-func (d *Decoder) detect(signal Samples) (result Message) {
+func (d *Decoder) detect(signal []float64) (result Message) {
 	steps := d.binary(signal)
-	tones := make(Samples, 0)
+	tones := make([]float64, 0)
 	if len(steps) >= 1 {
 		for idx, s := range steps[1:] {
 			s.span = float64(s.time - steps[idx].time)
@@ -201,7 +126,7 @@ func (d *Decoder) detect(signal Samples) (result Message) {
 	return
 }
 
-func (d *Decoder) search(spectrum Samples) (result []int) {
+func (d *Decoder) search(spectrum []float64) (result []int) {
 	total := funk.SumFloat64(spectrum)
 	value := 0.0
 	index := 0
@@ -222,15 +147,15 @@ func (d *Decoder) search(spectrum Samples) (result []int) {
  音声からモールス信号の文字列を抽出します。
  複数の周波数のモールス信号を分離できます。
 */
-func (d *Decoder) Read(signal Samples) (result []Message) {
+func (d *Decoder) Read(signal []float64) (result []Message) {
 	spec, _ := gossp.SplitSpectrogram(d.STFT.STFT(signal))
-	dist := make(Samples, d.STFT.FrameLen/2)
+	dist := make([]float64, d.STFT.FrameLen/2)
 	for _, s := range spec {
 		for idx, val := range s[d.Bias:len(dist)] {
 			dist[idx] += val * val
 		}
 	}
-	buff := make(Samples, len(spec))
+	buff := make([]float64, len(spec))
 	for _, idx := range d.search(dist) {
 		for t, s := range spec {
 			buff[t] = s[d.Bias+idx]
@@ -249,16 +174,16 @@ func (d *Decoder) Read(signal Samples) (result []Message) {
 type Monitor struct {
 	MaxHold int
 	Decoder Decoder
-	samples Samples
+	samples []float64
 }
 
 /*
  規定の設定が適用された解析器を構築します。
 */
-func DefaultMonitor(SampleRateInHz int) (monitor Monitor) {
-	shift := int(math.Round(0.02 * float64(SampleRateInHz)))
+func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
+	shift := int(math.Round(0.02 * float64(SamplingRateInHz)))
 	return Monitor{
-		MaxHold: 10 * SampleRateInHz,
+		MaxHold: 10 * SamplingRateInHz,
 		Decoder: Decoder{
 			Iter: 10,
 			Bias: 10,
@@ -272,22 +197,11 @@ func DefaultMonitor(SampleRateInHz int) (monitor Monitor) {
 /*
  音声からモールス信号の文字列を抽出します。
 */
-func (m *Monitor) Read(signal Samples) (result []Message) {
+func (m *Monitor) Read(signal []float64) (result []Message) {
 	m.samples = append(m.samples, signal...)
 	result = m.Decoder.Read(m.samples)
 	if len(m.samples) > m.MaxHold {
 		m.samples = m.samples[len(signal):]
-	}
-	return
-}
-
-/*
- 音声のバイト表現から音声信号を取得します。
-*/
-func Read32BitSignedInt(signal []byte) (result []float64) {
-	for _, buffer := range funk.Chunk(signal, 4).([][]byte) {
-		v := binary.LittleEndian.Uint32(buffer)
-		result = append(result, float64(int32(v)))
 	}
 	return
 }
