@@ -8,15 +8,7 @@ ZyLO
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
 
 [ZyLO](https://zylo.pafelog.net) is an official plugin marketplace and SDK integrated into [zLog 令和 edition](https://use.zlog.org).
-
-## Introduction
-
 zLog is a powerful amateur radio logging software for contests and has been loved by millions for 30 years.
-
-<img src='https://pafelog.net/images/zylo.18.svg' width='100%'>
-<img src='https://pafelog.net/images/zylo.22.svg' width='100%'>
-<img src='https://pafelog.net/images/zylo.23.svg' width='100%'>
-<img src='https://pafelog.net/images/zylo.32.svg' width='100%'>
 
 ## Downloads
 
