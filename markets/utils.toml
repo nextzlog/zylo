@@ -19,7 +19,7 @@ use = ["dll.format", "exe.format"]
 exp = "stable"
 
 [exe.format]
-url = "https://github.com/nextzlog/qxsl/releases/download/nightly/qxsl.exe"
+url = "https://github.com/autodyne/qxsl/releases/download/nightly/qxsl.exe"
 
 [dll.format]
 url = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll"
