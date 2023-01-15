@@ -1,7 +1,7 @@
 /*******************************************************************************
- * Amateur Radio Operational Logging Software 'ZyLO' since 2020 June 22
- * License: The MIT License since 2021 October 28 (see LICENSE)
- * Author: Journal of Hamradio Informatics (http://pafelog.net)
+ * Amateur Radio Operational Logging Software 'ZyLO' since 2020 June 22nd
+ * Released under the MIT License (or GPL v3 until 2021 Oct 28th) (see LICENSE)
+ * Univ. Tokyo Amateur Radio Club Development Task Force (https://nextzlog.dev)
 *******************************************************************************/
 package morse
 

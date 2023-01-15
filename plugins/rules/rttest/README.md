@@ -1,1 +1,1 @@
-[zLog令和版でリアルタイムコンテストに参戦する](https://pafelog.net/real)
+[zLog令和版でリアルタイムコンテストに参戦する](https://nextzlog.dev/real)

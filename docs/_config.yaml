@@ -1,5 +1,5 @@
 remote_theme: nextzlog/pafe
-url: https://zylo.pafelog.net
+url: https://nextzlog.github.io/zylo
 name: ZyLO
 icon: /assets/head.png
 lead: &desc ZyLOはWindowsで動作するコンテスト用ロギングソフトzLog令和版のプラグインを開発するためのフレームワークです。
@@ -11,4 +11,4 @@ links:
 - name: zLog.org
   href: https://zlog.org
 - name: 無線部開発班
-  href: https://pafelog.net
+  href: https://nextzlog.dev
