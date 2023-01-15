@@ -14,6 +14,8 @@ import (
 
 const MAPLOT_MENU = "MainForm.MainMenu.MaplotMenu"
 
+const SIZE = 800
+
 var (
 	//go:embed code.yaml
 	codeYaml string
@@ -104,6 +106,8 @@ func line(y, x, w int, brush *winc.Brush) {
 }
 
 func createWindow() {
+	win32.DefaultWindowW = SIZE
+	win32.DefaultWindowH = SIZE
 	form = win32.NewForm(nil)
 	view = winc.NewCanvasFromHwnd(form.Handle())
 	form.OnSize().Bind(onUpdateEvent)

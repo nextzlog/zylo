@@ -15,6 +15,16 @@ import (
 )
 
 /*
+ フォームのデフォルトの横幅です。
+*/
+var DefaultWindowW = 640
+
+/*
+ フォームのデフォルトの縦幅です。
+*/
+var DefaultWindowH = 640
+
+/*
  この拡張機能の専用のクラス名を持つフォームを構築します。
 */
 func NewForm(parent winc.Controller) *winc.Form {
@@ -44,8 +54,8 @@ func NewForm(parent winc.Controller) *winc.Form {
 		form.Hide()
 	})
 	if w <= 0 || h <= 0 {
-		w = 300
-		h = 300
+		w = DefaultWindowW
+		h = DefaultWindowH
 	}
 	form.SetSize(w, h)
 	if x <= 0 || y <= 0 {
