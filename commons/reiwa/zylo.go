@@ -730,9 +730,9 @@ func RunDelphi(exp string, args ...interface{}) int {
 var zylo_dupes = false
 var zylo_bands = make(map[byte]bool)
 var zylo_modes = make(map[byte]bool)
-var zylo_calls = regexp.MustCompile(`^.+$`)
-var zylo_rcvds = regexp.MustCompile(`^.+$`)
-var zylo_sents = regexp.MustCompile(`^.+$`)
+var zylo_calls = regexp.MustCompile(`^.*$`)
+var zylo_rcvds = regexp.MustCompile(`^.*$`)
+var zylo_sents = regexp.MustCompile(`^.*$`)
 
 /*
  重複交信を許容します。
