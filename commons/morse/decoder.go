@@ -10,7 +10,6 @@ import (
 	"github.com/r9y9/gossp/stft"
 	"github.com/thoas/go-funk"
 	"math"
-	"strings"
 )
 
 const MIN_RELIABLE_DOT = 2
@@ -19,52 +18,9 @@ const MIN_RELIABLE_DOT = 2
  モールス信号の文字列です。
 */
 type Message struct {
+	Data []float64
 	Code string
 	Freq int
-}
-
-/*
- 文章の区切りを検出した場合は真を返します。
-*/
-func (m *Message) Finish() (finish bool) {
-	return strings.HasSuffix(m.Code, " ; ")
-}
-
-/*
- この文字列の末尾に次の文字列を結合します。
-*/
-func (prev *Message) Join(next *Message) {
-	best := 1
-	save := 0
-	skip := 0
-	head := strings.Split(prev.Code, " ")
-	tail := strings.Split(next.Code, " ")
-	for idx := 0; idx < len(head); idx++ {
-		rel := len(head)-idx >= len(tail)
-		zip := funk.Zip(head[idx:], tail)
-		pos := 0
-		neg := 0
-		for idx, tuple := range zip {
-			p := tuple.Element1.(string)
-			n := tuple.Element2.(string)
-			if p == n {
-				pos += 1
-			} else if rel {
-				neg = idx + 1
-			} else {
-				neg = idx
-			}
-		}
-		if pos >= best {
-			best = pos
-			save = idx + neg
-			skip = neg
-		}
-	}
-	p := strings.Join(head[:save], " ")
-	n := strings.Join(tail[skip:], " ")
-	prev.Code = strings.TrimSpace(p + n)
-	next.Code = strings.TrimSpace(p + n)
 }
 
 /*
@@ -79,14 +35,15 @@ type Decoder struct {
 }
 
 func (d *Decoder) binary(signal []float64) (result []*step) {
+	key := make([]float64, len(signal))
 	max := funk.MaxFloat64(signal)
 	for idx, val := range signal {
-		signal[idx] = val * math.Min(d.Gain, max/val)
+		key[idx] = val * math.Min(d.Gain, max/val)
 	}
-	gmm := means{X: signal}
+	gmm := means{X: key}
 	gmm.optimize(d.Iter)
 	pre := 0
-	for idx, val := range signal {
+	for idx, val := range key {
 		cls := gmm.class(val)
 		if pre != cls {
 			result = append(result, &step{
@@ -96,10 +53,12 @@ func (d *Decoder) binary(signal []float64) (result []*step) {
 		}
 		pre = cls
 	}
-	return append(result, &step{time: len(signal)})
+	return
 }
 
 func (d *Decoder) detect(signal []float64) (result Message) {
+	result.Data = make([]float64, len(signal))
+	copy(result.Data, signal)
 	steps := d.binary(signal)
 	tones := make([]float64, 0)
 	if len(steps) >= 1 {
@@ -175,20 +134,21 @@ type Monitor struct {
 	MaxHold int
 	Decoder Decoder
 	samples []float64
+	targets []Message
 }
 
 /*
  規定の設定が適用された解析器を構築します。
 */
 func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
-	shift := int(math.Round(0.02 * float64(SamplingRateInHz)))
+	shift := int(math.Round(0.01 * float64(SamplingRateInHz)))
 	return Monitor{
-		MaxHold: 10 * SamplingRateInHz,
+		MaxHold: 5 * SamplingRateInHz,
 		Decoder: Decoder{
-			Iter: 10,
-			Bias: 10,
+			Iter: 5,
+			Bias: 5,
 			Gain: 2,
-			Thre: 0.03,
+			Thre: 0.01,
 			STFT: stft.New(shift, 2048),
 		},
 	}
@@ -198,10 +158,22 @@ func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
  音声からモールス信号の文字列を抽出します。
 */
 func (m *Monitor) Read(signal []float64) (result []Message) {
+	shift := m.Decoder.STFT.FrameShift
 	m.samples = append(m.samples, signal...)
-	result = m.Decoder.Read(m.samples)
 	if len(m.samples) > m.MaxHold {
-		m.samples = m.samples[len(signal):]
+		m.samples = m.samples[len(signal)/shift*shift:]
 	}
+	for _, next := range m.Decoder.Read(m.samples) {
+		for _, prev := range m.targets {
+			if next.Freq == prev.Freq {
+				drop := len(next.Data) - (len(signal) / shift)
+				data := append(prev.Data, next.Data[drop:]...)
+				next = m.Decoder.detect(data)
+				next.Freq = prev.Freq
+			}
+		}
+		result = append(result, next)
+	}
+	m.targets = result
 	return
 }
