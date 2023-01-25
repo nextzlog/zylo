@@ -21,6 +21,8 @@ type Message struct {
 	Data []float64
 	Code string
 	Freq int
+	Life int
+	Miss int
 }
 
 /*
@@ -132,6 +134,7 @@ func (d *Decoder) Read(signal []float64) (result []Message) {
 */
 type Monitor struct {
 	MaxHold int
+	MaxMiss int
 	Decoder Decoder
 	samples []float64
 	targets []Message
@@ -144,6 +147,7 @@ func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
 	shift := int(math.Round(0.01 * float64(SamplingRateInHz)))
 	return Monitor{
 		MaxHold: 5 * SamplingRateInHz,
+		MaxMiss: 5,
 		Decoder: Decoder{
 			Iter: 5,
 			Bias: 5,
@@ -170,9 +174,23 @@ func (m *Monitor) Read(signal []float64) (result []Message) {
 				data := append(prev.Data, next.Data[drop:]...)
 				next = m.Decoder.detect(data)
 				next.Freq = prev.Freq
+				next.Life = prev.Life
 			}
 		}
+		next.Life += 1
 		result = append(result, next)
+	}
+	for _, prev := range m.targets {
+		miss := true
+		for _, next := range result {
+			if next.Freq == prev.Freq {
+				miss = false
+			}
+		}
+		if miss && prev.Miss < m.MaxMiss {
+			prev.Miss += 1
+			result = append(result, prev)
+		}
 	}
 	m.targets = result
 	return

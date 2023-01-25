@@ -17,10 +17,10 @@ import (
 
 const (
 	CHOTTO_MENU = "MainForm.MainMenu.ChottoMenu"
+	FONT_FAMILY = "MS UI Gothic"
 	INTERVAL_MS = 500
+	LIFE_THRESH = 2
 )
-
-const FONT = "MS UI Gothic"
 
 //go:embed chotto.pas
 var runDelphi string
@@ -63,11 +63,17 @@ func onButtonEvent(num int) {
 }
 
 func onDecodeEvent(signal []float64) {
-	text := []string{}
+	label := []string{}
 	for _, m := range monitor.Read(signal) {
-		text = append(text, morse.CodeToText(m.Code))
+		if m.Life >= LIFE_THRESH {
+			text := morse.CodeToText(m.Code)
+			miss := strings.Count(text, "?")
+			if miss < len(text) {
+				label = append(label, text)
+			}
+		}
 	}
-	view.SetText(strings.Join(text, "\n"))
+	view.SetText(strings.Join(label, "\n"))
 }
 
 func onSignalEvent(out, in []byte, frames uint32) {
@@ -114,7 +120,7 @@ func createWindow() {
 	dock := winc.NewSimpleDock(form)
 	dock.Dock(view, winc.Fill)
 	view.SetText("")
-	view.SetFont(winc.NewFont(FONT, 24, 0))
+	view.SetFont(winc.NewFont(FONT_FAMILY, 24, 0))
 	return
 }
 
