@@ -94,7 +94,7 @@ func init() {
 	reiwa.OnInsertEvent = onInsertEvent
 	reiwa.OnDeleteEvent = onDeleteEvent
 	h.HandleFunc("/", wait)
-	server = &h.Server{Addr: ":8873"}
+	server = &h.Server{Addr: "localhost:8873"}
 	reiwa.AllowBandRange(reiwa.K3500, reiwa.M50)
 	reiwa.AllowModeRange(reiwa.CW, reiwa.AM)
 	reiwa.AllowRcvd(`^\d{2,}^`)
