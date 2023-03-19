@@ -1,1 +1,1 @@
-[zLog令和版でリアルタイムコンテストに参戦する](https://nextzlog.dev/real)
+[マニュアル](https://nextzlog.dev/real.pdf)
