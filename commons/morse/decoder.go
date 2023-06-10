@@ -8,11 +8,20 @@ package morse
 import (
 	"github.com/r9y9/gossp"
 	"github.com/r9y9/gossp/stft"
-	"github.com/thoas/go-funk"
 	"math"
 )
 
 const MIN_RELIABLE_DOT = 2
+
+func clip(x, min, max int) int {
+	if x < min {
+		x = min
+	}
+	if x > max {
+		x = max
+	}
+	return x
+}
 
 /*
  モールス信号の文字列です。
@@ -23,6 +32,7 @@ type Message struct {
 	Freq int
 	Life int
 	Miss int
+	side bool
 }
 
 /*
@@ -31,29 +41,25 @@ type Message struct {
 type Decoder struct {
 	Iter int
 	Bias int
+	Band int
 	Gain float64
-	Thre float64
+	Mute float64
+	Loud float64
 	STFT *stft.STFT
 }
 
 func (d *Decoder) binary(signal []float64) (result []*step) {
 	key := make([]float64, len(signal))
-	max := funk.MaxFloat64(signal)
+	max := Max64(signal)
 	for idx, val := range signal {
 		key[idx] = val * math.Min(d.Gain, max/val)
 	}
 	gmm := means{X: key}
 	gmm.optimize(d.Iter)
-	pre := 0
-	for idx, val := range key {
-		cls := gmm.class(val)
-		if pre != cls {
-			result = append(result, &step{
-				time: idx,
-				down: cls == 0,
-			})
-		}
-		pre = cls
+	tone := Max64(gmm.m)
+	mute := Min64(gmm.m)
+	if tone > d.Mute*mute {
+		result = gmm.steps()
 	}
 	return
 }
@@ -74,7 +80,7 @@ func (d *Decoder) detect(signal []float64) (result Message) {
 	if len(tones) >= 1 {
 		gmm := &means{X: tones}
 		gmm.optimize(d.Iter)
-		if funk.MinFloat64(gmm.m) > MIN_RELIABLE_DOT {
+		if Min64(gmm.m) > MIN_RELIABLE_DOT {
 			for _, s := range steps[1:] {
 				if s.down {
 					result.Code += s.tone(gmm.class(s.span))
@@ -88,17 +94,17 @@ func (d *Decoder) detect(signal []float64) (result Message) {
 }
 
 func (d *Decoder) search(spectrum []float64) (result []int) {
-	total := funk.SumFloat64(spectrum)
-	value := 0.0
-	index := 0
+	lev := d.Loud * Sum64(spectrum)
+	top := 0.0
+	pos := 0
 	for idx, val := range spectrum {
-		if val > value {
-			value = val
-			index = idx
-		} else if value > d.Thre*total {
-			result = append(result, index)
-			value = 0.0
-			index = 0
+		if val > top {
+			top = val
+			pos = idx
+		} else if val < lev && top > lev {
+			result = append(result, d.Bias+pos)
+			top = 0
+			pos = 0
 		}
 	}
 	return
@@ -118,12 +124,15 @@ func (d *Decoder) Read(signal []float64) (result []Message) {
 	}
 	buff := make([]float64, len(spec))
 	for _, idx := range d.search(dist) {
-		for t, s := range spec {
-			buff[t] = s[d.Bias+idx]
-		}
-		if m := d.detect(buff); m.Code != "" {
-			m.Freq = int(d.Bias + idx)
-			result = append(result, m)
+		for n := -d.Band; n <= d.Band; n++ {
+			for t, s := range spec {
+				buff[t] = s[clip(idx+n, 0, len(dist)-1)]
+			}
+			if m := d.detect(buff); m.Code != "" {
+				m.side = n != 0
+				m.Freq = int(idx + n)
+				result = append(result, m)
+			}
 		}
 	}
 	return
@@ -135,6 +144,7 @@ func (d *Decoder) Read(signal []float64) (result []Message) {
 type Monitor struct {
 	MaxHold int
 	MaxMiss int
+	MaxBand int
 	Decoder Decoder
 	samples []float64
 	targets []Message
@@ -144,18 +154,58 @@ type Monitor struct {
  規定の設定が適用された解析器を構築します。
 */
 func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
-	shift := int(math.Round(0.01 * float64(SamplingRateInHz)))
 	return Monitor{
-		MaxHold: 5 * SamplingRateInHz,
+		MaxHold: 2 * SamplingRateInHz,
 		MaxMiss: 5,
+		MaxBand: 3,
 		Decoder: Decoder{
 			Iter: 5,
 			Bias: 5,
+			Band: 0,
 			Gain: 2,
-			Thre: 0.01,
-			STFT: stft.New(shift, 2048),
+			Mute: 5,
+			Loud: 0.01,
+			STFT: stft.New(SamplingRateInHz/100, 2048),
 		},
 	}
+}
+
+func (m *Monitor) next(signal []float64) (result []Message) {
+	shift := m.Decoder.STFT.FrameShift
+	extra := m.Decoder
+	extra.Band = m.MaxBand
+	for _, next := range extra.Read(m.samples) {
+		for _, prev := range m.targets {
+			if next.Freq == prev.Freq {
+				drop := len(next.Data) - (len(signal) / shift)
+				data := append(prev.Data, next.Data[drop:]...)
+				next = m.Decoder.detect(data)
+				next.Freq = prev.Freq
+				next.Life = prev.Life
+			}
+		}
+		if !next.side {
+			next.Life += 1
+			result = append(result, next)
+		}
+	}
+	return
+}
+
+func (m *Monitor) prev(latest []Message) (result []Message) {
+	for _, prev := range m.targets {
+		miss := true
+		for _, next := range latest {
+			if next.Freq == prev.Freq {
+				miss = false
+			}
+		}
+		if miss && prev.Miss < m.MaxMiss {
+			prev.Miss += 1
+			result = append(result, prev)
+		}
+	}
+	return append(latest, result...)
 }
 
 /*
@@ -167,31 +217,7 @@ func (m *Monitor) Read(signal []float64) (result []Message) {
 	if len(m.samples) > m.MaxHold {
 		m.samples = m.samples[len(signal)/shift*shift:]
 	}
-	for _, next := range m.Decoder.Read(m.samples) {
-		for _, prev := range m.targets {
-			if next.Freq == prev.Freq {
-				drop := len(next.Data) - (len(signal) / shift)
-				data := append(prev.Data, next.Data[drop:]...)
-				next = m.Decoder.detect(data)
-				next.Freq = prev.Freq
-				next.Life = prev.Life
-			}
-		}
-		next.Life += 1
-		result = append(result, next)
-	}
-	for _, prev := range m.targets {
-		miss := true
-		for _, next := range result {
-			if next.Freq == prev.Freq {
-				miss = false
-			}
-		}
-		if miss && prev.Miss < m.MaxMiss {
-			prev.Miss += 1
-			result = append(result, prev)
-		}
-	}
+	result = m.prev(m.next(signal))
 	m.targets = result
 	return
 }

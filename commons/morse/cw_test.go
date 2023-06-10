@@ -5,11 +5,7 @@
 *******************************************************************************/
 package morse
 
-import (
-	"github.com/r9y9/gossp/stft"
-	"github.com/r9y9/gossp/window"
-	"testing"
-)
+import "testing"
 
 const (
 	RATE = 48000
@@ -22,17 +18,7 @@ func TestEnDe(t *testing.T) {
 		WPMs: 10,
 		Rate: RATE,
 	}
-	decoder := Decoder{
-		Iter: 50,
-		Bias: 2,
-		Gain: 2,
-		Thre: 0.03,
-		STFT: &stft.STFT{
-			FrameShift: RATE / 100,
-			FrameLen:   4096,
-			Window:     window.CreateHanning(4096),
-		},
-	}
+	decoder := DefaultMonitor(RATE).Decoder
 	tone := encoder.Tone(TextToCode(TEXT))
 	for _, msg := range decoder.Read(tone) {
 		if CodeToText(msg.Code) != TEXT {

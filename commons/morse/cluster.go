@@ -6,7 +6,6 @@
 package morse
 
 import (
-	"github.com/thoas/go-funk"
 	"math"
 	"sort"
 )
@@ -17,8 +16,8 @@ type means struct {
 }
 
 func (b *means) optimize(iterations int) {
-	b.m = append(b.m, funk.MinFloat64(b.X))
-	b.m = append(b.m, funk.MaxFloat64(b.X))
+	b.m = append(b.m, Min64(b.X))
+	b.m = append(b.m, Max64(b.X))
 	for i := 0; i < iterations; i++ {
 		newN := make([]float64, len(b.m))
 		newM := make([]float64, len(b.m))
@@ -31,7 +30,7 @@ func (b *means) optimize(iterations int) {
 			b.m[k] = m / newN[k]
 		}
 	}
-	sort.Sort(sort.Float64Slice(b.m))
+	sort.Float64s(b.m)
 }
 
 func (b *means) class(x float64) (k int) {
@@ -52,6 +51,21 @@ func (b *means) extra(x float64) (k int) {
 	} else {
 		return 2
 	}
+}
+
+func (b *means) steps() (result []*step) {
+	pre := 0
+	for n, x := range b.X {
+		k := b.class(x)
+		if pre != k {
+			result = append(result, &step{
+				time: n,
+				down: k == 0,
+			})
+		}
+		pre = k
+	}
+	return
 }
 
 type step struct {
@@ -80,4 +94,29 @@ func (s *step) mute(class int) string {
 	default:
 		return " ; "
 	}
+}
+
+func Min64(x []float64) (min float64) {
+	for n, v := range x {
+		if n == 0 || v < min {
+			min = v
+		}
+	}
+	return
+}
+
+func Max64(x []float64) (max float64) {
+	for n, v := range x {
+		if n == 0 || v > max {
+			max = v
+		}
+	}
+	return
+}
+
+func Sum64(x []float64) (sum float64) {
+	for _, v := range x {
+		sum += v
+	}
+	return
 }
