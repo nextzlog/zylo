@@ -13,14 +13,12 @@ import (
 
 const MIN_RELIABLE_DOT = 2
 
-func clip(x, min, max int) int {
-	if x < min {
-		x = min
+func abs(x int) int {
+	if x > 0 {
+		return x
+	} else {
+		return -x
 	}
-	if x > max {
-		x = max
-	}
-	return x
 }
 
 /*
@@ -32,7 +30,6 @@ type Message struct {
 	Freq int
 	Life int
 	Miss int
-	side bool
 }
 
 /*
@@ -41,7 +38,6 @@ type Message struct {
 type Decoder struct {
 	Iter int
 	Bias int
-	Band int
 	Gain float64
 	Mute float64
 	Loud float64
@@ -102,7 +98,7 @@ func (d *Decoder) search(spectrum []float64) (result []int) {
 			top = val
 			pos = idx
 		} else if val < lev && top > lev {
-			result = append(result, d.Bias+pos)
+			result = append(result, pos)
 			top = 0
 			pos = 0
 		}
@@ -124,15 +120,12 @@ func (d *Decoder) Read(signal []float64) (result []Message) {
 	}
 	buff := make([]float64, len(spec))
 	for _, idx := range d.search(dist) {
-		for n := -d.Band; n <= d.Band; n++ {
-			for t, s := range spec {
-				buff[t] = s[clip(idx+n, 0, len(dist)-1)]
-			}
-			if m := d.detect(buff); m.Code != "" {
-				m.side = n != 0
-				m.Freq = int(idx + n)
-				result = append(result, m)
-			}
+		for t, s := range spec {
+			buff[t] = s[d.Bias+idx]
+		}
+		if m := d.detect(buff); m.Code != "" {
+			m.Freq = int(d.Bias + idx)
+			result = append(result, m)
 		}
 	}
 	return
@@ -161,7 +154,6 @@ func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
 		Decoder: Decoder{
 			Iter: 5,
 			Bias: 5,
-			Band: 0,
 			Gain: 2,
 			Mute: 5,
 			Loud: 0.01,
@@ -172,11 +164,9 @@ func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
 
 func (m *Monitor) next(signal []float64) (result []Message) {
 	shift := m.Decoder.STFT.FrameShift
-	extra := m.Decoder
-	extra.Band = m.MaxBand
-	for _, next := range extra.Read(m.samples) {
+	for _, next := range m.Decoder.Read(m.samples) {
 		for _, prev := range m.targets {
-			if next.Freq == prev.Freq {
+			if abs(next.Freq-prev.Freq) <= m.MaxBand {
 				drop := len(next.Data) - (len(signal) / shift)
 				data := append(prev.Data, next.Data[drop:]...)
 				next = m.Decoder.detect(data)
@@ -184,10 +174,8 @@ func (m *Monitor) next(signal []float64) (result []Message) {
 				next.Life = prev.Life
 			}
 		}
-		if !next.side {
-			next.Life += 1
-			result = append(result, next)
-		}
+		next.Life += 1
+		result = append(result, next)
 	}
 	return
 }
@@ -196,7 +184,7 @@ func (m *Monitor) prev(latest []Message) (result []Message) {
 	for _, prev := range m.targets {
 		miss := true
 		for _, next := range latest {
-			if next.Freq == prev.Freq {
+			if abs(next.Freq-prev.Freq) <= m.MaxBand {
 				miss = false
 			}
 		}
