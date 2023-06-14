@@ -1,0 +1,140 @@
+## utils
+
+[pkg.chotto]
+tag = "Chotto Wakaru CW"
+msg = "Windowsの音声入力から, モールス信号を解析し, その内容を画面に表示します."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/utils/chotto/README.md"
+use = ["dll.chotto"]
+exp = "stable"
+
+[dll.chotto]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/chotto.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/chotto.dll.md5"
+
+[pkg.format]
+tag = "zLog additional I/O"
+msg = "CTESTWINのLG8やHAMLOGのHDBを始め, 様々なファイルへの対応をzLogのインポート・エクスポート機能に追加します."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/utils/format/README.md"
+use = ["dll.format", "exe.format"]
+exp = "stable"
+
+[exe.format]
+url = "https://github.com/autodyne/qxsl/releases/download/nightly/qxsl.exe"
+
+[dll.format]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/format.dll.md5"
+
+[pkg.latest]
+tag = "zLog update checker"
+msg = "zLogの最新のリリースを自動的に検出し, デスクトップの通知欄に表示します."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/utils/latest/README.md"
+use = ["dll.latest"]
+exp = "stable"
+
+[dll.latest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/latest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/latest.dll.md5"
+
+[pkg.maplot]
+tag = "Maplot"
+msg = "zLogで記録したQSOから, 交信済みのJCC/Gコードを検出し, 地図に描画します."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/utils/maplot/README.md"
+use = ["dll.maplot"]
+exp = "stable"
+
+[dll.maplot]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/maplot.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/maplot.dll.md5"
+
+[pkg.prefix]
+tag = "Prefix"
+msg = "zLogで記録したQSOから, 交信相手局の国や地域を特定し, 通知欄に表示します."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/utils/prefix/README.md"
+use = ["dll.prefix"]
+exp = "stable"
+
+## rules
+
+[dll.prefix]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/prefix.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/prefix.dll.md5"
+[pkg.aktest]
+tag = "旭川コンテスト"
+msg = "旭川コンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rules/aktest/README.md"
+use = ["dll.aktest", "cfg.aktest"]
+exp = "stable"
+
+[cfg.aktest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rules/aktest/aktest.cfg"
+
+[dll.aktest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/aktest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/aktest.dll.md5"
+
+[pkg.hstest]
+tag = "高校コンテスト"
+msg = "高校コンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rules/hstest/README.md"
+use = ["dll.hstest", "cfg.hstest"]
+exp = "stable"
+
+[cfg.hstest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rules/hstest/hstest.cfg"
+
+[dll.hstest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll.md5"
+
+[pkg.tmtest]
+tag = "東海マラソンコンテスト"
+msg = "東海マラソンコンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rules/tmtest/README.md"
+use = ["dll.tmtest", "cfg.tmtest"]
+exp = "stable"
+
+[cfg.tmtest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rules/tmtest/tmtest.cfg"
+
+[dll.tmtest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll.md5"
+
+[pkg.yltest]
+tag = "YLコンテスト"
+msg = "JLRS主催のYLコンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rules/yltest/README.md"
+use = ["dll.yltest", "cfg.yltest"]
+exp = "stable"
+
+[cfg.yltest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rules/yltest/yltest.cfg"
+
+[dll.yltest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll.md5"
+
+[pkg.rttest]
+tag = "リアルタイムコンテスト"
+msg = "リアルタイムコンテストのCFGファイルと, クラウド送受信を行うプラグインです."
+web = "https://github.com/nextzlog/zylo"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rules/rttest/README.md"
+use = ["dll.rttest", "cfg.rttest"]
+exp = "stable"
+
+[cfg.rttest]
+url = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rules/rttest/rttest.cfg"
+
+[dll.rttest]
+url = "https://github.com/nextzlog/zylo/releases/download/nightly/rttest.dll"
+sum = "https://github.com/nextzlog/zylo/releases/download/nightly/rttest.dll.md5"

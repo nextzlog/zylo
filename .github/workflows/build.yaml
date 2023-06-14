@@ -33,27 +33,27 @@ jobs:
     - run: |
         cargo build --release
         mv ${{matrix.path}} ${{matrix.name}}
+        gh release create zbuild || true
         gh release upload zbuild ${{matrix.name}} --clobber
-      working-directory: zbuild
   BuildDemo:
     needs: BuildZyLO
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-        - name: plugins/rules/aktest
-        - name: plugins/rules/hstest
-        - name: plugins/rules/rttest
+        - name: src/plugins/rules/aktest
+        - name: src/plugins/rules/hstest
+        - name: src/plugins/rules/rttest
           zlog: 2.8.3.0
-        - name: plugins/rules/tmtest
-        - name: plugins/rules/yltest
-        - name: plugins/utils/chotto
+        - name: src/plugins/rules/tmtest
+        - name: src/plugins/rules/yltest
+        - name: src/plugins/utils/chotto
           zlog: 2.8.3.0
-        - name: plugins/utils/format
-        - name: plugins/utils/latest
-        - name: plugins/utils/maplot
+        - name: src/plugins/utils/format
+        - name: src/plugins/utils/latest
+        - name: src/plugins/utils/maplot
           zlog: 2.8.3.0
-        - name: plugins/utils/prefix
+        - name: src/plugins/utils/prefix
     steps:
     - uses: nextzlog/zylo@master
       with:
@@ -75,23 +75,23 @@ jobs:
       with:
         nobuild: true
         token: ${{secrets.GITHUB_TOKEN}}
-    - run: cp zlog/zlog/main.dfm zylo
     - run: |
         mkdir -p _includes
-        grep object ../main.dfm > _includes/form.dfm
-      working-directory: zylo/docs
-    - name: publish docs
+        cp ${GITHUB_WORKSPACE}/zlog/zlog/main.dfm _includes
+        grep object _includes/main.dfm > _includes/form.dfm
+      working-directory: zylo/src/manuals
+    - name: publish manuals
       run: |
         go install github.com/robertkrimen/godocdown/godocdown@latest
-        godocdown -o _morse.md -template docs/_morse.md commons/morse
-        godocdown -o _reiwa.md -template docs/_reiwa.md commons/reiwa
-        godocdown -o _win32.md -template docs/_win32.md commons/win32
-        cat _*.md >> docs/index.md
-      working-directory: zylo
+        godocdown -o _morse.md -template manuals/_morse.md commons/morse
+        godocdown -o _reiwa.md -template manuals/_reiwa.md commons/reiwa
+        godocdown -o _win32.md -template manuals/_win32.md commons/win32
+        cat _*.md >> manuals/index.md
+      working-directory: zylo/src
     - uses: actions/configure-pages@v2
     - uses: actions/jekyll-build-pages@v1
       with:
-        source: zylo/docs
+        source: zylo/src/manuals
     - uses: actions/upload-pages-artifact@v1
   Publish:
     needs: BuildPage

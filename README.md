@@ -3,7 +3,6 @@ ZyLO
 
 ![image](https://img.shields.io/badge/Go-1.17-red.svg)
 ![image](https://img.shields.io/badge/Rust-1.56-red.svg)
-![image](https://img.shields.io/badge/Delphi-10.4-red.svg)
 ![image](https://img.shields.io/badge/license-MIT-darkblue.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
 

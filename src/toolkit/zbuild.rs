@@ -4,6 +4,8 @@
  * Univ. Tokyo Amateur Radio Club Development Task Force (https://nextzlog.dev)
 *******************************************************************************/
 
+const OPT: &str = "-replace zylo=github.com/nextzlog/zylo/src/commons@HEAD";
+
 use itertools::join;
 use jsonschema::JSONSchema;
 use minijinja::{context, Environment, State};
@@ -30,7 +32,7 @@ fn ok(code: i32) {
 
 fn init(pkg: &str) -> Return<String> {
 	shell("go", &format!("mod init {}", pkg));
-	shell("go", &include_str!("go.mod.opts"));
+	shell("go", &format!("mod edit {}", OPT));
 	shell("go", "get -u all");
 	shell("go", "mod tidy");
 	Ok(format!("{}.dll", pkg))
@@ -43,7 +45,7 @@ fn make(pkg: &str) -> Return<()> {
 	shell("upx", name);
 	let md5 = format!("{}.md5", name);
 	let sum = md5::compute(fs::read(&name)?);
-	fs::write(md5, format!("{v:x}", v=sum))?;
+	fs::write(md5, format!("{v:x}", v = sum))?;
 	Ok(())
 }
 
@@ -127,13 +129,13 @@ fn older(_st: &State, now: String, old: String) -> bool {
 }
 
 #[argopt::subcmd]
-fn compile(#[opt(default_value = "2.8")]ver: String) -> Return<()> {
+fn compile(#[opt(default_value = "2.8")] ver: String) -> Return<()> {
 	let mut env = Environment::new();
 	env.add_test("older_than", older);
-	let src = include_str!("zutils.go");
+	let src = include_str!("zbuild.go");
 	let ctx = context!(version => ver);
 	let lib = env.render_str(src, ctx);
-	save("zutils.go", lib?.as_bytes());
+	save("main.go", lib?.as_bytes());
 	make(&name(&env::current_dir()?).unwrap())
 }
 
