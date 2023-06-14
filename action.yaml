@@ -35,7 +35,7 @@ runs:
   - name: setup zbuild
     run: |
       mkdir -p .bin
-      gh release download -R nextzlog/zylo -p ${{env.ZBUILD}}
+      gh release download zbuild -R nextzlog/zylo
       sudo chmod a+x ${{env.ZBUILD}}
       mv ${{env.ZBUILD}} .bin/zbuild
       echo `pwd`/.bin >> $GITHUB_PATH

@@ -4,7 +4,7 @@
 *.md5
 *.lock
 go.sum
-zutils.go
+main.go
 target/
 !.github
 !.gitignore

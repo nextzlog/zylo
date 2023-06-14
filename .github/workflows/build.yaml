@@ -33,27 +33,27 @@ jobs:
     - run: |
         cargo build --release
         mv ${{matrix.path}} ${{matrix.name}}
+        gh release create zbuild || true
         gh release upload zbuild ${{matrix.name}} --clobber
-      working-directory: zbuild
   BuildDemo:
     needs: BuildZyLO
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-        - name: plugins/rules/aktest
-        - name: plugins/rules/hstest
-        - name: plugins/rules/rttest
+        - name: src/plugins/rules/aktest
+        - name: src/plugins/rules/hstest
+        - name: src/plugins/rules/rttest
           zlog: 2.8.3.0
-        - name: plugins/rules/tmtest
-        - name: plugins/rules/yltest
-        - name: plugins/utils/chotto
+        - name: src/plugins/rules/tmtest
+        - name: src/plugins/rules/yltest
+        - name: src/plugins/utils/chotto
           zlog: 2.8.3.0
-        - name: plugins/utils/format
-        - name: plugins/utils/latest
-        - name: plugins/utils/maplot
+        - name: src/plugins/utils/format
+        - name: src/plugins/utils/latest
+        - name: src/plugins/utils/maplot
           zlog: 2.8.3.0
-        - name: plugins/utils/prefix
+        - name: src/plugins/utils/prefix
     steps:
     - uses: nextzlog/zylo@master
       with:
