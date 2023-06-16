@@ -140,6 +140,12 @@ fn compile(#[opt(default_value = "2.8")] ver: String) -> Return<()> {
 }
 
 #[argopt::subcmd]
+fn new() -> Return<()> {
+	init(&name(&env::current_dir()?).unwrap())?;
+	Ok(())
+}
+
+#[argopt::subcmd]
 fn market() -> Return<()> {
 	let source = merge()?;
 	let target = io::stdout();
@@ -159,7 +165,7 @@ fn setup() -> Return<()> {
 	Ok(())
 }
 
-#[argopt::cmd_group(commands = [compile, market, setup])]
+#[argopt::cmd_group(commands = [compile, new, market, setup])]
 fn main() -> Return<()> {
 	env::set_var("GOOS", "windows");
 	env::set_var("GOARCH", "amd64");
