@@ -27,7 +27,7 @@ func init() {
 }
 
 /*
- モールス信号の文字列を欧文に変換します。
+モールス信号の文字列を欧文に変換します。
 */
 func CodeToText(code string) (result string) {
 	for _, s := range strings.Split(code, " ") {
@@ -41,7 +41,7 @@ func CodeToText(code string) (result string) {
 }
 
 /*
- 欧文をモールス信号の文字列に変換します。
+欧文をモールス信号の文字列に変換します。
 */
 func TextToCode(text string) (result string) {
 	for _, s := range text {

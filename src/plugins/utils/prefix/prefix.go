@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2022 JA1ZLO.
+Copyright (C) 2022 JA1ZLO.
 */
 package main
 

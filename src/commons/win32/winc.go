@@ -15,17 +15,17 @@ import (
 )
 
 /*
- フォームのデフォルトの横幅です。
+フォームのデフォルトの横幅です。
 */
 var DefaultWindowW = 640
 
 /*
- フォームのデフォルトの縦幅です。
+フォームのデフォルトの縦幅です。
 */
 var DefaultWindowH = 640
 
 /*
- この拡張機能の専用のクラス名を持つフォームを構築します。
+この拡張機能の専用のクラス名を持つフォームを構築します。
 */
 func NewForm(parent winc.Controller) *winc.Form {
 	name := fmt.Sprintf("zylo_%s_form", reiwa.PluginName)
@@ -67,7 +67,7 @@ func NewForm(parent winc.Controller) *winc.Form {
 }
 
 /*
- この拡張機能の専用のクラス名を持つパネルを構築します。
+この拡張機能の専用のクラス名を持つパネルを構築します。
 */
 func NewPanel(parent winc.Controller) *winc.Panel {
 	name := fmt.Sprintf("zylo_%s_panel", reiwa.PluginName)

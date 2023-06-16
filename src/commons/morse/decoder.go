@@ -22,7 +22,7 @@ func abs(x int) int {
 }
 
 /*
- モールス信号の文字列です。
+モールス信号の文字列です。
 */
 type Message struct {
 	Data []float64
@@ -33,7 +33,7 @@ type Message struct {
 }
 
 /*
- モールス信号の解析器です。
+モールス信号の解析器です。
 */
 type Decoder struct {
 	Iter int
@@ -107,8 +107,8 @@ func (d *Decoder) search(spectrum []float64) (result []int) {
 }
 
 /*
- 音声からモールス信号の文字列を抽出します。
- 複数の周波数のモールス信号を分離できます。
+音声からモールス信号の文字列を抽出します。
+複数の周波数のモールス信号を分離できます。
 */
 func (d *Decoder) Read(signal []float64) (result []Message) {
 	spec, _ := gossp.SplitSpectrogram(d.STFT.STFT(signal))
@@ -132,7 +132,7 @@ func (d *Decoder) Read(signal []float64) (result []Message) {
 }
 
 /*
- モールス信号の逐次的な解析器です。
+モールス信号の逐次的な解析器です。
 */
 type Monitor struct {
 	MaxHold int
@@ -144,7 +144,7 @@ type Monitor struct {
 }
 
 /*
- 規定の設定が適用された解析器を構築します。
+規定の設定が適用された解析器を構築します。
 */
 func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
 	return Monitor{
@@ -197,7 +197,7 @@ func (m *Monitor) prev(latest []Message) (result []Message) {
 }
 
 /*
- 音声からモールス信号の文字列を抽出します。
+音声からモールス信号の文字列を抽出します。
 */
 func (m *Monitor) Read(signal []float64) (result []Message) {
 	shift := m.Decoder.STFT.FrameShift

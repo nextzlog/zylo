@@ -13,7 +13,7 @@ const (
 )
 
 /*
- モールス信号の生成器です。
+モールス信号の生成器です。
 */
 type Encoder struct {
 	buff []float64
@@ -43,7 +43,7 @@ func (e *Encoder) size(code string) (cnt int) {
 }
 
 /*
- モールス信号の文字列を音声に変換します。
+モールス信号の文字列を音声に変換します。
 */
 func (e *Encoder) Tone(code string) []float64 {
 	idx := 0
