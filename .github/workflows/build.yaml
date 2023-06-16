@@ -47,8 +47,6 @@ jobs:
           zlog: 2.8.3.0
         - name: src/plugins/rules/tmtest
         - name: src/plugins/rules/yltest
-        - name: src/plugins/utils/chotto
-          zlog: 2.8.3.0
         - name: src/plugins/utils/format
         - name: src/plugins/utils/latest
         - name: src/plugins/utils/maplot
