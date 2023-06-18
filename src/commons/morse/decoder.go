@@ -11,14 +11,6 @@ import (
 	"math"
 )
 
-func abs(x int) int {
-	if x > 0 {
-		return x
-	} else {
-		return -x
-	}
-}
-
 /*
 モールス信号の文字列です。
 */
@@ -131,7 +123,6 @@ func (d *Decoder) Read(signal []float64) (result []Message) {
 */
 type Monitor struct {
 	MaxHold int
-	MaxBand int
 	Decoder Decoder
 	samples []float64
 	targets []Message
@@ -143,7 +134,6 @@ type Monitor struct {
 func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
 	return Monitor{
 		MaxHold: 2 * SamplingRateInHz,
-		MaxBand: 3,
 		Decoder: Decoder{
 			Iter: 5,
 			Bias: 5,
@@ -159,7 +149,7 @@ func (m *Monitor) next(signal []float64) (result []Message) {
 	shift := m.Decoder.STFT.FrameShift
 	for _, next := range m.Decoder.Read(m.samples) {
 		for _, prev := range m.targets {
-			if abs(next.Freq-prev.Freq) <= m.MaxBand {
+			if next.Freq == prev.Freq {
 				drop := len(next.Data) - (len(signal) / shift)
 				data := append(prev.Data, next.Data[drop:]...)
 				next = m.Decoder.detect(data)
