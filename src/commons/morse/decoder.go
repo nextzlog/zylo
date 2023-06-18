@@ -11,8 +11,6 @@ import (
 	"math"
 )
 
-const MIN_RELIABLE_DOT = 2
-
 func abs(x int) int {
 	if x > 0 {
 		return x
@@ -75,13 +73,11 @@ func (d *Decoder) detect(signal []float64) (result Message) {
 	if len(tones) >= 1 {
 		gmm := &means{X: tones}
 		gmm.optimize(d.Iter)
-		if min64(gmm.m) > MIN_RELIABLE_DOT {
-			for _, s := range steps[1:] {
-				if s.down {
-					result.Code += s.tone(gmm.class(s.span))
-				} else {
-					result.Code += s.mute(gmm.extra(s.span))
-				}
+		for _, s := range steps[1:] {
+			if s.down {
+				result.Code += s.tone(gmm.class(s.span))
+			} else {
+				result.Code += s.mute(gmm.extra(s.span))
 			}
 		}
 	}
