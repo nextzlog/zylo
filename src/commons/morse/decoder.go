@@ -29,7 +29,6 @@ type Message struct {
 	Code string
 	Freq int
 	Life int
-	Miss int
 }
 
 /*
@@ -136,7 +135,6 @@ func (d *Decoder) Read(signal []float64) (result []Message) {
 */
 type Monitor struct {
 	MaxHold int
-	MaxMiss int
 	MaxBand int
 	Decoder Decoder
 	samples []float64
@@ -149,7 +147,6 @@ type Monitor struct {
 func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
 	return Monitor{
 		MaxHold: 2 * SamplingRateInHz,
-		MaxMiss: 5,
 		MaxBand: 3,
 		Decoder: Decoder{
 			Iter: 5,
@@ -180,22 +177,6 @@ func (m *Monitor) next(signal []float64) (result []Message) {
 	return
 }
 
-func (m *Monitor) prev(latest []Message) (result []Message) {
-	for _, prev := range m.targets {
-		miss := true
-		for _, next := range latest {
-			if abs(next.Freq-prev.Freq) <= m.MaxBand {
-				miss = false
-			}
-		}
-		if miss && prev.Miss < m.MaxMiss {
-			prev.Miss += 1
-			result = append(result, prev)
-		}
-	}
-	return append(latest, result...)
-}
-
 /*
 音声からモールス信号の文字列を抽出します。
 */
@@ -205,7 +186,7 @@ func (m *Monitor) Read(signal []float64) (result []Message) {
 	if len(m.samples) > m.MaxHold {
 		m.samples = m.samples[len(signal)/shift*shift:]
 	}
-	result = m.prev(m.next(signal))
+	result = m.next(signal)
 	m.targets = result
 	return
 }
