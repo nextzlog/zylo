@@ -57,7 +57,7 @@ var dcb = malgo.DeviceCallbacks{
 type Device struct {
 	pointer unsafe.Pointer
 	capture *malgo.Device
-	monitor morse.Monitor
+	decoder morse.Decoder
 }
 
 func (dev *Device) Config() (cfg malgo.DeviceConfig) {
@@ -71,7 +71,7 @@ func (dev *Device) Config() (cfg malgo.DeviceConfig) {
 
 func (dev *Device) Listen() {
 	dev.capture, _ = malgo.InitDevice(ctx.Context, dev.Config(), dcb)
-	dev.monitor = morse.DefaultMonitor(int(dev.capture.SampleRate()))
+	dev.decoder = morse.DefaultDecoder(int(dev.capture.SampleRate()))
 	dev.capture.Start()
 }
 
@@ -94,7 +94,7 @@ func DeviceList() (table map[string]*Device, names []string) {
 }
 
 func onSignalEvent(out, in []byte, frames uint32) {
-	messages := dev.monitor.Read(readSignedInt(in))
+	messages := dev.decoder.Read(readSignedInt(in))
 	for _, m := range messages {
 		miss := true
 		for n, p := range data {

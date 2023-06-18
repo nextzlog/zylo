@@ -9,6 +9,7 @@ import (
 	"github.com/r9y9/gossp"
 	"github.com/r9y9/gossp/stft"
 	"math"
+	"sort"
 )
 
 /*
@@ -25,6 +26,7 @@ type Message struct {
 モールス信号の解析器です。
 */
 type Decoder struct {
+	Life int
 	Iter int
 	Bias int
 	Gain float64
@@ -33,6 +35,8 @@ type Decoder struct {
 	Rate int
 	Hold int
 	STFT *stft.STFT
+	prev []Message
+	wave []float64
 }
 
 func (d *Decoder) binary(signal []float64) (result []*step) {
@@ -84,25 +88,29 @@ func (d *Decoder) search(series [][]float64) (result []int) {
 	}
 	top := 0.0
 	pos := 0
+	bit := make(map[int]bool)
 	lev := d.Mute * sum64(pow[cut:])
 	for idx, val := range pow[d.Bias:cut] {
 		if val > top {
 			top = val
 			pos = idx
 		} else if val < lev && top > lev {
-			result = append(result, d.Bias+pos)
+			bit[d.Bias+pos] = true
 			top = 0
 			pos = 0
 		}
 	}
+	for _, prev := range d.prev {
+		bit[prev.Freq] = true
+	}
+	for freq := range bit {
+		result = append(result, freq)
+	}
+	sort.Ints(result)
 	return
 }
 
-/*
-音声からモールス信号の文字列を抽出します。
-複数の周波数のモールス信号を分離できます。
-*/
-func (d *Decoder) Read(signal []float64) (result []Message) {
+func (d *Decoder) scan(signal []float64) (result []Message) {
 	spec, _ := gossp.SplitSpectrogram(d.STFT.STFT(signal))
 	wave := make([]float64, len(spec))
 	for _, idx := range d.search(spec) {
@@ -117,62 +125,56 @@ func (d *Decoder) Read(signal []float64) (result []Message) {
 	return
 }
 
-/*
-モールス信号の逐次的な解析器です。
-*/
-type Monitor struct {
-	MaxHold int
-	Decoder Decoder
-	samples []float64
-	targets []Message
-}
-
-/*
-規定の設定が適用された解析器を構築します。
-*/
-func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
-	return Monitor{
-		MaxHold: 2 * SamplingRateInHz,
-		Decoder: Decoder{
-			Iter: 5,
-			Bias: 5,
-			Gain: 2,
-			Mute: 5,
-			Band: 1000,
-			Rate: SamplingRateInHz,
-			STFT: stft.New(SamplingRateInHz/100, 2048),
-		},
+func (d *Decoder) next(signal []float64) (result []Message) {
+	shift := d.STFT.FrameShift
+	if len(d.wave) > d.Hold {
+		d.wave = d.wave[len(d.wave)-d.Hold:]
 	}
-}
-
-func (m *Monitor) next(signal []float64) (result []Message) {
-	shift := m.Decoder.STFT.FrameShift
-	for _, next := range m.Decoder.Read(m.samples) {
-		for _, prev := range m.targets {
+	d.wave = append(d.wave, signal...)
+	for _, next := range d.scan(d.wave) {
+		for _, prev := range d.prev {
 			if next.Freq == prev.Freq {
 				drop := len(next.Data) - (len(signal) / shift)
 				data := append(prev.Data, next.Data[drop:]...)
-				next = m.Decoder.detect(data)
+				next = d.detect(data)
 				next.Freq = prev.Freq
 				next.Life = prev.Life
 			}
 		}
-		next.Life += 1
+		next.Life++
 		result = append(result, next)
 	}
+	d.prev = result
+	d.wave = signal
 	return
 }
 
 /*
 音声からモールス信号の文字列を抽出します。
+複数の周波数のモールス信号を分離できます。
 */
-func (m *Monitor) Read(signal []float64) (result []Message) {
-	shift := m.Decoder.STFT.FrameShift
-	m.samples = append(m.samples, signal...)
-	if len(m.samples) > m.MaxHold {
-		m.samples = m.samples[len(signal)/shift*shift:]
+func (d *Decoder) Read(signal []float64) (result []Message) {
+	for _, next := range d.next(signal) {
+		if next.Life >= d.Life {
+			result = append(result, next)
+		}
 	}
-	result = m.next(signal)
-	m.targets = result
 	return
+}
+
+/*
+推奨の設定が適用された解析器を構築します。
+*/
+func DefaultDecoder(SamplingRateInHz int) (decoder Decoder) {
+	return Decoder{
+		Life: 3,
+		Iter: 5,
+		Bias: 5,
+		Gain: 2,
+		Mute: 10,
+		Band: 1000,
+		Rate: SamplingRateInHz,
+		Hold: SamplingRateInHz,
+		STFT: stft.New(SamplingRateInHz/100, 2048),
+	}
 }

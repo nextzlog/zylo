@@ -18,7 +18,7 @@ func TestEnDe(t *testing.T) {
 		WPMs: 10,
 		Rate: RATE,
 	}
-	decoder := DefaultMonitor(RATE).Decoder
+	decoder := DefaultDecoder(RATE)
 	tone := encoder.Tone(TextToCode(TEXT))
 	for _, msg := range decoder.Read(tone) {
 		if CodeToText(msg.Code) != TEXT {
