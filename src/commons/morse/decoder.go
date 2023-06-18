@@ -29,7 +29,9 @@ type Decoder struct {
 	Bias int
 	Gain float64
 	Mute float64
-	Loud float64
+	Band int
+	Rate int
+	Hold int
 	STFT *stft.STFT
 }
 
@@ -41,11 +43,7 @@ func (d *Decoder) binary(signal []float64) (result []*step) {
 	}
 	gmm := means{X: key}
 	gmm.optimize(d.Iter)
-	tone := max64(gmm.m)
-	mute := min64(gmm.m)
-	if tone > d.Mute*mute {
-		result = gmm.steps()
-	}
+	result = gmm.steps()
 	return
 }
 
@@ -76,16 +74,23 @@ func (d *Decoder) detect(signal []float64) (result Message) {
 	return
 }
 
-func (d *Decoder) search(spectrum []float64) (result []int) {
-	lev := d.Loud * sum64(spectrum)
+func (d *Decoder) search(series [][]float64) (result []int) {
+	cut := d.Band * d.STFT.FrameLen / d.Rate
+	pow := make([]float64, d.STFT.FrameLen/2)
+	for _, sp := range series {
+		for idx, val := range sp[:len(pow)] {
+			pow[idx] += val * val
+		}
+	}
 	top := 0.0
 	pos := 0
-	for idx, val := range spectrum {
+	lev := d.Mute * sum64(pow[cut:])
+	for idx, val := range pow[d.Bias:cut] {
 		if val > top {
 			top = val
 			pos = idx
 		} else if val < lev && top > lev {
-			result = append(result, pos)
+			result = append(result, d.Bias+pos)
 			top = 0
 			pos = 0
 		}
@@ -99,19 +104,13 @@ func (d *Decoder) search(spectrum []float64) (result []int) {
 */
 func (d *Decoder) Read(signal []float64) (result []Message) {
 	spec, _ := gossp.SplitSpectrogram(d.STFT.STFT(signal))
-	dist := make([]float64, d.STFT.FrameLen/2)
-	for _, s := range spec {
-		for idx, val := range s[d.Bias:len(dist)] {
-			dist[idx] += val * val
-		}
-	}
-	buff := make([]float64, len(spec))
-	for _, idx := range d.search(dist) {
+	wave := make([]float64, len(spec))
+	for _, idx := range d.search(spec) {
 		for t, s := range spec {
-			buff[t] = s[d.Bias+idx]
+			wave[t] = s[idx]
 		}
-		if m := d.detect(buff); m.Code != "" {
-			m.Freq = int(d.Bias + idx)
+		if m := d.detect(wave); m.Code != "" {
+			m.Freq = idx
 			result = append(result, m)
 		}
 	}
@@ -139,7 +138,8 @@ func DefaultMonitor(SamplingRateInHz int) (monitor Monitor) {
 			Bias: 5,
 			Gain: 2,
 			Mute: 5,
-			Loud: 0.01,
+			Band: 1000,
+			Rate: SamplingRateInHz,
 			STFT: stft.New(SamplingRateInHz/100, 2048),
 		},
 	}
