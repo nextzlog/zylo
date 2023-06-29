@@ -10,14 +10,6 @@ path = 'src/toolkit/zbuild.rs'
 
 [dependencies]
 argopt = '*'
-itertools = '*'
-jsonschema = '*'
 md5 = '*'
 minijinja = '*'
-reqwest = {version = '*', features=['blocking']}
-serde-transcode = '*'
-serde_json = '*'
-serde_yaml = '*'
-structopt = '*'
-toml = '0.5.*'
 version-compare = '*'

@@ -1,4 +1,0 @@
-apt: install -y gcc-mingw-w64 golang-go upx
-brew: install mingw-w64 go upx
-choco: install mingw golang upx
-pacman: -Sy mingw-w64-gcc go upx

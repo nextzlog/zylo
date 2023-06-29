@@ -6,23 +6,14 @@
 
 const OPT: &str = "-replace zylo=github.com/nextzlog/zylo/src/commons@HEAD";
 
-use itertools::join;
-use jsonschema::JSONSchema;
 use minijinja::{context, Environment, State};
-use reqwest::blocking::get;
-use serde_json::Serializer;
-use serde_transcode::transcode;
-use serde_yaml::from_str;
-use std::error::Error;
 use std::io::Write;
 use std::process::abort;
 use std::process::Command as Cmd;
-use std::{env, fs, io, path};
-use toml::Deserializer;
-use toml::Value;
+use std::{env, fs, path};
 use version_compare::Version;
 
-type Return<E> = Result<E, Box<dyn Error>>;
+type Return<E> = Result<E, Box<dyn std::error::Error>>;
 
 fn ok(code: i32) {
 	if code != 0 {
@@ -61,63 +52,6 @@ fn save(name: &str, data: &[u8]) {
 	}
 }
 
-fn checksum(item: &mut Value) -> Return<()> {
-	if item.get("sum").is_none() {
-		let val = item.as_table_mut().unwrap();
-		let url = val["url"].as_str().unwrap();
-		let bin = get(url)?.error_for_status()?.bytes()?;
-		let sum = format!("{:x}", md5::compute(bin));
-		val.insert("sum".into(), Value::String(sum));
-	}
-	Ok(())
-}
-
-fn document(item: &mut Value) -> Return<()> {
-	if item.get("doc").is_some() {
-		let val = item.as_table_mut().unwrap();
-		let url = val["doc"].as_str().unwrap();
-		let txt = get(url)?.error_for_status()?.text()?;
-		val.insert("doc".into(), Value::String(txt));
-	}
-	Ok(())
-}
-
-fn tree(list: &mut Value) -> Return<String> {
-	let items = list.as_table_mut();
-	for (_, it) in items.unwrap() {
-		if it.is_table() {
-			tree(it)?;
-		}
-		if it.get("url").is_some() {
-			checksum(it)?;
-		} else {
-			document(it)?;
-		}
-	}
-	Ok(list.to_string())
-}
-
-fn fetch(url: &str) -> Return<String> {
-	let res = get(url)?.error_for_status()?;
-	let val = res.text()?.parse::<Value>()?;
-	let sch = from_str(include_str!("schema.yaml"))?;
-	let cmp = JSONSchema::compile(&sch).unwrap();
-	let tmp = serde_json::to_value(val.clone())?;
-	if let Err(error) = cmp.validate(&tmp) {
-		eprintln!("{}", join(error, ", "));
-		ok(1);
-	}
-	tree(&mut val.clone())
-}
-
-fn merge() -> Return<String> {
-	let mut toml = String::new();
-	for url in include_str!("market.list").lines() {
-		toml.push_str(&format!("{}\n", fetch(url)?));
-	}
-	Ok(toml)
-}
-
 #[allow(unused_must_use)]
 fn shell(cmd: &str, arg: &str) {
 	let seq = arg.split_whitespace();
@@ -146,26 +80,15 @@ fn new() -> Return<()> {
 }
 
 #[argopt::subcmd]
-fn market() -> Return<()> {
-	let source = merge()?;
-	let target = io::stdout();
-	let mut de = Deserializer::new(&source);
-	let mut en = Serializer::pretty(target);
-	Ok(transcode(&mut de, &mut en)?)
-}
-
-#[argopt::subcmd]
 fn setup() -> Return<()> {
-	let yaml = include_str!("launch.yaml");
-	let data = from_str::<Value>(yaml)?;
-	let cmds = data.as_table().unwrap();
-	for (cmd, args) in cmds {
-		shell(cmd, args.as_str().unwrap());
-	}
+	shell("apt", "install -y gcc-mingw-w64 golang-go upx");
+	shell("brew", "install mingw-w64 go upx");
+	shell("choco", "install mingw golang upx");
+	shell("pacman", "-Sy mingw-w64-gcc go upx");
 	Ok(())
 }
 
-#[argopt::cmd_group(commands = [compile, new, market, setup])]
+#[argopt::cmd_group(commands = [compile, new, setup])]
 fn main() -> Return<()> {
 	env::set_var("GOOS", "windows");
 	env::set_var("GOARCH", "amd64");

@@ -19,19 +19,12 @@ inputs:
   directory:
     description: 'project path'
     default: '.'
-  nobuild:
-    description: 'install only'
-    default: false
 runs:
   using: composite
   steps:
   - uses: actions/checkout@v2
     with:
       ref: ${{inputs.ref}}
-    if: ${{inputs.nobuild == 'false'}}
-  - uses: actions/setup-go@v3
-    with:
-      go-version: 1.18
   - name: setup zbuild
     run: |
       mkdir -p .bin
@@ -39,7 +32,6 @@ runs:
       sudo chmod a+x ${{env.ZBUILD}}
       mv ${{env.ZBUILD}} .bin/zbuild
       echo `pwd`/.bin >> $GITHUB_PATH
-      echo `go env GOPATH`/bin >> $GITHUB_PATH
     shell: bash
     env:
       ZBUILD: zbuild-${{runner.os}}
@@ -52,7 +44,6 @@ runs:
       gh release create ${{inputs.tag}} || true
       gh release upload ${{inputs.tag}} *.{dll,md5} --clobber
     shell: bash
-    if: ${{inputs.nobuild == 'false'}}
     env:
       LATEST: zbuild -R nextzlog/zylo
       GITHUB_TOKEN: ${{inputs.token}}

@@ -62,6 +62,9 @@ jobs:
     needs: BuildDemo
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
     - uses: actions/checkout@v3
       with:
         path: zylo
@@ -69,10 +72,6 @@ jobs:
       with:
         path: zlog
         repository: jr8ppg/zlog
-    - uses: nextzlog/zylo@master
-      with:
-        nobuild: true
-        token: ${{secrets.GITHUB_TOKEN}}
     - run: |
         mkdir -p _includes
         cp ${GITHUB_WORKSPACE}/zlog/zlog/main.dfm _includes
