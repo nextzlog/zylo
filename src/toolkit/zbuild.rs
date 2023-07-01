@@ -6,12 +6,11 @@
 
 const OPT: &str = "-replace zylo=github.com/nextzlog/zylo/src/commons@HEAD";
 
-use minijinja::{context, Environment, State};
+use minijinja::render;
 use std::io::Write;
 use std::process::abort;
 use std::process::Command as Cmd;
 use std::{env, fs, path};
-use version_compare::Version;
 
 type Return<E> = Result<E, Box<dyn std::error::Error>>;
 
@@ -58,25 +57,11 @@ fn shell(cmd: &str, arg: &str) {
 	Cmd::new(cmd).args(seq).status();
 }
 
-fn older(_st: &State, now: String, old: String) -> bool {
-	Version::from(&now).unwrap() < Version::from(&old).unwrap()
-}
-
 #[argopt::subcmd]
 fn compile(#[opt(default_value = "2.8")] ver: String) -> Return<()> {
-	let mut env = Environment::new();
-	env.add_test("older_than", older);
-	let src = include_str!("zbuild.go");
-	let ctx = context!(version => ver);
-	let lib = env.render_str(src, ctx);
-	save("main.go", lib?.as_bytes());
+	let lib = render!(include_str!("zbuild.go"), version => ver);
+	save("main.go", lib.as_bytes());
 	make(&name(&env::current_dir()?).unwrap())
-}
-
-#[argopt::subcmd]
-fn new() -> Return<()> {
-	init(&name(&env::current_dir()?).unwrap())?;
-	Ok(())
 }
 
 #[argopt::subcmd]
@@ -88,7 +73,7 @@ fn setup() -> Return<()> {
 	Ok(())
 }
 
-#[argopt::cmd_group(commands = [compile, new, setup])]
+#[argopt::cmd_group(commands = [compile, setup])]
 fn main() -> Return<()> {
 	env::set_var("GOOS", "windows");
 	env::set_var("GOARCH", "amd64");
