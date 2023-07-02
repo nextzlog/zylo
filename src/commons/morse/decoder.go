@@ -12,6 +12,11 @@ import (
 	"sort"
 )
 
+const (
+	edge_step = 10
+	edge_damp = 10
+)
+
 /*
 モールス信号の文字列です。
 */
@@ -19,24 +24,25 @@ type Message struct {
 	Data []float64
 	Code string
 	Freq int
-	Life int
+	Time int
+	Miss int
 }
 
 /*
 モールス信号の解析器です。
 */
 type Decoder struct {
-	Life int
 	Iter int
 	Bias int
+	Hold int
+	Miss int
 	Gain float64
 	Mute float64
-	Band int
-	Rate int
-	Hold int
 	STFT *stft.STFT
-	prev []Message
+	Spec [][]float64
 	wave []float64
+	prev []Message
+	time int
 }
 
 func (d *Decoder) binary(signal []float64) (result []*step) {
@@ -75,29 +81,23 @@ func (d *Decoder) detect(signal []float64) (result Message) {
 			}
 		}
 	}
+	result.Time = d.time
 	return
 }
 
 func (d *Decoder) search(series [][]float64) (result []int) {
-	cut := d.Band * d.STFT.FrameLen / d.Rate
-	pow := make([]float64, d.STFT.FrameLen/2)
+	cut := d.STFT.FrameLen / 2
+	pow := make([]float64, cut)
 	for _, sp := range series {
-		for idx, val := range sp[:len(pow)] {
-			pow[idx] += val * val
+		for n, v := range sp[:cut] {
+			pow[n] += v * v
 		}
 	}
-	top := 0.0
-	pos := 0
 	bit := make(map[int]bool)
-	lev := d.Mute * sum64(pow[cut:])
-	for idx, val := range pow[d.Bias:cut] {
-		if val > top {
-			top = val
-			pos = idx
-		} else if val < lev && top > lev {
-			bit[d.Bias+pos] = true
-			top = 0
-			pos = 0
+	lev := d.Mute * sum64(pow[d.Bias:])
+	for _, freq := range top64(pow[:cut]) {
+		if pow[freq] > lev && freq > d.Bias {
+			bit[freq] = true
 		}
 	}
 	for _, prev := range d.prev {
@@ -110,22 +110,42 @@ func (d *Decoder) search(series [][]float64) (result []int) {
 	return
 }
 
-func (d *Decoder) scan(signal []float64) (result []Message) {
-	spec, _ := gossp.SplitSpectrogram(d.STFT.STFT(signal))
-	wave := make([]float64, len(spec))
-	for _, idx := range d.search(spec) {
-		for t, s := range spec {
-			wave[t] = s[idx]
-		}
-		if m := d.detect(wave); m.Code != "" {
-			m.Freq = idx
-			result = append(result, m)
+func (d *Decoder) edge(signal []float64) (spec [][]float64) {
+	spec, _ = gossp.SplitSpectrogram(d.STFT.STFT(signal))
+	state := make([]float64, d.STFT.FrameLen)
+	for n := 0; n < edge_step; n++ {
+		for _, sp := range spec {
+			copy(state, sp)
+			for k, v := range sp[1 : len(sp)-1] {
+				if state[k] > v || state[k+2] > v {
+					sp[k+1] /= edge_damp
+				}
+			}
 		}
 	}
 	return
 }
 
-func (d *Decoder) next(signal []float64) (result []Message) {
+func (d *Decoder) scan(signal []float64) (result []Message) {
+	spec := d.edge(signal)
+	wave := make([]float64, len(spec))
+	for _, idx := range d.search(spec) {
+		for t, s := range spec {
+			wave[t] = s[idx]
+		}
+		next := d.detect(wave)
+		next.Freq = idx
+		result = append(result, next)
+	}
+	d.Spec = spec
+	return
+}
+
+/*
+音声からモールス信号の文字列を抽出します。
+複数の周波数のモールス信号を分離できます。
+*/
+func (d *Decoder) Read(signal []float64) (result []Message) {
 	shift := d.STFT.FrameShift
 	if len(d.wave) > d.Hold {
 		d.wave = d.wave[len(d.wave)-d.Hold:]
@@ -138,25 +158,20 @@ func (d *Decoder) next(signal []float64) (result []Message) {
 				data := append(prev.Data, next.Data[drop:]...)
 				next = d.detect(data)
 				next.Freq = prev.Freq
-				next.Life = prev.Life
+				next.Time = prev.Time
+				if next.Code == prev.Code {
+					next.Miss = prev.Miss + 1
+				}
 			}
 		}
-		next.Life++
 		result = append(result, next)
 	}
-	d.prev = result
+	d.time++
+	d.prev = nil
 	d.wave = signal
-	return
-}
-
-/*
-音声からモールス信号の文字列を抽出します。
-複数の周波数のモールス信号を分離できます。
-*/
-func (d *Decoder) Read(signal []float64) (result []Message) {
-	for _, next := range d.next(signal) {
-		if next.Life >= d.Life {
-			result = append(result, next)
+	for _, next := range result {
+		if next.Miss <= d.Miss {
+			d.prev = append(d.prev, next)
 		}
 	}
 	return
@@ -167,14 +182,12 @@ func (d *Decoder) Read(signal []float64) (result []Message) {
 */
 func DefaultDecoder(SamplingRateInHz int) (decoder Decoder) {
 	return Decoder{
-		Life: 3,
 		Iter: 5,
 		Bias: 5,
+		Miss: 2,
 		Gain: 2,
-		Mute: 10,
-		Band: 1000,
-		Rate: SamplingRateInHz,
-		Hold: SamplingRateInHz,
+		Mute: 0.2,
+		Hold: SamplingRateInHz * 5,
 		STFT: stft.New(SamplingRateInHz/100, 2048),
 	}
 }

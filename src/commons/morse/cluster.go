@@ -120,3 +120,17 @@ func sum64(x []float64) (sum float64) {
 	}
 	return
 }
+
+func top64(x []float64) (index []int) {
+	top := 0.0
+	pos := 0
+	for n, v := range x {
+		if v > top {
+			top = v
+			pos = n
+		} else if v < top {
+			index = append(index, pos)
+		}
+	}
+	return
+}
