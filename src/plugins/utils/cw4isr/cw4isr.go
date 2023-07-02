@@ -9,11 +9,12 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/gen2brain/malgo"
 	"github.com/thoas/go-funk"
 	"github.com/wcharczuk/go-chart/v2"
-	"math"
+	"image/color"
 	"net/url"
 	"unsafe"
 	"zylo/morse"
@@ -25,10 +26,12 @@ const (
 )
 
 const (
-	NAME = "Chotto Wakaru CW"
+	NAME = "CW4ISR Morse Decoder"
 	HREF = "https://use.zlog.org"
 	LINK = "Download Latest zLog"
 )
+
+const GRAPH_WIDTH = 500
 
 var (
 	ctx *malgo.AllocatedContext
@@ -36,18 +39,18 @@ var (
 )
 
 var (
+	items []morse.Message
 	table map[string]*Device
 	names []string
+	graph [][]float64
+	level float64
 )
 
 var (
-	data []morse.Message
-	his  *widget.List
-)
-
-var (
+	his *widget.List
 	lab *widget.Label
 	osc *canvas.Image
+	spa *canvas.Raster
 )
 
 var dcb = malgo.DeviceCallbacks{
@@ -97,24 +100,35 @@ func onSignalEvent(out, in []byte, frames uint32) {
 	messages := dev.decoder.Read(readSignedInt(in))
 	for _, m := range messages {
 		miss := true
-		for n, p := range data {
+		for n, p := range items {
 			freq := m.Freq == p.Freq
-			life := m.Life >= p.Life
-			if freq && life {
-				data[n] = m
+			time := m.Time == p.Time
+			if freq && time {
+				items[n] = m
 				miss = false
-			} else if freq {
-				data[n].Life = math.MaxInt32
 			}
 		}
 		if miss {
-			data = append(data, m)
+			items = append(items, m)
 		}
 	}
-	if len(data) > MAX_HISTORY {
-		data = data[len(data)-MAX_HISTORY:]
+	if len(items) > MAX_HISTORY {
+		items = items[len(items)-MAX_HISTORY:]
+	}
+	graph = append(graph, dev.decoder.Spec...)
+	if len(graph) > GRAPH_WIDTH {
+		graph = graph[len(graph)-GRAPH_WIDTH:]
+	}
+	level = 0.0
+	for _, row := range graph {
+		for _, v := range row {
+			if v > level {
+				level = v
+			}
+		}
 	}
 	his.Refresh()
+	spa.Refresh()
 }
 
 func readSignedInt(signal []byte) (result []float64) {
@@ -125,8 +139,24 @@ func readSignedInt(signal []byte) (result []float64) {
 	return
 }
 
+func updateSpec(x, y, w, h int) (pixel color.Color) {
+	x = x * GRAPH_WIDTH / w
+	y = (h - y) * 100 / h
+	value := 0.0
+	width := GRAPH_WIDTH - len(graph)
+	if x > width {
+		value = graph[x-width][y] / level
+	}
+	return color.RGBA{
+		R: uint8(255 * value),
+		G: uint8(255 * value),
+		B: 0,
+		A: 255,
+	}
+}
+
 func length() int {
-	return len(data)
+	return len(items)
 }
 
 func create() fyne.CanvasObject {
@@ -134,11 +164,11 @@ func create() fyne.CanvasObject {
 }
 
 func update(id widget.ListItemID, obj fyne.CanvasObject) {
-	obj.(*widget.Label).SetText(morse.CodeToText(data[id].Code))
+	obj.(*widget.Label).SetText(morse.CodeToText(items[id].Code))
 }
 
 func choice(id widget.ListItemID) {
-	x := make([]float64, len(data[id].Data))
+	x := make([]float64, len(items[id].Data))
 	for n, _ := range x {
 		x[n] = float64(n)
 	}
@@ -146,16 +176,31 @@ func choice(id widget.ListItemID) {
 		Series: []chart.Series{
 			chart.ContinuousSeries{
 				XValues: x,
-				YValues: data[id].Data,
+				YValues: items[id].Data,
+				Style: chart.Style{
+					FillColor: chart.GetDefaultColor(0),
+				},
 			},
 		},
+		XAxis: chart.XAxis{
+			Style: chart.Style{
+				Hidden: true,
+			},
+		},
+		YAxis: chart.YAxis{
+			Style: chart.Style{
+				Hidden: true,
+			},
+		},
+		Width:  int(osc.Size().Width),
+		Height: int(osc.Size().Height),
 	}
 	buffer := &chart.ImageWriter{}
 	graph.Render(chart.PNG, buffer)
 	image, _ := buffer.Image()
 	osc.Image = image
 	osc.Refresh()
-	lab.SetText(morse.CodeToText(data[id].Code))
+	lab.SetText(morse.CodeToText(items[id].Code))
 }
 
 func restart(name string) {
@@ -167,18 +212,20 @@ func restart(name string) {
 }
 
 func clear() {
-	data = nil
+	items = nil
 	his.Refresh()
 }
 
 func main() {
 	ctx, _ = malgo.InitContext(nil, malgo.ContextConfig{}, nil)
 	app := app.New()
+	app.Settings().SetTheme(theme.DarkTheme())
 	win := app.NewWindow(NAME)
 	ref, _ := url.Parse(HREF)
 	btm := widget.NewHyperlink(LINK, ref)
 	osc = &canvas.Image{}
 	lab = widget.NewLabel("")
+	spa = canvas.NewRasterWithPixels(updateSpec)
 	his = widget.NewList(length, create, update)
 	his.OnSelected = choice
 	table, names = DeviceList()
@@ -188,7 +235,9 @@ func main() {
 	lhs := container.NewBorder(nil, btn, nil, nil, his)
 	rhs := container.NewBorder(lab, nil, nil, nil, osc)
 	hsp := container.NewHSplit(lhs, rhs)
-	out := container.NewBorder(sel, btm, nil, nil, hsp)
+	vsp := container.NewVSplit(hsp, spa)
+	out := container.NewBorder(sel, btm, nil, nil, vsp)
+	hsp.SetOffset(0.2)
 	win.SetContent(out)
 	win.Resize(fyne.NewSize(640, 480))
 	win.ShowAndRun()
