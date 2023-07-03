@@ -41,6 +41,7 @@ var (
 
 var (
 	items []morse.Message
+	alive []morse.Message
 	table map[string]*Device
 	names []string
 	graph [][]float64
@@ -49,7 +50,6 @@ var (
 
 var (
 	his *widget.List
-	lab *widget.Label
 	osc *canvas.Image
 	spa *canvas.Raster
 )
@@ -98,8 +98,8 @@ func DeviceList() (table map[string]*Device, names []string) {
 }
 
 func onSignalEvent(out, in []byte, frames uint32) {
-	messages := dev.decoder.Read(readSignedInt(in))
-	for _, m := range messages {
+	alive = dev.decoder.Read(readSignedInt(in))
+	for _, m := range alive {
 		miss := true
 		for n, p := range items {
 			freq := m.Freq == p.Freq
@@ -130,6 +130,7 @@ func onSignalEvent(out, in []byte, frames uint32) {
 	}
 	his.Refresh()
 	spa.Refresh()
+	oscilloscope()
 }
 
 func readSignedInt(signal []byte) (result []float64) {
@@ -140,7 +141,7 @@ func readSignedInt(signal []byte) (result []float64) {
 	return
 }
 
-func updateSpec(x, y, w, h int) (pixel color.Color) {
+func spectrogram(x, y, w, h int) (pixel color.Color) {
 	x = x * GRAPH_WIDTH / w
 	y = (h - y) * 100 / h
 	value := 0.0
@@ -156,6 +157,28 @@ func updateSpec(x, y, w, h int) (pixel color.Color) {
 	}
 }
 
+func oscilloscope() {
+	graph := chart.Chart{
+		Width:  int(osc.Size().Width),
+		Height: int(osc.Size().Height),
+	}
+	graph.XAxis.Style.Hidden = true
+	graph.YAxis.Style.Hidden = true
+	for _, item := range alive {
+		x := float64(len(item.Data))
+		g := chart.ContinuousSeries{
+			XValues: chart.LinearRange(1, x),
+			YValues: item.Data,
+		}
+		graph.Series = append(graph.Series, g)
+	}
+	buffer := &chart.ImageWriter{}
+	graph.Render(chart.PNG, buffer)
+	image, _ := buffer.Image()
+	osc.Image = image
+	osc.Refresh()
+}
+
 func length() int {
 	return len(items)
 }
@@ -165,43 +188,8 @@ func create() fyne.CanvasObject {
 }
 
 func update(id widget.ListItemID, obj fyne.CanvasObject) {
-	obj.(*widget.Label).SetText(morse.CodeToText(items[id].Code))
-}
-
-func choice(id widget.ListItemID) {
-	x := make([]float64, len(items[id].Data))
-	for n, _ := range x {
-		x[n] = float64(n)
-	}
-	graph := chart.Chart{
-		Series: []chart.Series{
-			chart.ContinuousSeries{
-				XValues: x,
-				YValues: items[id].Data,
-				Style: chart.Style{
-					FillColor: chart.GetDefaultColor(0),
-				},
-			},
-		},
-		XAxis: chart.XAxis{
-			Style: chart.Style{
-				Hidden: true,
-			},
-		},
-		YAxis: chart.YAxis{
-			Style: chart.Style{
-				Hidden: true,
-			},
-		},
-		Width:  int(osc.Size().Width),
-		Height: int(osc.Size().Height),
-	}
-	buffer := &chart.ImageWriter{}
-	graph.Render(chart.PNG, buffer)
-	image, _ := buffer.Image()
-	osc.Image = image
-	osc.Refresh()
-	lab.SetText(morse.CodeToText(items[id].Code))
+	text := morse.CodeToText(items[len(items)-id-1].Code)
+	obj.(*widget.Label).SetText(text)
 }
 
 func restart(name string) {
@@ -229,10 +217,8 @@ func main() {
 	ref, _ := url.Parse(HREF)
 	btm := widget.NewHyperlink(LINK, ref)
 	osc = &canvas.Image{}
-	lab = widget.NewLabel("")
-	spa = canvas.NewRasterWithPixels(updateSpec)
+	spa = canvas.NewRasterWithPixels(spectrogram)
 	his = widget.NewList(length, create, update)
-	his.OnSelected = choice
 	table, names = DeviceList()
 	sel := widget.NewSelect(names, restart)
 	vol := widget.NewSlider(0, VOL_MAX_VAL)
@@ -240,13 +226,10 @@ func main() {
 	vol.OnChanged = volume
 	sel.SetSelectedIndex(0)
 	vol.SetValue(0.3 * VOL_MAX_VAL)
-	lhs := container.NewBorder(nil, btn, nil, nil, his)
-	rhs := container.NewBorder(lab, nil, nil, nil, osc)
-	hsp := container.NewHSplit(lhs, rhs)
-	vsp := container.NewVSplit(hsp, spa)
-	bar := container.NewBorder(nil, nil, sel, nil, vol)
+	mon := container.NewGridWithRows(2, osc, spa)
+	vsp := container.NewVSplit(his, mon)
+	bar := container.NewBorder(nil, nil, sel, btn, vol)
 	out := container.NewBorder(bar, btm, nil, nil, vsp)
-	hsp.SetOffset(0.2)
 	win.SetContent(out)
 	win.Resize(fyne.NewSize(640, 480))
 	win.ShowAndRun()
