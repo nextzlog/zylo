@@ -23,6 +23,7 @@ import (
 const (
 	INTERVAL_MS = 200
 	MAX_HISTORY = 100
+	VOL_MAX_VAL = 100
 )
 
 const (
@@ -216,6 +217,10 @@ func clear() {
 	his.Refresh()
 }
 
+func volume(vol float64) {
+	dev.decoder.Mute = vol / VOL_MAX_VAL
+}
+
 func main() {
 	ctx, _ = malgo.InitContext(nil, malgo.ContextConfig{}, nil)
 	app := app.New()
@@ -230,13 +235,17 @@ func main() {
 	his.OnSelected = choice
 	table, names = DeviceList()
 	sel := widget.NewSelect(names, restart)
+	vol := widget.NewSlider(0, VOL_MAX_VAL)
 	btn := widget.NewButton("clear", clear)
+	vol.OnChanged = volume
 	sel.SetSelectedIndex(0)
+	vol.SetValue(0.3 * VOL_MAX_VAL)
 	lhs := container.NewBorder(nil, btn, nil, nil, his)
 	rhs := container.NewBorder(lab, nil, nil, nil, osc)
 	hsp := container.NewHSplit(lhs, rhs)
 	vsp := container.NewVSplit(hsp, spa)
-	out := container.NewBorder(sel, btm, nil, nil, vsp)
+	bar := container.NewBorder(nil, nil, sel, nil, vol)
+	out := container.NewBorder(bar, btm, nil, nil, vsp)
 	hsp.SetOffset(0.2)
 	win.SetContent(out)
 	win.Resize(fyne.NewSize(640, 480))
