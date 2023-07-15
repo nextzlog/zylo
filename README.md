@@ -2,22 +2,36 @@ ZyLO
 ====
 
 ![image](https://img.shields.io/badge/Go-1.17-red.svg)
-![image](https://img.shields.io/badge/Rust-1.56-red.svg)
 ![image](https://img.shields.io/badge/license-MIT-darkblue.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
 
-ZyLO is an official plugin SDK integrated into [zLog 令和 edition](https://use.zlog.org).
+ZyLO is an official plugin SDK integrated into [zLog v2.8 or later](https://use.zlog.org).
 zLog is a powerful amateur radio logging software for contests and has been loved by millions for 30 years.
-
-## Downloads
-
-- [zbuild](https://github.com/nextzlog/zylo/releases/zbuild)
-- [zLog2.8+](https://github.com/jr8ppg/zLog/releases/latest)
 
 ## Documents
 
 - [Slides](https://nextzlog.dev/zylo.pdf)
 - [Manual](https://nextzlog.github.io/zylo)
+
+## Install
+
+```sh
+$ go install github.com/nextzlog/zylo/zbuild@HEAD
+```
+
+## Usage
+
+To install Go, MinGW and UPX:
+
+```sh
+$ zbuild setup
+```
+
+To create a DLL for zLog 2.8:
+
+```sh
+$ zbuild build --version 2.8
+```
 
 ## Contribution
 

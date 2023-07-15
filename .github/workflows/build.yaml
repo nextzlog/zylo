@@ -10,33 +10,7 @@ permissions:
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 jobs:
-  BuildZyLO:
-    runs-on: ${{matrix.os}}
-    strategy:
-      matrix:
-        include:
-        - os: macos-latest
-          name: zbuild-macOS
-          path: target/release/zbuild
-        - os: ubuntu-latest
-          name: zbuild-Linux
-          path: target/release/zbuild
-        - os: windows-latest
-          name: zbuild-Windows.exe
-          path: target/release/zbuild.exe
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-    - run: |
-        cargo build --release
-        mv ${{matrix.path}} ${{matrix.name}}
-        gh release create zbuild || true
-        gh release upload zbuild ${{matrix.name}} --clobber
-  BuildDemo:
-    needs: BuildZyLO
+  Compile:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -44,22 +18,20 @@ jobs:
         - name: src/plugins/rules/aktest
         - name: src/plugins/rules/hstest
         - name: src/plugins/rules/rttest
-          zlog: 2.8.3.0
         - name: src/plugins/rules/tmtest
         - name: src/plugins/rules/yltest
         - name: src/plugins/utils/format
         - name: src/plugins/utils/latest
         - name: src/plugins/utils/maplot
-          zlog: 2.8.3.0
         - name: src/plugins/utils/prefix
     steps:
     - uses: nextzlog/zylo@master
       with:
         token: ${{secrets.GITHUB_TOKEN}}
-        version: ${{matrix.zlog}}
+        version: 2.8.3.0
         directory: ${{matrix.name}}
-  BuildPage:
-    needs: BuildDemo
+  Prepare:
+    needs: Compile
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-go@v3
@@ -91,7 +63,7 @@ jobs:
         source: zylo/src/manuals
     - uses: actions/upload-pages-artifact@v1
   Publish:
-    needs: BuildPage
+    needs: Prepare
     runs-on: ubuntu-latest
     environment:
       name: github-pages

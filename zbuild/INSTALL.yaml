@@ -1,0 +1,25 @@
+true:
+- sudo:
+  - apt
+  - install
+  - -y
+  - gcc-mingw-w64
+  - golang-go
+  - upx
+- sudo:
+  - pacman
+  - -Sy
+  - mingw-w64-gcc
+  - go
+  - upx
+false:
+- brew:
+  - install
+  - mingw-w64
+  - go
+  - upx
+- choco:
+  - install
+  - mingw
+  - golang
+  - upx

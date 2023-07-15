@@ -25,26 +25,18 @@ runs:
   - uses: actions/checkout@v2
     with:
       ref: ${{inputs.ref}}
-  - name: setup zbuild
+  - uses: actions/setup-go@v3
+    with:
+      go-version: 1.18
+  - name: zbuild
     run: |
-      mkdir -p .bin
-      gh release download zbuild -R nextzlog/zylo
-      sudo chmod a+x ${{env.ZBUILD}}
-      mv ${{env.ZBUILD}} .bin/zbuild
-      echo `pwd`/.bin >> $GITHUB_PATH
-    shell: bash
-    env:
-      ZBUILD: zbuild-${{runner.os}}
-      GITHUB_TOKEN: ${{inputs.token}}
-  - run: sudo .bin/zbuild setup
-    shell: bash
-  - name: build plugin
-    run: |
-      zbuild compile ${{inputs.version}}
+      go install github.com/nextzlog/zylo/zbuild@HEAD
+      zbuild setup --sudo || zbuild setup
+      zbuild build --version ${{inputs.version}}
       gh release create ${{inputs.tag}} || true
       gh release upload ${{inputs.tag}} *.{dll,md5} --clobber
     shell: bash
     env:
-      LATEST: zbuild -R nextzlog/zylo
+      GOPROXY: direct
       GITHUB_TOKEN: ${{inputs.token}}
     working-directory: ${{inputs.directory}}

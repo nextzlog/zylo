@@ -2,9 +2,8 @@
 *.h
 *.dll
 *.md5
-*.lock
 go.sum
-main.go
-target/
+zbuild
+!zbuild/
 !.github
 !.gitignore
