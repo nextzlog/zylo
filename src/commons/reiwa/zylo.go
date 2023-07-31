@@ -3,6 +3,7 @@
  * Released under the MIT License (or GPL v3 until 2021 Oct 28th) (see LICENSE)
  * Univ. Tokyo Amateur Radio Club Development Task Force (https://nextzlog.dev)
 *******************************************************************************/
+
 package reiwa
 
 /*
@@ -86,22 +87,22 @@ import (
 )
 
 /*
-問合わせの返り値の長さの限度です。
+Length limit of query response.
 */
 const ResponseCapacity = 256
 
 /*
-設定を保管するファイルの名前です。
+zlog.ini.
 */
 const SettingsFileName = "zlog.ini"
 
 /*
-この拡張機能を識別できる名前です。
+The name of this plugin.
 */
 var PluginName = ""
 
 /*
-この拡張機能が動くバージョンです。
+zLog version where this plugin works.
 */
 var MinVersion = "2.8.3.0"
 
@@ -247,20 +248,20 @@ func zylo_attach_event(test, path *C.char) {
 	}
 }
 
-//export zylo_assign_event
-func zylo_assign_event(test, path *C.char) {
-	defer DisplayPanic()
-	t := C.GoString(test)
-	c := C.GoString(path)
-	OnAssignEvent(t, c)
-}
-
 //export zylo_detach_event
 func zylo_detach_event(test, path *C.char) {
 	defer DisplayPanic()
 	t := C.GoString(test)
 	c := C.GoString(path)
 	OnDetachEvent(t, c)
+}
+
+//export zylo_assign_event
+func zylo_assign_event(test, path *C.char) {
+	defer DisplayPanic()
+	t := C.GoString(test)
+	c := C.GoString(path)
+	OnAssignEvent(t, c)
 }
 
 //export zylo_insert_event
@@ -316,7 +317,7 @@ func zylo_add_editor_handler(name string) (evID int) {
 }
 
 /*
-QSO構造体です。
+zLog QSO structure.
 */
 type QSO struct {
 	time  float64
@@ -347,7 +348,7 @@ type QSO struct {
 }
 
 /*
-QSO構造体の通信方式の列挙子です。
+Enum of modes.
 */
 const (
 	CW = iota
@@ -359,7 +360,7 @@ const (
 )
 
 /*
-QSO構造体の周波数帯の列挙子です。
+Enum of bands.
 */
 const (
 	K1900 = iota
@@ -381,14 +382,14 @@ const (
 )
 
 /*
-交信を識別する番号を返します。
+Returns the QSO ID.
 */
 func (qso *QSO) GetID() int32 {
 	return qso.id / 100
 }
 
 /*
-交信が行われた時刻を返します。
+Returns the time of the QSO.
 */
 func (qso *QSO) GetTime() time.Time {
 	t := math.Abs(qso.time)
@@ -398,105 +399,106 @@ func (qso *QSO) GetTime() time.Time {
 }
 
 /*
-呼出符号のポータブル表記を除く部分を返します。
+Returns the canonical call sign,
+excluding the portable designator.
 */
 func (qso *QSO) GetCallSign() string {
 	return strings.Split(qso.GetCall(), "/")[0]
 }
 
 /*
-交信相手の呼出符号を返します。
+Returns the call sign.
 */
 func (qso *QSO) GetCall() string {
 	return zylo_decode_string(qso.call[:])
 }
 
 /*
-送信したコンテストナンバーを返します。
+Returns the submitted contest number.
 */
 func (qso *QSO) GetSent() string {
 	return zylo_decode_string(qso.sent[:])
 }
 
 /*
-受信したコンテストナンバーを返します。
+Returns the received contest number.
 */
 func (qso *QSO) GetRcvd() string {
 	return zylo_decode_string(qso.rcvd[:])
 }
 
 /*
-運用者名を返します。
+Returns the operator name.
 */
 func (qso *QSO) GetName() string {
 	return zylo_decode_string(qso.name[:])
 }
 
 /*
-備考を返します。
+Returns remarks.
 */
 func (qso *QSO) GetNote() string {
 	return zylo_decode_string(qso.note[:])
 }
 
 /*
-主マルチプライヤを返します。
+Returns the primary multiplier.
 */
 func (qso *QSO) GetMul1() string {
 	return zylo_decode_string(qso.mul1[:])
 }
 
 /*
-マルチプライヤを返します。
+Returns the secondary multiplier.
 */
 func (qso *QSO) GetMul2() string {
 	return zylo_decode_string(qso.mul2[:])
 }
 
 /*
-副マルチプライヤを返します。
+Sets the call sign.
 */
 func (qso *QSO) SetCall(value string) {
 	copy(qso.call[:], zylo_encode_string(value))
 }
 
 /*
-送信したコンテストナンバーを設定します。
+Sets the submitted contest number.
 */
 func (qso *QSO) SetSent(value string) {
 	copy(qso.sent[:], zylo_encode_string(value))
 }
 
 /*
-受信したコンテストナンバーを設定します。
+Sets the received contest number.
 */
 func (qso *QSO) SetRcvd(value string) {
 	copy(qso.rcvd[:], zylo_encode_string(value))
 }
 
 /*
-運用者名を設定します。
+Sets the operator name.
 */
 func (qso *QSO) SetName(value string) {
 	copy(qso.name[:], zylo_encode_string(value))
 }
 
 /*
-備考を設定します。
+Sets remarks.
 */
 func (qso *QSO) SetNote(value string) {
 	copy(qso.note[:], zylo_encode_string(value))
 }
 
 /*
-主マルチプライヤを設定します。
+Sets the primary multiplier.
 */
 func (qso *QSO) SetMul1(value string) {
 	copy(qso.mul1[:], zylo_encode_string(value))
 }
 
 /*
-副マルチプライヤを設定します。
+Sets the secondary multiplier.
 */
 func (qso *QSO) SetMul2(value string) {
 	copy(qso.mul2[:], zylo_encode_string(value))
@@ -512,69 +514,69 @@ func zylo_encode_string(v string) []byte {
 }
 
 /*
-重複交信を検査します。
-有効な交信の場合は真を返します。
+Checks for duplicate QSOs.
+Returns true if the QSO is valid.
 */
 func (qso *QSO) VerifyDupe() bool {
 	return !qso.Dupe || zylo_dupes
 }
 
 /*
-周波数帯を検査します。
-有効な交信の場合は真を返します。
+Checks the band.
+Returns true if the QSO is valid.
 */
 func (qso *QSO) VerifyBand() bool {
 	return zylo_bands[qso.Band]
 }
 
 /*
-通信方式を検査します。
-有効な交信の場合は真を返します。
+Checks the mode.
+Returns true if the QSO is valid.
 */
 func (qso *QSO) VerifyMode() bool {
 	return zylo_modes[qso.Mode]
 }
 
 /*
-交信相手の呼出符号を検査します。
-有効な交信の場合は真を返します。
+Checks the call sign.
+Returns true if the QSO is valid.
 */
 func (qso *QSO) VerifyCall() bool {
 	return zylo_calls.MatchString(qso.GetCall())
 }
 
 /*
-コンテストナンバーを検査します。
-有効な交信の場合は真を返します。
-*/
-func (qso *QSO) VerifyRcvd() bool {
-	return zylo_rcvds.MatchString(qso.GetRcvd())
-}
-
-/*
-コンテストナンバーを検査します。
-有効な交信の場合は真を返します。
+Checks the submitted contest number.
+Returns true if the QSO is valid.
 */
 func (qso *QSO) VerifySent() bool {
 	return zylo_sents.MatchString(qso.GetSent())
 }
 
 /*
-コンテストナンバーを正規表現でグループ化します。
+Checks the received contest number.
+Returns true if the QSO is valid.
 */
-func (qso *QSO) GetRcvdGroups() []string {
-	return zylo_rcvds.FindStringSubmatch(qso.GetRcvd())
+func (qso *QSO) VerifyRcvd() bool {
+	return zylo_rcvds.MatchString(qso.GetRcvd())
 }
 
 /*
-コンテストナンバーを正規表現でグループ化します。
+Groups submitted contest numbers by regular expression.
 */
 func (qso *QSO) GetSentGroups() []string {
 	return zylo_sents.FindStringSubmatch(qso.GetSent())
 }
 
 /*
-QSOを無効な交信とします。
+Groups received contest numbers by regular expression.
+*/
+func (qso *QSO) GetRcvdGroups() []string {
+	return zylo_rcvds.FindStringSubmatch(qso.GetRcvd())
+}
+
+/*
+Makes the QSO an invalid QSO.
 */
 func (qso *QSO) Invalid() {
 	qso.Score = 0
@@ -583,14 +585,14 @@ func (qso *QSO) Invalid() {
 }
 
 /*
-QSO構造体をヘッダ情報なしで書き込みます。
+Dumps QSO structure without header information.
 */
 func (qso *QSO) DumpWithoutHead(w io.Writer) {
 	binary.Write(w, binary.LittleEndian, qso)
 }
 
 /*
-QSO構造体をヘッダ情報なしで読み取ります。
+Reads QSO structure without header information.
 */
 func (qso *QSO) LoadWithoutHead(r io.Reader) {
 	raw := make([]byte, 256)
@@ -599,7 +601,7 @@ func (qso *QSO) LoadWithoutHead(r io.Reader) {
 }
 
 /*
-QSO列をヘッダ情報付きのバイト列に変換します。
+Converts QSOs to byte sequence with header information.
 */
 func DumpZLO(qso ...QSO) (bin []byte) {
 	_, diff := time.Now().In(zone).Zone()
@@ -613,7 +615,7 @@ func DumpZLO(qso ...QSO) (bin []byte) {
 }
 
 /*
-ヘッダ情報付きのバイト列をQSO列に変換します。
+Converts byte sequence with header information to QSOs.
 */
 func LoadZLO(bin []byte) (logs []QSO) {
 	buf := bytes.NewReader(bin)
@@ -627,28 +629,28 @@ func LoadZLO(bin []byte) (logs []QSO) {
 }
 
 /*
-指定された交信記録をzLog側に追加します。
+Adds the QSO record to zLog.
 */
 func (qso *QSO) Insert() {
 	C.insert(unsafe.Pointer(qso), insertCB)
 }
 
 /*
-指定された交信記録をzLog側で削除します。
+Deletes the QSO record in zLog.
 */
 func (qso *QSO) Delete() {
 	C.delete(unsafe.Pointer(qso), deleteCB)
 }
 
 /*
-指定されたzLog側の交信記録を更新します。
+Updates the QSO record in zLog.
 */
 func (qso *QSO) Update() {
 	C.update(unsafe.Pointer(qso), updateCB)
 }
 
 /*
-指定された設定を取得します。
+Gets the specified setting.
 */
 func GetINI(section, key string) string {
 	init, _ := ini.LooseLoad(SettingsFileName)
@@ -656,7 +658,7 @@ func GetINI(section, key string) string {
 }
 
 /*
-指定された設定を保存します。
+Sets the specified setting.
 */
 func SetINI(section, key, value string) {
 	init, _ := ini.LooseLoad(SettingsFileName)
@@ -665,8 +667,7 @@ func SetINI(section, key, value string) {
 }
 
 /*
-パニックを捕捉してダイアログで表示します。
-例:
+Catch a panic and display it in a dialog.
 
 	defer DisplayPanic()
 */
@@ -677,7 +678,7 @@ func DisplayPanic() {
 }
 
 /*
-指定された文字列をダイアログで表示します。
+Displays the specified string in a dialog.
 */
 func DisplayModal(msg string, args ...interface{}) {
 	text := C.CString(fmt.Sprintf(msg, args...))
@@ -686,7 +687,7 @@ func DisplayModal(msg string, args ...interface{}) {
 }
 
 /*
-指定された文字列を通知バナーに表示します。
+Displays the specified string in a toast.
 */
 func DisplayToast(msg string, args ...interface{}) {
 	text := C.CString(fmt.Sprintf(msg, args...))
@@ -695,7 +696,7 @@ func DisplayToast(msg string, args ...interface{}) {
 }
 
 /*
-指定されたクエリを問い合わせます。
+Makes the specified query.
 */
 func Query(text string) string {
 	buf := make([]byte, ResponseCapacity+1)
@@ -705,8 +706,7 @@ func Query(text string) string {
 }
 
 /*
-指定されたウィンドウハンドルを取得します。
-例:
+Gets the specified window handle.
 
 	GetUI("MainForm.FileOpenItem")
 	GetUI("MenuForm.CancelButton")
@@ -718,8 +718,8 @@ func GetUI(expression string) uintptr {
 }
 
 /*
-指定されたスクリプトを実行します。
-zLog 2.8.3.0以降に限定の機能です。
+Calls the specified Delphi script.
+Limited to zLog 2.8.3.0 and later.
 */
 func RunDelphi(exp string, args ...interface{}) int {
 	e := C.CString(fmt.Sprintf(exp, args...))
@@ -731,18 +731,18 @@ var zylo_dupes = false
 var zylo_bands = make(map[byte]bool)
 var zylo_modes = make(map[byte]bool)
 var zylo_calls = regexp.MustCompile(`^.*$`)
-var zylo_rcvds = regexp.MustCompile(`^.*$`)
 var zylo_sents = regexp.MustCompile(`^.*$`)
+var zylo_rcvds = regexp.MustCompile(`^.*$`)
 
 /*
-重複交信を許容します。
+Allows duplicate QSO.
 */
 func AllowDupe() {
 	zylo_dupes = true
 }
 
 /*
-指定された周波数帯を許容します。
+Allows the specified bands.
 */
 func AllowBand(bands ...byte) {
 	for _, band := range bands {
@@ -751,7 +751,7 @@ func AllowBand(bands ...byte) {
 }
 
 /*
-指定された通信方式を許容します。
+Allows the specified modes.
 */
 func AllowMode(modes ...byte) {
 	for _, mode := range modes {
@@ -760,7 +760,7 @@ func AllowMode(modes ...byte) {
 }
 
 /*
-指定された周波数帯を許容します。
+Allows the specified bands.
 */
 func AllowBandRange(lo, hi byte) {
 	for b := lo; b <= hi; b++ {
@@ -769,7 +769,7 @@ func AllowBandRange(lo, hi byte) {
 }
 
 /*
-指定された通信方式を許容します。
+Allows the specified modes.
 */
 func AllowModeRange(lo, hi byte) {
 	for m := lo; m <= hi; m++ {
@@ -778,104 +778,103 @@ func AllowModeRange(lo, hi byte) {
 }
 
 /*
-交信相手の呼出符号の正規表現を設定します。
+Allows call signs of the pattern.
 */
 func AllowCall(pattern string) {
 	zylo_calls = regexp.MustCompile(pattern)
 }
 
 /*
-コンテストナンバーの正規表現を設定します。
-*/
-func AllowRcvd(pattern string) {
-	zylo_rcvds = regexp.MustCompile(pattern)
-}
-
-/*
-コンテストナンバーの正規表現を設定します。
+Allows submitted contest numbers of the pattern.
 */
 func AllowSent(pattern string) {
 	zylo_sents = regexp.MustCompile(pattern)
 }
 
 /*
-I/O拡張機能が利用する専用の変数です。
+Allows received contest numbers of the pattern.
+*/
+func AllowRcvd(pattern string) {
+	zylo_rcvds = regexp.MustCompile(pattern)
+}
+
+/*
+File extension filter for I/O plugin.
 */
 var FileExtFilter string
 
 /*
-DATファイルを内蔵するための変数です。
+Variable for embedding zLog DAT file.
 */
 var CityMultiList string
 
 /*
-拡張機能の起動時に呼び出されます。
+Called when the plugin is launched.
 */
 var OnLaunchEvent = func() {}
 
 /*
-拡張機能の終了時に呼び出されます。
+Called when the plugin is finished.
 */
 var OnFinishEvent = func() {}
 
 /*
-ウィンドウメッセージを受信します。
+Receives window messages.
 */
 var OnWindowEvent = func(msg uintptr) {}
 
 /*
-交信記録をZLOファイルに変換する要求を処理します。
+Converts a file in another format to a ZLO file.
 */
 var OnImportEvent = func(source, target string) error {
 	return nil
 }
 
 /*
-ZLOファイルを他の書式に変換する要求を処理します。
+Converts a ZLO file to a file in another format.
 */
 var OnExportEvent = func(source, format string) error {
 	return nil
 }
 
 /*
-コンテストを開いた直後に呼び出されます。
+Called just after opening the contest. 
 */
 var OnAttachEvent = func(contest, configs string) {}
 
 /*
-得点計算の権限が移譲された場合に呼び出されます。
-*/
-var OnAssignEvent = func(contest, configs string) {}
-
-/*
-コンテストを閉じた直後に呼び出されます。
+Called just after closing the contest.
 */
 var OnDetachEvent = func(contest, configs string) {}
 
 /*
-交信記録が追加された際に呼び出されます。
-修正時はまず削除、次に追加が行われます。
+Called when scoring is delegated.
+*/
+var OnAssignEvent = func(contest, configs string) {}
+
+/*
+Called when a QSO record is added.
 */
 var OnInsertEvent = func(qso *QSO) {}
 
 /*
-交信記録が削除された際に呼び出されます。
-修正時はまず削除、次に追加が行われます。
+Called when a QSO record is deleted.
+Deletion is performed before addition.
 */
 var OnDeleteEvent = func(qso *QSO) {}
 
 /*
-交信の得点やマルチプライヤを検査する時に呼び出されます。
-編集中の交信記録に対し、必要なら何度でも呼び出されます。
-無効な交信の場合は、マルチプライヤを空の文字列にします。
+Determines QSO score and multiplier.
+Empty multiplier for an invalid QSO.
+Called several times before the QSO is recorded.
 */
 var OnVerifyEvent = func(qso *QSO) {
 	ok := true
 	ok = ok && qso.VerifyDupe()
 	ok = ok && qso.VerifyBand()
 	ok = ok && qso.VerifyMode()
-	ok = ok && qso.VerifyRcvd()
 	ok = ok && qso.VerifySent()
+	ok = ok && qso.VerifyRcvd()
 	if ok {
 		OnAcceptEvent(qso)
 	} else {
@@ -884,31 +883,30 @@ var OnVerifyEvent = func(qso *QSO) {
 }
 
 /*
-有効と判定した交信に得点やマルチプライヤを設定します。
+Sets QSO point and multiplier.
 */
 var OnAcceptEvent = func(qso *QSO) {
 	qso.SetMul1(qso.GetRcvd())
 }
 
 /*
-総合得点を計算します。
-引数は交信の合計得点と主マルチプライヤの異なり数です。
+Calculates total score.
 */
 var OnPointsEvent = func(score, mul1s int) int {
 	return score * mul1s
 }
 
 /*
-指定された名前のボタンにイベントハンドラを登録します。
-起動時のみ登録できます。それ以後の登録は無視されます。
+Registers an event handler for the button with the given name. 
+Subsequent registrations after plugin startup will be ignored.
 */
 func HandleButton(name string, handler func(int)) {
 	buttons[zylo_add_button_handler(name)] = handler
 }
 
 /*
-指定された名前の記入欄にイベントハンドラを登録します。
-起動時のみ登録できます。それ以後の登録は無視されます。
+Registers an event handler for the editor with the given name.
+Subsequent registrations after plugin startup will be ignored.
 */
 func HandleEditor(name string, handler func(int)) {
 	editors[zylo_add_editor_handler(name)] = handler

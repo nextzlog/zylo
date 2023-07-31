@@ -3,6 +3,7 @@
  * Released under the MIT License (or GPL v3 until 2021 Oct 28th) (see LICENSE)
  * Univ. Tokyo Amateur Radio Club Development Task Force (https://nextzlog.dev)
 *******************************************************************************/
+
 package win32
 
 import (
@@ -15,17 +16,17 @@ import (
 )
 
 /*
-フォームのデフォルトの横幅です。
+Default window width.
 */
 var DefaultWindowW = 640
 
 /*
-フォームのデフォルトの縦幅です。
+Default window height.
 */
 var DefaultWindowH = 640
 
 /*
-この拡張機能の専用のクラス名を持つフォームを構築します。
+Creates a form with a dedicated class name for this plugin.
 */
 func NewForm(parent winc.Controller) *winc.Form {
 	name := fmt.Sprintf("zylo_%s_form", reiwa.PluginName)
@@ -67,7 +68,7 @@ func NewForm(parent winc.Controller) *winc.Form {
 }
 
 /*
-この拡張機能の専用のクラス名を持つパネルを構築します。
+Creates a panel with a dedicated class name for this plugin.
 */
 func NewPanel(parent winc.Controller) *winc.Panel {
 	name := fmt.Sprintf("zylo_%s_panel", reiwa.PluginName)
