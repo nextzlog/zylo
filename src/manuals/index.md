@@ -1,16 +1,17 @@
 ---
 title: ZyLO
-subtitle: プラグイン開発マニュアル
+subtitle: Plugin Development Manual
 ---
 
-## オブジェクトの便覧
+{% include README.md %}
 
-- 以下にzLogのメイン画面のオブジェクトを列挙します。`GetUI`関数や`RunDelphi`関数で参照できます。
+## Components
+
+The following is a list of objects in the zLog main window.
+They can be referenced by `GetUI` and `RunDelphi` functions.
 
 ```pascal
 {% include form.dfm %}
 ```
-
-## 組み込み関数と変数
 
 

@@ -2,7 +2,7 @@ remote_theme: autodyne/pafe
 url: https://nextzlog.github.io/zylo
 name: ZyLO
 icon: /assets/head.png
-lead: &desc ZyLOはWindowsで動作するコンテスト用ロギングソフトzLog令和版のプラグインを開発するためのフレームワークです。
+lead: &desc ZyLO is the official plugin SDK for zLog, a powerful and extensible logging software for amateur radio contests.
 desc: *desc
 links:
 - name: GitHub

@@ -1,4 +1,4 @@
-### zylo/reiwa
+## zylo/reiwa
 
 {% capture body %}
 {{.EmitUsage}}

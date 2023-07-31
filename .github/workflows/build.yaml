@@ -48,6 +48,7 @@ jobs:
         mkdir -p _includes
         cp ${GITHUB_WORKSPACE}/zlog/zlog/main.dfm _includes
         grep object _includes/main.dfm > _includes/form.dfm
+        cp $GITHUB_WORKSPACE/zylo/README.md _includes/
       working-directory: zylo/src/manuals
     - name: publish manuals
       run: |

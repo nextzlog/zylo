@@ -1,4 +1,4 @@
-### zylo/win32
+## zylo/win32
 
 {% capture body %}
 {{.EmitUsage}}
