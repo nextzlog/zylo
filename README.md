@@ -4,6 +4,7 @@ ZyLO
 ![image](https://img.shields.io/badge/Go-1.17-red.svg)
 ![image](https://img.shields.io/badge/license-MIT-darkblue.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
+![badge](https://github.com/nextzlog/zylo/actions/workflows/clean.yaml/badge.svg)
 
 ZyLO is the official plugin SDK for [zLog v2.8 or later](https://use.zlog.org).
 zLog is powerful and extensible logging software for amateur radio contests, and users can easily install plugins via plugin manager dialog.

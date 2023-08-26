@@ -838,7 +838,7 @@ var OnExportEvent = func(source, format string) error {
 }
 
 /*
-Called just after opening the contest. 
+Called just after opening the contest.
 */
 var OnAttachEvent = func(contest, configs string) {}
 
@@ -897,7 +897,7 @@ var OnPointsEvent = func(score, mul1s int) int {
 }
 
 /*
-Registers an event handler for the button with the given name. 
+Registers an event handler for the button with the given name.
 Subsequent registrations after plugin startup will be ignored.
 */
 func HandleButton(name string, handler func(int)) {
