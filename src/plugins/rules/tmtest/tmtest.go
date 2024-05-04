@@ -15,6 +15,7 @@ var cityMultiList string
 
 func init() {
 	reiwa.CityMultiList = cityMultiList
+	reiwa.OnDetachEvent = onDetachEvent
 	reiwa.OnInsertEvent = onInsertEvent
 	reiwa.OnDeleteEvent = onDeleteEvent
 	reiwa.OnAcceptEvent = onAcceptEvent
@@ -23,6 +24,10 @@ func init() {
 	reiwa.AllowModeRange(reiwa.CW, reiwa.OTHER)
 	reiwa.AllowCall(`^\w{3,}`)
 	reiwa.AllowRcvd(`^\d{3,}$`)
+}
+
+func onDetachEvent(contest, configs string) {
+	clear(days)
 }
 
 func onInsertEvent(qso *reiwa.QSO) {
