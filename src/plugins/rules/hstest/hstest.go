@@ -9,13 +9,15 @@ import (
 )
 
 var hsmults int
+var hstable map[string]int
 
 //go:embed hstest.dat
 var cityMultiList string
 
 func init() {
+	hstable = make(map[string]int)
 	reiwa.CityMultiList = cityMultiList
-	reiwa.OnAssignEvent = onAssignEvent
+	reiwa.OnDetachEvent = onDetachEvent
 	reiwa.OnInsertEvent = onInsertEvent
 	reiwa.OnDeleteEvent = onDeleteEvent
 	reiwa.OnAcceptEvent = onAcceptEvent
@@ -25,19 +27,32 @@ func init() {
 	reiwa.AllowRcvd(`^(\d{2,})(HS|C)$`)
 }
 
-func onAssignEvent(contest, configs string) {
+func onDetachEvent(contest, configs string) {
+	clear(hstable)
 	hsmults = 0
 }
 
 func onInsertEvent(qso *reiwa.QSO) {
 	if qso.GetMul2() == "HS" {
-		hsmults += 1
+		call := qso.GetCall()
+		if n, ok := hstable[call]; ok {
+			hstable[call] = n + 1
+		} else {
+			hstable[call] = 1
+			hsmults += 1
+		}
 	}
 }
 
 func onDeleteEvent(qso *reiwa.QSO) {
 	if qso.GetMul2() == "HS" {
-		hsmults -= 1
+		call := qso.GetCall()
+		if n := hstable[call]; n <= 1 {
+			delete(hstable, call)
+			hsmults -= 1
+		} else {
+			hstable[call] = n - 1
+		}
 	}
 }
 

@@ -1,7 +1,7 @@
 ZyLO
 ====
 
-![image](https://img.shields.io/badge/Go-1.17-red.svg)
+![image](https://img.shields.io/badge/Go-1.22-red.svg)
 ![image](https://img.shields.io/badge/license-MIT-darkblue.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/build.yaml/badge.svg)
 ![badge](https://github.com/nextzlog/zylo/actions/workflows/clean.yaml/badge.svg)
