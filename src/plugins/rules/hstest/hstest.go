@@ -8,6 +8,7 @@ import (
 	"zylo/reiwa"
 )
 
+var enabled bool
 var hsmults int
 var hstable map[string]int
 
@@ -17,6 +18,7 @@ var cityMultiList string
 func init() {
 	hstable = make(map[string]int)
 	reiwa.CityMultiList = cityMultiList
+	reiwa.OnAssignEvent = onAssignEvent
 	reiwa.OnDetachEvent = onDetachEvent
 	reiwa.OnInsertEvent = onInsertEvent
 	reiwa.OnDeleteEvent = onDeleteEvent
@@ -27,13 +29,18 @@ func init() {
 	reiwa.AllowRcvd(`^(\d{2,})(HS|C)$`)
 }
 
+func onAssignEvent(contest, configs string) {
+	enabled = true
+}
+
 func onDetachEvent(contest, configs string) {
 	clear(hstable)
 	hsmults = 0
+	enabled = false
 }
 
 func onInsertEvent(qso *reiwa.QSO) {
-	if qso.GetMul2() == "HS" {
+	if enabled && qso.GetMul2() == "HS" {
 		call := qso.GetCall()
 		if n, ok := hstable[call]; ok {
 			hstable[call] = n + 1
@@ -45,7 +52,7 @@ func onInsertEvent(qso *reiwa.QSO) {
 }
 
 func onDeleteEvent(qso *reiwa.QSO) {
-	if qso.GetMul2() == "HS" {
+	if enabled && qso.GetMul2() == "HS" {
 		call := qso.GetCall()
 		if n := hstable[call]; n <= 1 {
 			delete(hstable, call)
