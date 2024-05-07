@@ -90,10 +90,10 @@ func setup(c *cli.Context) error {
 }
 
 func build(c *cli.Context) error {
-	name, _ := os.Getwd()
-	name = filepath.Base(name)
-	dllName := fmt.Sprintf("%s.dll", name)
-	md5Name := fmt.Sprintf("%s.md5", name)
+	pkgName, _ := os.Getwd()
+	pkgName = filepath.Base(pkgName)
+	dllName := fmt.Sprintf("%s.dll", pkgName)
+	md5Name := fmt.Sprintf("%s.md5", dllName)
 	os.Setenv("GOOS", "windows")
 	os.Setenv("GOARCH", "amd64")
 	os.Setenv("CGO_ENABLED", "1")
@@ -102,7 +102,7 @@ func build(c *cli.Context) error {
 	main, _ := os.Create("main.go")
 	defer main.Close()
 	main.WriteString(fmt.Sprintf(version, c.String("version")))
-	call("go", "mod", "init", name)
+	call("go", "mod", "init", pkgName)
 	call("go", replaceCmd...)
 	call("go", "get", "-u", "all")
 	call("go", "mod", "tidy")
