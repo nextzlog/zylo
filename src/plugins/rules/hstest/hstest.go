@@ -66,7 +66,11 @@ func onDeleteEvent(qso *reiwa.QSO) {
 func onAcceptEvent(qso *reiwa.QSO) {
 	rcvd := qso.GetRcvdGroups()
 	qso.SetMul1(rcvd[1])
-	qso.SetMul2(rcvd[2])
+	if rcvd[2] == "HS" {
+		qso.SetMul2("HS")
+	} else {
+		qso.SetMul2("")
+	}
 	if qso.Mode == reiwa.CW {
 		qso.Score = 3
 	} else {
