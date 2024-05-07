@@ -333,8 +333,8 @@ type QSO struct {
 	Pow1  byte
 	mul1  [31]byte
 	mul2  [31]byte
-	new1  bool
-	new2  bool
+	New1  bool
+	New2  bool
 	Score byte
 	name  [15]byte
 	note  [65]byte
