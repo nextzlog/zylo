@@ -299,6 +299,7 @@ Follow [@nextzlog](https://twitter.com/nextzlog) on Twitter.
 - JG1VPP
 - JS2FVO
 - JJ1GUJ
+- JR8PPG
 
 ### Clauses
 
