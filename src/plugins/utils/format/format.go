@@ -9,7 +9,7 @@ import (
 	"zylo/reiwa"
 )
 
-const QXSL = "qxsl.exe"
+const QXSL = "./qxsl.exe"
 
 //go:embed qxsl.fmt
 var fileExtFilter string
