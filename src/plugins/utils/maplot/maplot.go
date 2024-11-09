@@ -5,111 +5,74 @@ package main
 
 import (
 	_ "embed"
-	"github.com/tadvi/winc"
-	"gopkg.in/yaml.v2"
+	"encoding/json"
+	"fmt"
+	"github.com/pkg/browser"
+	"net/http"
 	"regexp"
 	"zylo/reiwa"
-	"zylo/win32"
 )
+
+type Marker struct {
+	Code string
+	Drop bool
+}
 
 const MAPLOT_MENU = "MainForm.MainMenu.MaplotMenu"
 
-const SIZE = 800
+//go:embed maplot.pas
+var runDelphi string
 
 var (
-	//go:embed code.yaml
-	codeYaml string
-	//go:embed city.yaml
-	cityYaml string
-	//go:embed maplot.pas
-	runDelphi string
+	markers []Marker
+	pattern = regexp.MustCompile("[0-9]+")
 )
 
-type Code struct {
-	Name   string
-	Cities []string
-}
-
-type City struct {
-	YX map[int]map[int]int
-}
-
-var (
-	codeMap map[string]Code
-	cityMap map[string]City
-	enabled []City
-)
-
-var (
-	rcvd = regexp.MustCompile("\\d*")
-	face = winc.RGB(0xff, 0x00, 0x00)
-	edge = winc.RGB(0x00, 0x00, 0x00)
-)
-
-var (
-	form *winc.Form
-	view *winc.Canvas
-)
+var server = &http.Server{Addr: ":49599"}
 
 func init() {
 	reiwa.PluginName = "maplot"
 	reiwa.OnLaunchEvent = onLaunchEvent
+	reiwa.OnFinishEvent = onFinishEvent
+	reiwa.OnDetachEvent = onDetachEvent
 	reiwa.OnInsertEvent = onInsertEvent
+	reiwa.OnDeleteEvent = onDeleteEvent
 }
 
 func onLaunchEvent() {
-	createWindow()
-	yaml.UnmarshalStrict([]byte(cityYaml), &cityMap)
-	yaml.UnmarshalStrict([]byte(codeYaml), &codeMap)
+	http.HandleFunc("/", serve)
+	go server.ListenAndServe()
 	reiwa.RunDelphi(runDelphi)
-	reiwa.HandleButton(MAPLOT_MENU, func(num int) {
-		form.Show()
-		onUpdateEvent(nil)
-	})
+	reiwa.HandleButton(MAPLOT_MENU, onBrowseEvent)
+}
+
+func onFinishEvent() {
+	server.Close()
+}
+
+func onDetachEvent(contest, configs string) {
+	markers = nil
 }
 
 func onInsertEvent(qso *reiwa.QSO) {
-	n := rcvd.FindString(qso.GetRcvd())
-	if code, ok := codeMap[n]; ok {
-		mark(code, face)
+	marker := Marker{pattern.FindString(qso.GetRcvd()), false}
+	markers = append(markers, marker)
+}
+
+func onDeleteEvent(qso *reiwa.QSO) {
+	marker := Marker{pattern.FindString(qso.GetRcvd()), true}
+	markers = append(markers, marker)
+}
+
+func onBrowseEvent(num int) {
+	browser.OpenURL("https://jg1vpp.github.io/qth.zlog.org")
+}
+
+func serve(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	if text, err := json.Marshal(markers); err != nil {
+		reiwa.DisplayModal(err.Error())
+	} else {
+		fmt.Fprintf(writer, string(text))
 	}
-}
-
-func onUpdateEvent(ev *winc.Event) {
-	fill(cityMap["JA"], edge)
-	for _, code := range enabled {
-		fill(code, face)
-	}
-}
-
-func mark(code Code, color winc.Color) {
-	for _, city := range code.Cities {
-		if pt, ok := cityMap[city]; ok {
-			enabled = append(enabled, pt)
-			fill(pt, face)
-		}
-	}
-}
-
-func fill(city City, color winc.Color) {
-	br := winc.NewSolidColorBrush(color)
-	for y, runs := range city.YX {
-		for x, width := range runs {
-			line(y, x, width, br)
-		}
-	}
-	br.Dispose()
-}
-
-func line(y, x, w int, brush *winc.Brush) {
-	view.FillRect(winc.NewRect(x, y, x+w, y+1), brush)
-}
-
-func createWindow() {
-	win32.DefaultWindowW = SIZE
-	win32.DefaultWindowH = SIZE
-	form = win32.NewForm(nil)
-	view = winc.NewCanvasFromHwnd(form.Handle())
-	form.OnSize().Bind(onUpdateEvent)
-	return
 }
