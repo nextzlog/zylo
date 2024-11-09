@@ -619,11 +619,18 @@ Converts byte sequence with header information to QSOs.
 */
 func LoadZLO(bin []byte) (logs []QSO) {
 	buf := bytes.NewReader(bin)
-	new(QSO).LoadWithoutHead(buf)
+	head := make([]byte, 256)
+	io.ReadFull(buf, head)
+	zlox := make([]byte, 0)
+	if string(head[:4]) == "ZLOX" {
+		zlox = make([]byte, 128)
+	}
+	io.ReadFull(buf, zlox)
 	for buf.Len() > 0 {
 		qso := QSO{}
 		qso.LoadWithoutHead(buf)
 		logs = append(logs, qso)
+		io.ReadFull(buf, zlox)
 	}
 	return logs
 }
