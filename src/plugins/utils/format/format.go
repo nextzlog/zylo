@@ -6,10 +6,16 @@ package main
 import (
 	_ "embed"
 	"os/exec"
+	"path/filepath"
+	"syscall"
 	"zylo/reiwa"
 )
 
-const QXSL = "./qxsl.exe"
+const (
+	ZYLO = "zylo"
+	PATH = "path"
+	QXSL = "qxsl.exe"
+)
 
 //go:embed qxsl.fmt
 var fileExtFilter string
@@ -21,9 +27,22 @@ func init() {
 }
 
 func onImportEvent(source, target string) error {
-	return exec.Command(QXSL, source, target, "zbin").Run()
+	return invoke(source, target, "zbin")
 }
 
 func onExportEvent(source, format string) error {
-	return exec.Command(QXSL, source, source, format).Run()
+	return invoke(source, source, format)
+}
+
+func invoke(source, target, format string) (err error) {
+	exe := filepath.Join(reiwa.GetINI(ZYLO, PATH), QXSL)
+	exe, _ = filepath.Abs(exe)
+	cmd := exec.Command(exe, source, target, format)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		HideWindow: true,
+	}
+	if err = cmd.Run(); err != nil {
+		reiwa.DisplayModal(err.Error())
+	}
+	return
 }

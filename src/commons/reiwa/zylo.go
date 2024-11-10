@@ -79,6 +79,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"path/filepath"
 	"regexp"
 	"runtime/debug"
 	"strings"
@@ -90,11 +91,6 @@ import (
 Length limit of query response.
 */
 const ResponseCapacity = 256
-
-/*
-zlog.ini.
-*/
-const SettingsFileName = "zlog.ini"
 
 /*
 The name of this plugin.
@@ -657,10 +653,21 @@ func (qso *QSO) Update() {
 }
 
 /*
+zlog.ini.
+*/
+func PathToINI() string {
+	path, _ := os.Executable()
+	tail := filepath.Ext(path)
+	path = strings.TrimSuffix(path, tail)
+	path, _ = filepath.Abs(path + ".ini")
+	return path
+}
+
+/*
 Gets the specified setting.
 */
 func GetINI(section, key string) string {
-	init, _ := ini.LooseLoad(SettingsFileName)
+	init, _ := ini.LooseLoad(PathToINI())
 	return init.Section(section).Key(key).String()
 }
 
@@ -668,9 +675,9 @@ func GetINI(section, key string) string {
 Sets the specified setting.
 */
 func SetINI(section, key, value string) {
-	init, _ := ini.LooseLoad(SettingsFileName)
+	init, _ := ini.LooseLoad(PathToINI())
 	init.Section(section).Key(key).SetValue(value)
-	init.SaveTo(SettingsFileName)
+	init.SaveTo(PathToINI())
 }
 
 /*
