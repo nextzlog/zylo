@@ -34,13 +34,13 @@ jobs:
     needs: Compile
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-go@v3
+    - uses: actions/setup-go@v5
       with:
         go-version: '1.22'
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         path: zylo
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         path: zlog
         repository: jr8ppg/zlog
@@ -57,11 +57,11 @@ jobs:
         godocdown -o _win32.md -template manuals/_win32.md commons/win32
         cat _*.md >> manuals/index.md
       working-directory: zylo/src
-    - uses: actions/configure-pages@v2
+    - uses: actions/configure-pages@v5
     - uses: actions/jekyll-build-pages@v1
       with:
         source: zylo/src/manuals
-    - uses: actions/upload-pages-artifact@v1
+    - uses: actions/upload-pages-artifact@v3
   Publish:
     needs: Prepare
     runs-on: ubuntu-latest
@@ -69,4 +69,4 @@ jobs:
       name: github-pages
       url: ${{steps.deployment.outputs.page_url}}
     steps:
-    - uses: actions/deploy-pages@v1
+    - uses: actions/deploy-pages@v4
