@@ -19,6 +19,9 @@ inputs:
   directory:
     description: 'project path'
     default: '.'
+  os:
+    description: 'target: windows, darwin or linux'
+    default: windows
 runs:
   using: composite
   steps:
@@ -32,9 +35,9 @@ runs:
     run: |
       go install github.com/nextzlog/zylo/zbuild@HEAD
       zbuild setup --sudo || zbuild setup
-      zbuild build --version ${{inputs.version}}
+      zbuild build --version ${{inputs.version}} --os ${{inputs.os}}
       gh release create ${{inputs.tag}} || true
-      gh release upload ${{inputs.tag}} *.{dll,md5} --clobber
+      gh release upload ${{inputs.tag}} *.{dll,dylib,so,md5} --clobber
     shell: bash
     env:
       GOPROXY: direct

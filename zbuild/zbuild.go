@@ -47,6 +47,11 @@ func main() {
 			Name:  "version",
 			Value: "2.8",
 		},
+		cli.StringFlag{
+			Name:  "os",
+			Value: "windows",
+			Usage: "windows, darwin or linux",
+		},
 	}
 	setupCmd := cli.Command{
 		Name:   "setup",
@@ -89,16 +94,26 @@ func setup(c *cli.Context) error {
 	return errors.New("failed")
 }
 
+var extensions = map[string]string{
+	"windows": "dll",
+	"darwin":  "dylib",
+	"linux":   "so",
+}
+
 func build(c *cli.Context) error {
 	pkgName, _ := os.Getwd()
 	pkgName = filepath.Base(pkgName)
-	dllName := fmt.Sprintf("%s.dll", pkgName)
-	md5Name := fmt.Sprintf("%s.md5", dllName)
-	os.Setenv("GOOS", "windows")
-	os.Setenv("GOARCH", "amd64")
+	goos := c.String("os")
+	dllEx := extentions[goos]
+	dllName := fmt.Sprintf("%s.%s", pkgName, dllEx)
+	md5Name := fmt.Sprintf("%s.%s", dllName, "md5")
+	os.Setenv("GOOS", goos)
 	os.Setenv("CGO_ENABLED", "1")
 	os.Setenv("GOPROXY", "direct")
-	os.Setenv("CC", "x86_64-w64-mingw32-gcc")
+	if goos == "windows" {
+		os.Setenv("GOARCH", "amd64")
+		os.Setenv("CC", "x86_64-w64-mingw32-gcc")
+	}
 	main, _ := os.Create("main.go")
 	defer main.Close()
 	main.WriteString(fmt.Sprintf(version, c.String("version")))

@@ -1,3 +1,5 @@
+//go:build windows
+
 /*******************************************************************************
  * Amateur Radio Operational Logging Software 'ZyLO' since 2020 June 22nd
  * Released under the MIT License (or GPL v3 until 2021 Oct 28th) (see LICENSE)

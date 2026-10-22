@@ -99,6 +99,8 @@ Run `zbuild` inside the directory to build a plugin DLL with the same name as th
 ```sh
 $ zbuild build
 $ zbuild build --version 2.8.3.0
+$ zbuild build --os darwin
+$ zbuild build --os linux
 ```
 
 ### Launch
@@ -167,6 +169,14 @@ jobs:
       with:
         token: ${{secrets.GITHUB_TOKEN}}
         directory: /path/to/golang/files
+  BuildDylib:
+    runs-on: macos-latest
+    steps:
+    - uses: nextzlog/zylo@master
+      with:
+        token: ${{secrets.GITHUB_TOKEN}}
+        directory: /path/to/golang/files
+        os: darwin
 ```
 
 ## Scoring
