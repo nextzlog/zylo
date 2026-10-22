@@ -107,7 +107,6 @@ func build(c *cli.Context) error {
 	call("go", "get", "-u", "all")
 	call("go", "mod", "tidy")
 	call("go", "build", "-o", dllName, "-buildmode=c-shared")
-	call("upx", dllName)
 	file, _ := os.Open(dllName)
 	save, _ := os.Create(md5Name)
 	defer file.Close()

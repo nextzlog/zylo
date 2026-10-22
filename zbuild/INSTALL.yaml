@@ -2,24 +2,21 @@ true:
 - sudo:
   - sh
   - -c
-  - apt-get update && apt-get install -y gcc-mingw-w64 git upx
+  - apt-get update && apt-get install -y gcc-mingw-w64 git
 - sudo:
   - pacman
   - -Sy
   - mingw-w64-gcc
   - go
   - git
-  - upx
 false:
 - brew:
   - install
   - mingw-w64
   - go
   - git
-  - upx
 - choco:
   - install
   - mingw
   - golang
   - git
-  - upx
