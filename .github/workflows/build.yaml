@@ -15,15 +15,11 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: src/plugins/rules/aktest
-        - name: src/plugins/rules/hstest
-        - name: src/plugins/rules/rttest
-        - name: src/plugins/rules/tmtest
-        - name: src/plugins/rules/yltest
-        - name: src/plugins/utils/format
-        - name: src/plugins/utils/latest
-        - name: src/plugins/utils/maplot
-        - name: src/plugins/utils/prefix
+        - name: src/plugins/aktest
+        - name: src/plugins/hstest
+        - name: src/plugins/rttest
+        - name: src/plugins/tmtest
+        - name: src/plugins/yltest
     steps:
     - uses: nextzlog/zylo@master
       with:
