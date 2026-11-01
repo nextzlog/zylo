@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+<style>
+html { color-scheme: light; }
+body { margin: 0 auto; max-width: 52rem; padding: 2rem 1rem; font-family: sans-serif; font-size: 15px; line-height: 1.6; color: #000; background: #fff; }
+h1 { border-bottom: 2px solid #000; padding-bottom: .25rem; }
+h2 { border-bottom: 1px solid #999; padding-bottom: .15rem; margin-top: 2rem; }
+pre, code { font-family: monospace; background: #f6f6f6; }
+pre { padding: .75rem; overflow-x: auto; border: 1px solid #ccc; }
+table { border-collapse: collapse; display: block; overflow-x: auto; }
+th { background: #eee; }
+th, td { border: 1px solid #999; padding: .25rem .5rem; text-align: left; }
+a { color: #0645ad; }
+</style>
+</head>
+<body>
+{{ content }}
+</body>
+</html>

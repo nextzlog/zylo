@@ -1,9 +1,4 @@
 .*
-*.h
-*.dll
-*.md5
-go.sum
-zbuild
-!zbuild/
 !.github
 !.gitignore
+_site

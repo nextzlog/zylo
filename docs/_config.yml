@@ -1,0 +1,7 @@
+title: ZyLO
+description: Plugin DLL interface of zLog
+defaults:
+- scope:
+    path: ''
+  values:
+    layout: default

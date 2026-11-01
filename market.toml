@@ -1,76 +1,11 @@
-## utils
+[pkg.zlog-max]
+tag = "zLog Max"
+msg = "zLog Max の CFG ファイルのサポートと, CTESTWIN LG8 や HAMLOG HDB のサポートを追加します."
+web = "https://github.com/nextzlog/zmax"
+doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/docs/zlog-max.md"
+use = ["dll.zlog-max"]
+exp = "unstable"
 
-[pkg.aktest]
-tag = "旭川コンテスト"
-msg = "旭川コンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
-web = "https://github.com/nextzlog/zylo"
-doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/aktest/README.md"
-use = ["dll.aktest", "cfg.aktest"]
-exp = "stable"
-
-[cfg.aktest]
-url = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/aktest/aktest.cfg"
-
-[dll.aktest]
-url = "https://github.com/nextzlog/zylo/releases/download/nightly/aktest.dll"
-sum = "https://github.com/nextzlog/zylo/releases/download/nightly/aktest.dll.md5"
-
-[pkg.hstest]
-tag = "高校コンテスト"
-msg = "高校コンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
-web = "https://github.com/nextzlog/zylo"
-doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/hstest/README.md"
-use = ["dll.hstest", "cfg.hstest"]
-exp = "stable"
-
-[cfg.hstest]
-url = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/hstest/hstest.cfg"
-
-[dll.hstest]
-url = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll"
-sum = "https://github.com/nextzlog/zylo/releases/download/nightly/hstest.dll.md5"
-
-[pkg.tmtest]
-tag = "東海マラソンコンテスト"
-msg = "東海マラソンコンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
-web = "https://github.com/nextzlog/zylo"
-doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/tmtest/README.md"
-use = ["dll.tmtest", "cfg.tmtest"]
-exp = "stable"
-
-[cfg.tmtest]
-url = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/tmtest/tmtest.cfg"
-
-[dll.tmtest]
-url = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll"
-sum = "https://github.com/nextzlog/zylo/releases/download/nightly/tmtest.dll.md5"
-
-[pkg.yltest]
-tag = "YLコンテスト"
-msg = "JLRS主催のYLコンテストのCFGファイルと, 正確な得点計算を行うプラグインです."
-web = "https://github.com/nextzlog/zylo"
-doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/yltest/README.md"
-use = ["dll.yltest", "cfg.yltest"]
-exp = "stable"
-
-[cfg.yltest]
-url = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/yltest/yltest.cfg"
-
-[dll.yltest]
-url = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll"
-sum = "https://github.com/nextzlog/zylo/releases/download/nightly/yltest.dll.md5"
-
-[pkg.rttest]
-tag = "リアルタイムコンテスト"
-msg = "リアルタイムコンテストのCFGファイルと, クラウド送受信を行うプラグインです."
-web = "https://github.com/nextzlog/zylo"
-doc = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rttest/README.md"
-use = ["dll.rttest", "cfg.rttest"]
-exp = "stable"
-
-[cfg.rttest]
-url = "https://raw.githubusercontent.com/nextzlog/zylo/master/src/plugins/rttest/rttest.cfg"
-
-[dll.rttest]
-url = "https://github.com/nextzlog/zylo/releases/download/nightly/rttest.dll"
-sum = "https://github.com/nextzlog/zylo/releases/download/nightly/rttest.dll.md5"
+[dll.zlog-max]
+url = "https://github.com/nextzlog/zmax/releases/download/nightly/zlog-max.dll"
+sum = "https://github.com/nextzlog/zmax/releases/download/nightly/zlog-max.dll.md5"
